@@ -98,7 +98,7 @@
       <Project>{239ef8b9-f88a-4452-ab8f-2222db1fcbb9}</Project>
       <Name>System.Extensions</Name>
     </ProjectReference>
-    <ProjectReference Include="G:\TaoBaoSDK\TopSdk.csproj">
+    <ProjectReference Include="..\TopSdk\TopSdk.csproj">
       <Project>{9c11cae5-5188-4e71-825b-68fc3135728a}</Project>
       <Name>TopSdk</Name>
     </ProjectReference>

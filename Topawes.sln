@@ -5,13 +5,13 @@ VisualStudioVersion = 14.0.23107.0
 MinimumVisualStudioVersion = 10.0.40219.1
 Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "Topawes", "WindowsFormsClient\Topawes.csproj", "{8B8BEBD1-A182-450D-B4EF-DE2E4820D4F8}"
 EndProject
-Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "TopSdk", "G:\TaoBaoSDK\TopSdk.csproj", "{9C11CAE5-5188-4E71-825B-68FC3135728A}"
-EndProject
 Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "TopModel", "TopModel\TopModel.csproj", "{45C5CCD1-5F44-48E2-A48D-C3803635E350}"
 EndProject
 Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "Moonlight", "Moonlight\Moonlight.csproj", "{B38891EF-DFB2-426E-A368-9E76E8221B2E}"
 EndProject
 Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "System.Extensions", "System.Extensions\System.Extensions.csproj", "{239EF8B9-F88A-4452-AB8F-2222DB1FCBB9}"
+EndProject
+Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "TopSdk", "TopSdk\TopSdk.csproj", "{9C11CAE5-5188-4E71-825B-68FC3135728A}"
 EndProject
 Global
 	GlobalSection(SolutionConfigurationPlatforms) = preSolution
@@ -23,10 +23,6 @@ Global
 		{8B8BEBD1-A182-450D-B4EF-DE2E4820D4F8}.Debug|Any CPU.Build.0 = Debug|Any CPU
 		{8B8BEBD1-A182-450D-B4EF-DE2E4820D4F8}.Release|Any CPU.ActiveCfg = Release|Any CPU
 		{8B8BEBD1-A182-450D-B4EF-DE2E4820D4F8}.Release|Any CPU.Build.0 = Release|Any CPU
-		{9C11CAE5-5188-4E71-825B-68FC3135728A}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
-		{9C11CAE5-5188-4E71-825B-68FC3135728A}.Debug|Any CPU.Build.0 = Debug|Any CPU
-		{9C11CAE5-5188-4E71-825B-68FC3135728A}.Release|Any CPU.ActiveCfg = Release|Any CPU
-		{9C11CAE5-5188-4E71-825B-68FC3135728A}.Release|Any CPU.Build.0 = Release|Any CPU
 		{45C5CCD1-5F44-48E2-A48D-C3803635E350}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
 		{45C5CCD1-5F44-48E2-A48D-C3803635E350}.Debug|Any CPU.Build.0 = Debug|Any CPU
 		{45C5CCD1-5F44-48E2-A48D-C3803635E350}.Release|Any CPU.ActiveCfg = Release|Any CPU
@@ -39,6 +35,10 @@ Global
 		{239EF8B9-F88A-4452-AB8F-2222DB1FCBB9}.Debug|Any CPU.Build.0 = Debug|Any CPU
 		{239EF8B9-F88A-4452-AB8F-2222DB1FCBB9}.Release|Any CPU.ActiveCfg = Release|Any CPU
 		{239EF8B9-F88A-4452-AB8F-2222DB1FCBB9}.Release|Any CPU.Build.0 = Release|Any CPU
+		{9C11CAE5-5188-4E71-825B-68FC3135728A}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
+		{9C11CAE5-5188-4E71-825B-68FC3135728A}.Debug|Any CPU.Build.0 = Debug|Any CPU
+		{9C11CAE5-5188-4E71-825B-68FC3135728A}.Release|Any CPU.ActiveCfg = Release|Any CPU
+		{9C11CAE5-5188-4E71-825B-68FC3135728A}.Release|Any CPU.Build.0 = Release|Any CPU
 	EndGlobalSection
 	GlobalSection(SolutionProperties) = preSolution
 		HideSolutionNode = FALSE

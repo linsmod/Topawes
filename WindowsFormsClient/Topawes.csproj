@@ -314,7 +314,7 @@
       <Project>{45c5ccd1-5f44-48e2-a48d-c3803635e350}</Project>
       <Name>TopModel</Name>
     </ProjectReference>
-    <ProjectReference Include="G:\TaoBaoSDK\TopSdk.csproj">
+    <ProjectReference Include="..\TopSdk\TopSdk.csproj">
       <Project>{9c11cae5-5188-4e71-825b-68fc3135728a}</Project>
       <Name>TopSdk</Name>
     </ProjectReference>
