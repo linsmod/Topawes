@@ -1,0 +1,382 @@
+﻿<?xml version="1.0" encoding="utf-8"?>
+<Project ToolsVersion="12.0" DefaultTargets="Build" xmlns="http://schemas.microsoft.com/developer/msbuild/2003">
+  <Import Project="$(MSBuildExtensionsPath)\$(MSBuildToolsVersion)\Microsoft.Common.props" Condition="Exists('$(MSBuildExtensionsPath)\$(MSBuildToolsVersion)\Microsoft.Common.props')" />
+  <PropertyGroup>
+    <Configuration Condition=" '$(Configuration)' == '' ">Debug</Configuration>
+    <Platform Condition=" '$(Platform)' == '' ">AnyCPU</Platform>
+    <ProjectGuid>{8B8BEBD1-A182-450D-B4EF-DE2E4820D4F8}</ProjectGuid>
+    <OutputType>WinExe</OutputType>
+    <AppDesignerFolder>Properties</AppDesignerFolder>
+    <RootNamespace>WinFormsClient</RootNamespace>
+    <AssemblyName>Topawes</AssemblyName>
+    <TargetFrameworkVersion>v4.5</TargetFrameworkVersion>
+    <FileAlignment>512</FileAlignment>
+    <PublishUrl>publish\</PublishUrl>
+    <Install>false</Install>
+    <InstallFrom>Disk</InstallFrom>
+    <UpdateEnabled>false</UpdateEnabled>
+    <UpdateMode>Foreground</UpdateMode>
+    <UpdateInterval>7</UpdateInterval>
+    <UpdateIntervalUnits>Days</UpdateIntervalUnits>
+    <UpdatePeriodically>false</UpdatePeriodically>
+    <UpdateRequired>false</UpdateRequired>
+    <MapFileExtensions>true</MapFileExtensions>
+    <ApplicationRevision>0</ApplicationRevision>
+    <ApplicationVersion>1.0.0.%2a</ApplicationVersion>
+    <IsWebBootstrapper>false</IsWebBootstrapper>
+    <UseApplicationTrust>false</UseApplicationTrust>
+    <BootstrapperEnabled>true</BootstrapperEnabled>
+  </PropertyGroup>
+  <PropertyGroup Condition=" '$(Configuration)|$(Platform)' == 'Debug|AnyCPU' ">
+    <PlatformTarget>AnyCPU</PlatformTarget>
+    <DebugSymbols>true</DebugSymbols>
+    <DebugType>full</DebugType>
+    <Optimize>false</Optimize>
+    <OutputPath>bin\Debug\</OutputPath>
+    <DefineConstants>DEBUG;TRACE</DefineConstants>
+    <ErrorReport>prompt</ErrorReport>
+    <WarningLevel>4</WarningLevel>
+    <Prefer32Bit>false</Prefer32Bit>
+    <GenerateSerializationAssemblies>Off</GenerateSerializationAssemblies>
+  </PropertyGroup>
+  <PropertyGroup Condition=" '$(Configuration)|$(Platform)' == 'Release|AnyCPU' ">
+    <PlatformTarget>AnyCPU</PlatformTarget>
+    <DebugType>pdbonly</DebugType>
+    <Optimize>true</Optimize>
+    <OutputPath>bin\Release\</OutputPath>
+    <DefineConstants>TRACE</DefineConstants>
+    <ErrorReport>prompt</ErrorReport>
+    <WarningLevel>4</WarningLevel>
+  </PropertyGroup>
+  <PropertyGroup Condition="'$(Configuration)|$(Platform)' == 'Debug|x86'">
+    <DebugSymbols>true</DebugSymbols>
+    <OutputPath>bin\x86\Debug\</OutputPath>
+    <DefineConstants>DEBUG;TRACE</DefineConstants>
+    <DebugType>full</DebugType>
+    <PlatformTarget>x86</PlatformTarget>
+    <ErrorReport>prompt</ErrorReport>
+    <CodeAnalysisRuleSet>MinimumRecommendedRules.ruleset</CodeAnalysisRuleSet>
+    <Prefer32Bit>true</Prefer32Bit>
+  </PropertyGroup>
+  <PropertyGroup Condition="'$(Configuration)|$(Platform)' == 'Release|x86'">
+    <OutputPath>bin\x86\Release\</OutputPath>
+    <DefineConstants>TRACE</DefineConstants>
+    <Optimize>true</Optimize>
+    <DebugType>pdbonly</DebugType>
+    <PlatformTarget>x86</PlatformTarget>
+    <ErrorReport>prompt</ErrorReport>
+    <CodeAnalysisRuleSet>MinimumRecommendedRules.ruleset</CodeAnalysisRuleSet>
+    <Prefer32Bit>true</Prefer32Bit>
+  </PropertyGroup>
+  <PropertyGroup Condition="'$(Configuration)|$(Platform)' == 'Debug|x64'">
+    <PlatformTarget>x64</PlatformTarget>
+    <OutputPath>bin\x64\Debug\</OutputPath>
+  </PropertyGroup>
+  <PropertyGroup Condition="'$(Configuration)|$(Platform)' == 'Release|x64'">
+    <PlatformTarget>x64</PlatformTarget>
+    <OutputPath>bin\x64\Release\</OutputPath>
+  </PropertyGroup>
+  <PropertyGroup>
+    <ApplicationIcon>basket_buy_red_sell_shopping_128px_225_easyicon.net.ico</ApplicationIcon>
+  </PropertyGroup>
+  <PropertyGroup>
+    <ManifestCertificateThumbprint>857C1B8D5F77773FF7413948D0865B830F4584E5</ManifestCertificateThumbprint>
+  </PropertyGroup>
+  <PropertyGroup>
+    <ManifestKeyFile>WinFormsClient_TemporaryKey.pfx</ManifestKeyFile>
+  </PropertyGroup>
+  <PropertyGroup>
+    <GenerateManifests>false</GenerateManifests>
+  </PropertyGroup>
+  <PropertyGroup>
+    <SignManifests>false</SignManifests>
+  </PropertyGroup>
+  <PropertyGroup>
+    <StartupObject />
+  </PropertyGroup>
+  <PropertyGroup />
+  <PropertyGroup>
+    <TargetZone>LocalIntranet</TargetZone>
+  </PropertyGroup>
+  <PropertyGroup>
+    <ApplicationManifest>Properties\app.manifest</ApplicationManifest>
+  </PropertyGroup>
+  <ItemGroup>
+    <Reference Include="LiteDB, Version=1.0.3.0, Culture=neutral, processorArchitecture=MSIL">
+      <HintPath>..\packages\LiteDB.1.0.3\lib\net40\LiteDB.dll</HintPath>
+      <Private>True</Private>
+    </Reference>
+    <Reference Include="Microsoft.AspNet.SignalR.Client, Version=2.2.0.0, Culture=neutral, PublicKeyToken=31bf3856ad364e35, processorArchitecture=MSIL">
+      <HintPath>..\packages\Microsoft.AspNet.SignalR.Client.2.2.0\lib\net45\Microsoft.AspNet.SignalR.Client.dll</HintPath>
+      <Private>True</Private>
+    </Reference>
+    <Reference Include="Microsoft.VisualBasic" />
+    <Reference Include="Newtonsoft.Json, Version=7.0.0.0, Culture=neutral, PublicKeyToken=30ad4fe6b2a6aeed, processorArchitecture=MSIL">
+      <HintPath>..\packages\Newtonsoft.Json.7.0.1\lib\net45\Newtonsoft.Json.dll</HintPath>
+      <Private>True</Private>
+    </Reference>
+    <Reference Include="System" />
+    <Reference Include="System.ComponentModel.DataAnnotations" />
+    <Reference Include="System.Configuration" />
+    <Reference Include="System.Core" />
+    <Reference Include="System.Net.Http" />
+    <Reference Include="System.Runtime.Serialization" />
+    <Reference Include="System.Web" />
+    <Reference Include="System.Web.Extensions" />
+    <Reference Include="System.Windows.Presentation" />
+    <Reference Include="System.Xml.Linq" />
+    <Reference Include="System.Data.DataSetExtensions" />
+    <Reference Include="Microsoft.CSharp" />
+    <Reference Include="System.Data" />
+    <Reference Include="System.Deployment" />
+    <Reference Include="System.Drawing" />
+    <Reference Include="System.Windows.Forms" />
+    <Reference Include="System.Xml" />
+  </ItemGroup>
+  <ItemGroup>
+    <Compile Include="Helpers\AppDatabase.cs" />
+    <Compile Include="Helpers\AppDataStorage.cs" />
+    <Compile Include="AppSettingForm.cs">
+      <SubType>Form</SubType>
+    </Compile>
+    <Compile Include="AppSettingForm.Designer.cs">
+      <DependentUpon>AppSettingForm.cs</DependentUpon>
+    </Compile>
+    <Compile Include="Helpers\AppSetttings.cs" />
+    <Compile Include="BaseForm.cs">
+      <SubType>Form</SubType>
+    </Compile>
+    <Compile Include="BaseForm.Designer.cs">
+      <DependentUpon>BaseForm.cs</DependentUpon>
+    </Compile>
+    <Compile Include="BizEventArgs\AccountBizEventArgs.cs" />
+    <Compile Include="BizEventArgs\IndexBizEventArgs.cs" />
+    <Compile Include="BizEventArgs\ItemBizEventArgs.cs" />
+    <Compile Include="BizEventArgs\StockBizEventArgs.cs" />
+    <Compile Include="Helpers\BizHelper.cs" />
+    <Compile Include="Helpers\DataGridOpr.cs" />
+    <Compile Include="Helpers\DynamicJson.cs" />
+    <Compile Include="EditTextLinesForm.cs">
+      <SubType>Form</SubType>
+    </Compile>
+    <Compile Include="EditTextLinesForm.Designer.cs">
+      <DependentUpon>EditTextLinesForm.cs</DependentUpon>
+    </Compile>
+    <Compile Include="Extensions\ControlExtension.cs" />
+    <Compile Include="Extensions\ListExtension.cs" />
+    <Compile Include="Extensions\LiteDbExtension.cs" />
+    <Compile Include="Extensions\StringExtensions.cs" />
+    <Compile Include="Helpers\ProductItemHelper.cs" />
+    <Compile Include="Helpers\WBHelper.cs" />
+    <Compile Include="Models\ProductItem.cs" />
+    <Compile Include="Models\Statistic.cs" />
+    <Compile Include="ModifyStockQtyForm.cs">
+      <SubType>Form</SubType>
+    </Compile>
+    <Compile Include="ModifyStockQtyForm.Designer.cs">
+      <DependentUpon>ModifyStockQtyForm.cs</DependentUpon>
+    </Compile>
+    <Compile Include="Properties\Resources.Designer.cs">
+      <AutoGen>True</AutoGen>
+      <DesignTime>True</DesignTime>
+      <DependentUpon>Resources.resx</DependentUpon>
+    </Compile>
+    <Compile Include="SetProfitForm.cs">
+      <SubType>Form</SubType>
+    </Compile>
+    <Compile Include="SetProfitForm.Designer.cs">
+      <DependentUpon>SetProfitForm.cs</DependentUpon>
+    </Compile>
+    <Compile Include="Settings.cs" />
+    <Compile Include="WBMode\WBTaoDurexValidationMode.cs" />
+    <Compile Include="WhiteListForm.cs">
+      <SubType>Form</SubType>
+    </Compile>
+    <Compile Include="WhiteListForm.Designer.cs">
+      <DependentUpon>WhiteListForm.cs</DependentUpon>
+    </Compile>
+    <Compile Include="BlackListForm.cs">
+      <SubType>Form</SubType>
+    </Compile>
+    <Compile Include="BlackListForm.Designer.cs">
+      <DependentUpon>BlackListForm.cs</DependentUpon>
+    </Compile>
+    <Compile Include="Helpers\DWebBrowserEvents2.cs" />
+    <Compile Include="Helpers\Encryption.cs" />
+    <Compile Include="Helpers\ExtendedWinFormsWebBrowser.cs">
+      <SubType>Component</SubType>
+    </Compile>
+    <Compile Include="Helpers\ExtendedWinFormsWebBrowserEventHelper.cs" />
+    <Compile Include="Extensions\HtmlElementExtension.cs" />
+    <Compile Include="Extensions\WebBrowserExtension.cs" />
+    <Compile Include="HtmlEntity\TableEntity.cs" />
+    <Compile Include="Helpers\HtmlHelper.cs" />
+    <Compile Include="Helpers\IECookieHelper.cs" />
+    <Compile Include="Helpers\IEFeatureControl.cs" />
+    <Compile Include="LocalLoginForm.cs">
+      <SubType>Form</SubType>
+    </Compile>
+    <Compile Include="LocalLoginForm.Designer.cs">
+      <DependentUpon>LocalLoginForm.cs</DependentUpon>
+    </Compile>
+    <Compile Include="MessageHubClient.cs" />
+    <Compile Include="Models\TaoJsonpResult.cs" />
+    <Compile Include="WBMode\WBTaoChongZhiBrowserMode.cs" />
+    <Compile Include="TaoLoginForm.cs">
+      <SubType>Form</SubType>
+    </Compile>
+    <Compile Include="TaoLoginForm.Designer.cs">
+      <DependentUpon>TaoLoginForm.cs</DependentUpon>
+    </Compile>
+    <Compile Include="BizEventArgs\TradeBizEventArgs.cs" />
+    <Compile Include="Helpers\UrlHelper.cs" />
+    <Compile Include="WBMode\WBTaoLoginMode.cs" />
+    <Compile Include="WBMode\WebBrowserMode.cs" />
+    <Compile Include="WinFormsClient.cs">
+      <SubType>Form</SubType>
+    </Compile>
+    <Compile Include="WinFormsClient.Designer.cs">
+      <DependentUpon>WinFormsClient.cs</DependentUpon>
+    </Compile>
+    <Compile Include="Program.cs" />
+    <Compile Include="Properties\AssemblyInfo.cs" />
+    <EmbeddedResource Include="AppSettingForm.resx">
+      <DependentUpon>AppSettingForm.cs</DependentUpon>
+    </EmbeddedResource>
+    <EmbeddedResource Include="BaseForm.resx">
+      <DependentUpon>BaseForm.cs</DependentUpon>
+    </EmbeddedResource>
+    <EmbeddedResource Include="EditTextLinesForm.resx">
+      <DependentUpon>EditTextLinesForm.cs</DependentUpon>
+    </EmbeddedResource>
+    <EmbeddedResource Include="ModifyStockQtyForm.resx">
+      <DependentUpon>ModifyStockQtyForm.cs</DependentUpon>
+    </EmbeddedResource>
+    <EmbeddedResource Include="SetProfitForm.resx">
+      <DependentUpon>SetProfitForm.cs</DependentUpon>
+    </EmbeddedResource>
+    <EmbeddedResource Include="WhiteListForm.resx">
+      <DependentUpon>WhiteListForm.cs</DependentUpon>
+    </EmbeddedResource>
+    <EmbeddedResource Include="BlackListForm.resx">
+      <DependentUpon>BlackListForm.cs</DependentUpon>
+    </EmbeddedResource>
+    <EmbeddedResource Include="LocalLoginForm.resx">
+      <DependentUpon>LocalLoginForm.cs</DependentUpon>
+    </EmbeddedResource>
+    <EmbeddedResource Include="TaoLoginForm.resx">
+      <DependentUpon>TaoLoginForm.cs</DependentUpon>
+    </EmbeddedResource>
+    <EmbeddedResource Include="Properties\Resources.resx">
+      <Generator>ResXFileCodeGenerator</Generator>
+      <SubType>Designer</SubType>
+      <LastGenOutput>Resources.Designer.cs</LastGenOutput>
+    </EmbeddedResource>
+    <EmbeddedResource Include="WinFormsClient.resx">
+      <DependentUpon>WinFormsClient.cs</DependentUpon>
+    </EmbeddedResource>
+    <None Include="packages.config" />
+    <None Include="Properties\app.manifest" />
+    <None Include="Properties\Settings.settings">
+      <Generator>SettingsSingleFileGenerator</Generator>
+      <LastGenOutput>Settings.Designer.cs</LastGenOutput>
+    </None>
+    <Compile Include="Properties\Settings.Designer.cs">
+      <AutoGen>True</AutoGen>
+      <DependentUpon>Settings.settings</DependentUpon>
+      <DesignTimeSharedInput>True</DesignTimeSharedInput>
+    </Compile>
+  </ItemGroup>
+  <ItemGroup>
+    <None Include="App.config" />
+  </ItemGroup>
+  <ItemGroup>
+    <COMReference Include="MSHTML">
+      <Guid>{3050F1C5-98B5-11CF-BB82-00AA00BDCE0B}</Guid>
+      <VersionMajor>4</VersionMajor>
+      <VersionMinor>0</VersionMinor>
+      <Lcid>0</Lcid>
+      <WrapperTool>primary</WrapperTool>
+      <Isolated>False</Isolated>
+      <EmbedInteropTypes>True</EmbedInteropTypes>
+    </COMReference>
+  </ItemGroup>
+  <ItemGroup>
+    <ProjectReference Include="..\Moonlight\Moonlight.csproj">
+      <Project>{b38891ef-dfb2-426e-a368-9e76e8221b2e}</Project>
+      <Name>Moonlight</Name>
+    </ProjectReference>
+    <ProjectReference Include="..\System.Extensions\System.Extensions.csproj">
+      <Project>{239ef8b9-f88a-4452-ab8f-2222db1fcbb9}</Project>
+      <Name>System.Extensions</Name>
+    </ProjectReference>
+    <ProjectReference Include="..\TopModel\TopModel.csproj">
+      <Project>{45c5ccd1-5f44-48e2-a48d-c3803635e350}</Project>
+      <Name>TopModel</Name>
+    </ProjectReference>
+    <ProjectReference Include="G:\TaoBaoSDK\TopSdk.csproj">
+      <Project>{9c11cae5-5188-4e71-825b-68fc3135728a}</Project>
+      <Name>TopSdk</Name>
+    </ProjectReference>
+  </ItemGroup>
+  <ItemGroup>
+    <Content Include="basket_buy_red_sell_shopping_128px_225_easyicon.net.ico" />
+    <None Include="Resources\user_24px_1130007_easyicon.net.png" />
+    <None Include="Resources\green_dot_24px_520103_easyicon.net.png" />
+    <None Include="Resources\ball_circle_orange_point_24px_2004_easyicon.net.png" />
+    <None Include="Resources\dialog_information_24px_509705_easyicon.net.png" />
+    <None Include="Resources\Lock_32px_1134504_easyicon.net.png" />
+    <None Include="Resources\Lock_Unlocked_24px_1134503_easyicon.net.png" />
+    <None Include="Resources\point_amp_Shoort_camera_24px_1184021_easyicon.net.png" />
+    <None Include="Resources\minus_red_24px_504650_easyicon.net.png" />
+    <None Include="Resources\plus_grey_24px_504660_easyicon.net.png" />
+    <None Include="Resources\arrow_down_24px_1180273_easyicon.net.png" />
+    <None Include="Resources\arrow_up_24px_1180274_easyicon.net.png" />
+    <None Include="Resources\arrow_down_24px_1180465_easyicon.net.png" />
+    <None Include="Resources\arrow_up_24px_1180466_easyicon.net.png" />
+    <None Include="Resources\qq_24px_1164430_easyicon.net.png" />
+    <None Include="Resources\qq_22.5px_1164502_easyicon.net.png" />
+    <None Include="Resources\phone_24px_1180573_easyicon.net.png" />
+    <None Include="Resources\close_24px_1159855_easyicon.net.png" />
+    <None Include="Resources\X_close_24px_1187252_easyicon.net.png" />
+    <None Include="Resources\exchange_16px_1072104_easyicon.net.png" />
+    <None Include="Resources\exchange_24px_1131468_easyicon.net.png" />
+    <None Include="Resources\stock_task_recurring_24px_1078502_easyicon.net.png" />
+    <None Include="Resources\stock_task_assigned_to_24px_1078501_easyicon.net.png" />
+    <None Include="Resources\stock_task_assigned_24px_1078500_easyicon.net.png" />
+    <None Include="Resources\stock_task_24px_1078499_easyicon.net.png" />
+    <None Include="Resources\stock_lock_24px_509820_easyicon.net.png" />
+    <None Include="Resources\applications_internet_24px_509744_easyicon.net.png" />
+    <None Include="Resources\applications_system_24px_509746_easyicon.net.png" />
+    <None Include="Resources\Refresh_16px_1186205_easyicon.net.png" />
+    <None Include="Resources\refresh_24px_1140121_easyicon.net.png" />
+    <None Include="Resources\refresh_24px_1170291_easyicon.net.png" />
+    <None Include="Resources\format_list_bulleted_24px_1181899_easyicon.net.png" />
+    <None Include="Resources\accept_list_24px_13500_easyicon.net.png" />
+    <None Include="Resources\view_list_tree_24px_540199_easyicon.net.png" />
+    <None Include="Resources\white_list_24px_573221_easyicon.net.png" />
+    <None Include="Resources\To_do_list_24px_1061515_easyicon.net.png" />
+    <None Include="Resources\ui_menu_blue_16px_514871_easyicon.net.png" />
+    <None Include="Resources\ui_menu_16px_514870_easyicon.net.png" />
+  </ItemGroup>
+  <ItemGroup>
+    <BootstrapperPackage Include=".NETFramework,Version=v4.5">
+      <Visible>False</Visible>
+      <ProductName>Microsoft .NET Framework 4.5 %28x86 和 x64%29</ProductName>
+      <Install>true</Install>
+    </BootstrapperPackage>
+    <BootstrapperPackage Include="Microsoft.Net.Framework.3.5.SP1">
+      <Visible>False</Visible>
+      <ProductName>.NET Framework 3.5 SP1</ProductName>
+      <Install>false</Install>
+    </BootstrapperPackage>
+  </ItemGroup>
+  <Import Project="$(MSBuildToolsPath)\Microsoft.CSharp.targets" />
+  <!-- To modify your build process, add your task inside one of the targets below and uncomment it. 
+       Other similar extension points exist, see Microsoft.Common.targets.
+  <Target Name="BeforeBuild">
+  </Target>
+  <Target Name="AfterBuild">
+  </Target>
+  -->
+</Project>

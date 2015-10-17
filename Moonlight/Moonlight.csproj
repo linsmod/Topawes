@@ -1,0 +1,135 @@
+﻿<?xml version="1.0" encoding="utf-8"?>
+<Project ToolsVersion="14.0" DefaultTargets="Build" xmlns="http://schemas.microsoft.com/developer/msbuild/2003">
+  <Import Project="$(MSBuildExtensionsPath)\$(MSBuildToolsVersion)\Microsoft.Common.props" Condition="Exists('$(MSBuildExtensionsPath)\$(MSBuildToolsVersion)\Microsoft.Common.props')" />
+  <PropertyGroup>
+    <Configuration Condition=" '$(Configuration)' == '' ">Debug</Configuration>
+    <Platform Condition=" '$(Platform)' == '' ">AnyCPU</Platform>
+    <ProjectGuid>{B38891EF-DFB2-426E-A368-9E76E8221B2E}</ProjectGuid>
+    <OutputType>Library</OutputType>
+    <AppDesignerFolder>Properties</AppDesignerFolder>
+    <RootNamespace>Moonlight</RootNamespace>
+    <AssemblyName>Moonlight</AssemblyName>
+    <TargetFrameworkVersion>v4.0</TargetFrameworkVersion>
+    <FileAlignment>512</FileAlignment>
+    <TargetFrameworkProfile />
+  </PropertyGroup>
+  <PropertyGroup Condition=" '$(Configuration)|$(Platform)' == 'Debug|AnyCPU' ">
+    <DebugSymbols>true</DebugSymbols>
+    <DebugType>full</DebugType>
+    <Optimize>false</Optimize>
+    <OutputPath>bin\Debug\</OutputPath>
+    <DefineConstants>DEBUG;TRACE</DefineConstants>
+    <ErrorReport>prompt</ErrorReport>
+    <WarningLevel>4</WarningLevel>
+  </PropertyGroup>
+  <PropertyGroup Condition=" '$(Configuration)|$(Platform)' == 'Release|AnyCPU' ">
+    <DebugType>pdbonly</DebugType>
+    <Optimize>true</Optimize>
+    <OutputPath>bin\Release\</OutputPath>
+    <DefineConstants>TRACE</DefineConstants>
+    <ErrorReport>prompt</ErrorReport>
+    <WarningLevel>4</WarningLevel>
+  </PropertyGroup>
+  <ItemGroup>
+    <Reference Include="LiteDB, Version=1.0.3.0, Culture=neutral, processorArchitecture=MSIL">
+      <HintPath>..\packages\LiteDB.1.0.3\lib\net40\LiteDB.dll</HintPath>
+      <Private>True</Private>
+    </Reference>
+    <Reference Include="Newtonsoft.Json, Version=7.0.0.0, Culture=neutral, PublicKeyToken=30ad4fe6b2a6aeed, processorArchitecture=MSIL">
+      <HintPath>..\packages\Newtonsoft.Json.7.0.1\lib\net40\Newtonsoft.Json.dll</HintPath>
+      <Private>True</Private>
+    </Reference>
+    <Reference Include="System" />
+    <Reference Include="System.Core" />
+    <Reference Include="System.Drawing" />
+    <Reference Include="System.Windows.Forms" />
+    <Reference Include="System.Xml.Linq" />
+    <Reference Include="System.Data.DataSetExtensions" />
+    <Reference Include="Microsoft.CSharp" />
+    <Reference Include="System.Data" />
+    <Reference Include="System.Xml" />
+  </ItemGroup>
+  <ItemGroup>
+    <Compile Include="AppSetting.cs" />
+    <Compile Include="Helpers\HttpHelper.cs" />
+    <Compile Include="Microsoft\ShDocVw\DWebBrowserEvents2.cs" />
+    <Compile Include="SettingStorage\ApplicationGlobalSetting.cs" />
+    <Compile Include="SettingStorage\ApplicationUserSettingStorage.cs" />
+    <Compile Include="SettingStorage\ApplicationGlobalSettingStorage.cs" />
+    <Compile Include="SettingStorage\ApplicationUserSetting.cs" />
+    <Compile Include="EntityStorage\UpsertType.cs" />
+    <Compile Include="Cryptography\Encryption.cs" />
+    <Compile Include="EntityStorage\DbContext.cs" />
+    <Compile Include="EntityStorage\Extensions\DbContextExtension.cs" />
+    <Compile Include="EntityStorage\Extensions\LiteDbExtension.cs" />
+    <Compile Include="Properties\AssemblyInfo.cs" />
+    <Compile Include="Treading\BlockingQueue.cs" />
+    <Compile Include="Treading\SendOrPostCallbackItem.cs" />
+    <Compile Include="Treading\StaSynchronizationContext.cs" />
+    <Compile Include="Treading\StaThread.cs" />
+    <Compile Include="WebDownloader\HttpDownloadClient.cs" />
+    <Compile Include="WebDownloader\HttpDownloadClientStatus.cs" />
+    <Compile Include="WebDownloader\HttpDownloadCompletedEventArgs.cs" />
+    <Compile Include="WebDownloader\HttpDownloadProgressChangedEventArgs.cs" />
+    <Compile Include="WindowsForms\AppUserSettingChangedEventArgs.cs" />
+    <Compile Include="WindowsForms\Controls\AxHostEx.cs" />
+    <Compile Include="WindowsForms\Controls\ExtendedWinFormsWebBrowser.cs">
+      <SubType>Component</SubType>
+    </Compile>
+    <Compile Include="WindowsForms\Controls\ExtendedWinFormsWebBrowserEventHelper.cs" />
+    <Compile Include="WindowsForms\Controls\MoonDataGridView.cs">
+      <SubType>Component</SubType>
+    </Compile>
+    <Compile Include="WindowsForms\Controls\MoonDataGridView.Designer.cs">
+      <DependentUpon>MoonDataGridView.cs</DependentUpon>
+    </Compile>
+    <Compile Include="WindowsForms\IECookieHelper.cs" />
+    <Compile Include="WindowsForms\IEDownloadManager.cs" />
+    <Compile Include="WindowsForms\NativeMethods.cs" />
+    <Compile Include="WindowsForms\StateControls\MoonCheckBox.cs">
+      <SubType>Component</SubType>
+    </Compile>
+    <Compile Include="WindowsForms\StateControls\MoonCheckBox.Designer.cs">
+      <DependentUpon>MoonCheckBox.cs</DependentUpon>
+    </Compile>
+    <Compile Include="WindowsForms\StateControls\MoonDropDownList.cs">
+      <SubType>Component</SubType>
+    </Compile>
+    <Compile Include="WindowsForms\StateControls\MoonDropDownList.Designer.cs">
+      <DependentUpon>MoonDropDownList.cs</DependentUpon>
+    </Compile>
+    <Compile Include="WindowsForms\StateControls\MoonToolStripMenuItem.cs">
+      <SubType>Component</SubType>
+    </Compile>
+    <Compile Include="WindowsForms\StateControls\MoonToolStripMenuItem.Designer.cs">
+      <DependentUpon>MoonToolStripMenuItem.cs</DependentUpon>
+    </Compile>
+    <Compile Include="WindowsForms\StateControls\MoonUpDown.cs">
+      <SubType>Component</SubType>
+    </Compile>
+    <Compile Include="WindowsForms\StateControls\MoonUpDown.Designer.cs">
+      <DependentUpon>MoonUpDown.cs</DependentUpon>
+    </Compile>
+    <Compile Include="WindowsForms\StateControls\StripMenuItemShownEventArgs.cs" />
+  </ItemGroup>
+  <ItemGroup>
+    <None Include="packages.config" />
+  </ItemGroup>
+  <ItemGroup>
+    <Folder Include="Network\" />
+  </ItemGroup>
+  <ItemGroup>
+    <ProjectReference Include="..\System.Extensions\System.Extensions.csproj">
+      <Project>{239ef8b9-f88a-4452-ab8f-2222db1fcbb9}</Project>
+      <Name>System.Extensions</Name>
+    </ProjectReference>
+  </ItemGroup>
+  <Import Project="$(MSBuildToolsPath)\Microsoft.CSharp.targets" />
+  <!-- To modify your build process, add your task inside one of the targets below and uncomment it. 
+       Other similar extension points exist, see Microsoft.Common.targets.
+  <Target Name="BeforeBuild">
+  </Target>
+  <Target Name="AfterBuild">
+  </Target>
+  -->
+</Project>
