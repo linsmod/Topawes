@@ -40,14 +40,16 @@ namespace PushServer
             TopOperation.TmcStartListen();
         }
 
-        public static ApiResult TmcGroupAddThenTmcUserPermit(string nick, string accessToken)
+        public static ApiResult TmcUserPermitThenTmcGroupAdd(string nick, string accessToken)
         {
             if (!Initialized)
             {
                 throw new Exception("使用TopManager前必须Initialize");
             }
-            TopOperation.AddGroup(nick);
-            return TopOperation.PermitMSG(accessToken);
+            var x = TopOperation.PermitMSG(accessToken);
+            if (!x.Success)
+                return x;
+            return TopOperation.AddGroup(nick);
         }
 
 
@@ -125,13 +127,14 @@ namespace PushServer
                 return x.ErrMsg;
             }
 
-            public void AddGroup(string nick)
+            public ApiResult AddGroup(string nick)
             {
                 ITopClient client = new DefaultTopClient(url_api, AppKey, AppSecret);
                 TmcGroupAddRequest req = new TmcGroupAddRequest();
                 req.GroupName = "sunshine";
                 req.Nicks = nick;
                 TmcGroupAddResponse response = client.Execute(req);
+                return response.AsApiResult();
             }
             /// <summary>
             /// 连接消息服务
@@ -231,18 +234,14 @@ namespace PushServer
             /// </summary>
             /// <param name="nick">店铺昵称</param>
             /// <returns></returns>
-            public string TmcUserGet(Models.UserTaoOAuth taoUserOAuth)
+            public ApiResult<TmcUser> TmcUserGet(Models.UserTaoOAuth taoUserOAuth)
             {
                 ITopClient client = new DefaultTopClient(url_api, AppKey, AppSecret);
                 TmcUserGetRequest request = new TmcUserGetRequest();
                 request.Nick = taoUserOAuth.taobao_user_nick;
                 request.Fields = "user_nick,topics,user_id,is_valid,created,modified";
                 var resp = client.Execute<TmcUserGetResponse>(request, taoUserOAuth.access_token);
-                if (resp.IsError)
-                {
-                    return resp.ErrMsg;
-                }
-                return resp.Body;
+                return resp.AsApiResult(resp.TmcUser);
             }
 
             /// <summary>

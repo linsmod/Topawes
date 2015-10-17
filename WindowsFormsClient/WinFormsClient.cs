@@ -53,7 +53,7 @@ namespace WinFormsClient
         internal WinFormsClient()
         {
             InitializeComponent();
-            this.Visible = false;
+
             wb = new ExtendedWinFormsWebBrowser(wbLoginMode);
             //wb.ProgressChanged2 += (s, e) =>
             //{
@@ -79,14 +79,6 @@ namespace WinFormsClient
             if (msg.Msg == WM_SYSCOMMAND && ((int)msg.WParam == SC_MINIMIZE))
             {
                 this.ShowInTaskbar = false;
-                this.notifyIcon1.Icon = this.Icon;
-                this.notifyIcon1.Text = AppSetting.UserSetting.UserName;
-                this.notifyIcon1.BalloonTipText = AppSetting.UserSetting.UserName;
-                this.notifyIcon1.DoubleClick += (s, e) =>
-                {
-                    this.Visible = true;
-                    this.Show();
-                };
                 this.Hide();
             }
             base.WndProc(ref msg);
@@ -311,6 +303,7 @@ namespace WinFormsClient
 
             try
             {
+                
                 await Connection.Start();
                 this.tssl_ConnState.Text = "连接状态：" + ConnectionState.Connected.AsZhConnectionState();
                 IsLogin = true;
@@ -324,7 +317,7 @@ namespace WinFormsClient
                 AppDatabase.Initialize(userName);
                 LoadUserSetting();
                 this.AppendText(string.Format("账号 [{0}] - 服务消息代理状态={1}", userName, ((bool)userInfo.TopManagerInitialized) ? " 运行中" : " 未启动，请联系技术支持。"));
-
+                SetupTaskbarIcon();
                 AppDatabase.db.Statistics.Delete(userName);
                 AppDatabase.db.Statistics.Insert(new Statistic { Id = userName });
                 var statistic = AppDatabase.db.Statistics.FindById(userName);
@@ -373,6 +366,22 @@ namespace WinFormsClient
             catch (Exception ex)
             {
                 AppendException(ex);
+            }
+        }
+
+        private void SetupTaskbarIcon()
+        {
+            if (this.notifyIcon1.Icon == null)
+            {
+                this.notifyIcon1.Icon = this.Icon;
+                this.notifyIcon1.Text = AppSetting.UserSetting.UserName;
+                this.notifyIcon1.BalloonTipText = AppSetting.UserSetting.UserName;
+                this.notifyIcon1.DoubleClick += (s, e) =>
+                {
+                    this.ShowInTaskbar = true;
+                    this.Show();
+                    this.WindowState = FormWindowState.Normal;
+                };
             }
         }
 
@@ -912,31 +921,39 @@ namespace WinFormsClient
 
         private async Task<bool> SyncAllProductList()
         {
-            bool success = false;
-            if (this.InvokeRequired)
+            try
             {
-                return await ((Task<bool>)this.Invoke(new SyncProductListDelegate(this.SyncAllProductList)));
-            }
-            else
-            {
-                //仓库中
-                success = await SyncInStockProductList();
+                bool success = false;
+                if (this.InvokeRequired)
+                {
+                    return await ((Task<bool>)this.Invoke(new SyncProductListDelegate(this.SyncAllProductList)));
+                }
+                else
+                {
+                    //仓库中
+                    success = await SyncInStockProductList();
+                    if (success)
+                    {
+                        //出售中
+                        success = await SyncOnSaleProductList();
+                    }
+                }
                 if (success)
                 {
-                    //出售中
-                    success = await SyncOnSaleProductList();
+                    this.SmartInvokeAsync(() =>
+                    {
+                        BindDGViewProduct();
+                        tabControl1.Enabled = true;
+                    });
                 }
+                AppSetting.UserSetting.Set<DateTime?>("LastSyncProductAt", DateTime.Now);
+                return success;
             }
-            if (success)
+            catch (Exception ex)
             {
-                this.SmartInvokeAsync(() =>
-                {
-                    BindDGViewProduct();
-                    tabControl1.Enabled = true;
-                });
+                AppendText("同步商品异常，你可以稍后重试。");
+                return false;
             }
-            AppSetting.UserSetting.Set<DateTime?>("LastSyncProductAt", DateTime.Now);
-            return success;
         }
 
         private async Task<bool> SyncInStockProductList()

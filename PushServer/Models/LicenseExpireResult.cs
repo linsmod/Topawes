@@ -14,11 +14,20 @@ namespace PushServer.Models
     }
     public static class LicenseExtension
     {
+        public static LicenseState AsLicenseState(this DateTime licenseExpires)
+        {
+            return new DateTime?(licenseExpires).AsLicenseState();
+        }
         public static LicenseState AsLicenseState(this DateTime? licenseExpires)
         {
             if (!licenseExpires.HasValue)
                 return LicenseState.未授权;
             return licenseExpires.Value > DateTime.Now ? LicenseState.正常 : LicenseState.授权过期;
+        }
+
+        public static string AsRemainingTime(this DateTime licenseExpires)
+        {
+            return new DateTime?(licenseExpires).AsRemainingTime();
         }
 
         public static string AsRemainingTime(this DateTime? licenseExpires)

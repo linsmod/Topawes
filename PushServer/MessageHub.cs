@@ -14,6 +14,7 @@ using Top.Api.Request;
 using Top.Api;
 using TopModel.Models;
 using PushServer.MessageHubs;
+using Top.Api.Domain;
 
 namespace PushServer
 {
@@ -142,7 +143,7 @@ namespace PushServer
         public ApiResult TmcGroupAddThenTmcUserPermit()
         {
             var user = UserManager.FindByName(Context.User.Identity.Name);
-            return TopManager.TmcGroupAddThenTmcUserPermit(user.TaoOAuth.taobao_user_nick, user.TaoOAuth.access_token);
+            return TopManager.TmcUserPermitThenTmcGroupAdd(user.TaoOAuth.taobao_user_nick, user.TaoOAuth.access_token);
         }
 
         //no stop,only cancel msg
@@ -154,14 +155,10 @@ namespace PushServer
         }
 
         [Authorize]
-        public void TmcUserGet()
+        public ApiResult<TmcUser> TmcUserGet()
         {
-            if (!NotifyIfLicensExpired(Context.User.Identity.Name, SoftwareId))
-            {
-                var user = UserManager.FindByName(Context.User.Identity.Name);
-                string msg = TopManager.TopOperation.TmcUserGet(user.TaoOAuth);
-                Clients.Caller.OnMessage("已开通以下消息:" + msg);
-            }
+            var user = UserManager.FindByName(Context.User.Identity.Name);
+            return TopManager.TopOperation.TmcUserGet(user.TaoOAuth);
         }
 
         [Authorize]
