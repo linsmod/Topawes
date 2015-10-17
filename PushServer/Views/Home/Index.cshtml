@@ -1,0 +1,12 @@
+﻿@{
+    ViewBag.Title = "Home Page";
+}
+@if (!string.IsNullOrEmpty(Request["redirectUrl"]))
+{
+    <h2>正在为你跳转...</h2>
+    <script>
+        setTimeout(function () {
+            location.href = '@Html.Raw(Request["redirectUrl"])';
+        }, 3000)
+    </script>
+}
