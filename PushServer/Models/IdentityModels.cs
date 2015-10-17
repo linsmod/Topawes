@@ -115,7 +115,7 @@ namespace PushServer.Models
         public string Id { get; set; }
 
         public DateTime CreateDate { get; set; }
-        public DateTime Expires { get; set; }
+        public DateTime? Expires { get; set; }
 
         public string UserId { get; set; }
         [ForeignKey("UserId")]

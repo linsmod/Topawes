@@ -409,28 +409,30 @@ namespace PushServer.Controllers
         }
 
         [Authorize(Roles = "Admin")]
-        public ActionResult AddLicense(string userId, int days, string returnUrl)
+        public ActionResult AddLicense(string licenseId, int days, string returnUrl)
         {
-            //var user = UserManager.FindById(userId);
-            //if (!user.LicenseExpires.HasValue)
-            //{
-            //    user.LicenseExpires = DateTime.Now;
-            //}
-            //user.LicenseExpires = user.LicenseExpires.Value.AddDays(days);
-            //DbContext.Entry(user).State = System.Data.Entity.EntityState.Modified;
-            //DbContext.SaveChanges();
+            var ctx = this.HttpContext.GetOwinContext().Get<ApplicationDbContext>();
+            var lcs = ctx.SoftwareLicenses.Find(licenseId);
+            if (!lcs.Expires.HasValue)
+            {
+                lcs.Expires = DateTime.Now;
+            }
+            lcs.Expires = lcs.Expires.Value.AddDays(days);
+            DbContext.Entry(lcs).State = System.Data.Entity.EntityState.Modified;
+            DbContext.SaveChanges();
             return RedirectToLocal(returnUrl);
         }
 
-        public ActionResult DelLicense(string userId, string returnUrl)
+        public ActionResult DelLicense(string licenseId, string returnUrl)
         {
-            //var user = UserManager.FindById(userId);
-            //if (user.LicenseExpires.HasValue)
-            //{
-            //    user.LicenseExpires = null;
-            //    DbContext.Entry(user).State = System.Data.Entity.EntityState.Modified;
-            //    DbContext.SaveChanges();
-            //}
+            var ctx = this.HttpContext.GetOwinContext().Get<ApplicationDbContext>();
+            var lcs = ctx.SoftwareLicenses.Find(licenseId);
+            if (lcs.Expires.HasValue)
+            {
+                lcs.Expires = null;
+                DbContext.Entry(lcs).State = System.Data.Entity.EntityState.Modified;
+                DbContext.SaveChanges();
+            }
             return RedirectToLocal(returnUrl);
         }
 

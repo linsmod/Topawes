@@ -202,13 +202,9 @@
     <Compile Include="MessageHubs\TopawesHub.cs" />
     <Compile Include="MessageHubs\TradeMessageHub.cs" />
     <Compile Include="MessageHubs\TradeRateMessageHub.cs" />
-    <Compile Include="Migrations\201509251304554_InitDatabase.cs" />
-    <Compile Include="Migrations\201509251304554_InitDatabase.Designer.cs">
-      <DependentUpon>201509251304554_InitDatabase.cs</DependentUpon>
-    </Compile>
-    <Compile Include="Migrations\201509260022388_AddUpdateDateForTaoUserOAuthTable.cs" />
-    <Compile Include="Migrations\201509260022388_AddUpdateDateForTaoUserOAuthTable.Designer.cs">
-      <DependentUpon>201509260022388_AddUpdateDateForTaoUserOAuthTable.cs</DependentUpon>
+    <Compile Include="Migrations\201510171338172_Init.cs" />
+    <Compile Include="Migrations\201510171338172_Init.Designer.cs">
+      <DependentUpon>201510171338172_Init.cs</DependentUpon>
     </Compile>
     <Compile Include="Migrations\Configuration.cs" />
     <Compile Include="Models\AccountViewModels.cs" />
@@ -304,11 +300,8 @@
     </ProjectReference>
   </ItemGroup>
   <ItemGroup>
-    <EmbeddedResource Include="Migrations\201509251304554_InitDatabase.resx">
-      <DependentUpon>201509251304554_InitDatabase.cs</DependentUpon>
-    </EmbeddedResource>
-    <EmbeddedResource Include="Migrations\201509260022388_AddUpdateDateForTaoUserOAuthTable.resx">
-      <DependentUpon>201509260022388_AddUpdateDateForTaoUserOAuthTable.cs</DependentUpon>
+    <EmbeddedResource Include="Migrations\201510171338172_Init.resx">
+      <DependentUpon>201510171338172_Init.cs</DependentUpon>
     </EmbeddedResource>
   </ItemGroup>
   <PropertyGroup>

@@ -40,10 +40,10 @@
                 <td>@item.Expires.AsRemainingTime()</td>
                 <td>@item.Expires.AsLicenseState()</td>
                 <td>
-                    <a href="/account/addlicense?userId=@item.Id&days=1&returnUrl=@Request.Url.PathAndQuery">+1天</a>
-                    | <a href="/account/addlicense?userId=@item.Id&days=10&returnUrl=@Request.Url.PathAndQuery">+10天</a>
-                    | <a href="/account/addlicense?userId=@item.Id&days=15&returnUrl=@Request.Url.PathAndQuery">+15天</a>
-                    | <a href="/account/addlicense?userId=@item.Id&days=30&returnUrl=@Request.Url.PathAndQuery">+1月</a>
+                    <a href="/account/addlicense?licenseId=@item.Id&days=1&returnUrl=@Request.Url.PathAndQuery">+1天</a>
+                    | <a href="/account/addlicense?licenseId=@item.Id&days=10&returnUrl=@Request.Url.PathAndQuery">+10天</a>
+                    | <a href="/account/addlicense?licenseId=@item.Id&days=15&returnUrl=@Request.Url.PathAndQuery">+15天</a>
+                    | <a href="/account/addlicense?licenseId=@item.Id&days=30&returnUrl=@Request.Url.PathAndQuery">+1月</a>
                     @if (state != LicenseState.未授权)
                     {
                         <span>|</span>
