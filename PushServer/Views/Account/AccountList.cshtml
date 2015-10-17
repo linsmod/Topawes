@@ -31,54 +31,65 @@
     </tr>
     @foreach (var user in Model)
     {
-        foreach (var item in user.SoftwareLicenses)
+        if (user.SoftwareLicenses.Any())
         {
-            var state = item.Expires.AsLicenseState();
-            <tr>
-                <td>@item.User.UserName</td>
-                <td>@item.SoftwareId</td>
-                <td>@item.Expires.AsRemainingTime()</td>
-                <td>@item.Expires.AsLicenseState()</td>
-                <td>
-                    <a href="/account/addlicense?licenseId=@item.Id&days=1&returnUrl=@Request.Url.PathAndQuery">+1天</a>
-                    | <a href="/account/addlicense?licenseId=@item.Id&days=10&returnUrl=@Request.Url.PathAndQuery">+10天</a>
-                    | <a href="/account/addlicense?licenseId=@item.Id&days=15&returnUrl=@Request.Url.PathAndQuery">+15天</a>
-                    | <a href="/account/addlicense?licenseId=@item.Id&days=30&returnUrl=@Request.Url.PathAndQuery">+1月</a>
-                    @if (state != LicenseState.未授权)
-                    {
-                        <span>|</span>
-                        <a href="/account/dellicense?userId=@item.Id&returnUrl=@Request.Url.PathAndQuery">
-                            取消授权
-                        </a>
-                    }
-                </td>
-                <td style="padding:0;">
-                    <table class="table table-condensed">
-                        @foreach (var conn in user.Connections.OrderByDescending(x => x.LastConnectDate).Take(5))
+            foreach (var item in user.SoftwareLicenses)
+            {
+                var state = item.Expires.AsLicenseState();
+                <tr>
+                    <td>@item.User.UserName</td>
+                    <td>@item.SoftwareId</td>
+                    <td>@item.Expires.AsRemainingTime()</td>
+                    <td>@item.Expires.AsLicenseState()</td>
+                    <td>
+                        <a href="/account/addlicense?licenseId=@item.Id&days=1&returnUrl=@Request.Url.PathAndQuery">+1天</a>
+                        | <a href="/account/addlicense?licenseId=@item.Id&days=10&returnUrl=@Request.Url.PathAndQuery">+10天</a>
+                        | <a href="/account/addlicense?licenseId=@item.Id&days=15&returnUrl=@Request.Url.PathAndQuery">+15天</a>
+                        | <a href="/account/addlicense?licenseId=@item.Id&days=30&returnUrl=@Request.Url.PathAndQuery">+1月</a>
+                        @if (state != LicenseState.未授权)
                         {
-                            <tr>
-                                <td title="客户端版本=@conn.UserAgent">
-                                    @conn.ConnectionID
-                                </td>
-                                <td title="最后活动=@conn.LastConnectDate.AsReadable()">
-                                    @conn.LastConnectDate.AsReadable()
-                                </td>
-                                <td title="当前状态=@(conn.Connected ? "在线" : "离线")">
-                                    @(conn.Connected ? "在线" : "离线")
-                                </td>
-                                <td>
-                                    @if (conn.Connected)
-                                    {
-                                        <a href="javascript:;" onclick="$.post('/account/heartbeat/@conn.ConnectionID');">测试</a>
-                                    }
-                                </td>
-                            </tr>
+                            <span>|</span>
+                            <a href="/account/dellicense?licenseId=@item.Id&returnUrl=@Request.Url.PathAndQuery">
+                                取消授权
+                            </a>
                         }
-                    </table>
-                </td>
+                    </td>
+                    <td style="padding:0;">
+                        <table class="table table-condensed">
+                            @foreach (var conn in user.Connections.OrderByDescending(x => x.LastConnectDate).Take(5))
+                            {
+                                <tr>
+                                    <td title="客户端版本=@conn.UserAgent">
+                                        @conn.ConnectionID
+                                    </td>
+                                    <td title="最后活动=@conn.LastConnectDate.AsReadable()">
+                                        @conn.LastConnectDate.AsReadable()
+                                    </td>
+                                    <td title="当前状态=@(conn.Connected ? "在线" : "离线")">
+                                        @(conn.Connected ? "在线" : "离线")
+                                    </td>
+                                    <td width="40">
+                                        @if (conn.Connected)
+                                        {
+                                            <a href="javascript:;" onclick="$.post('/account/heartbeat/@conn.ConnectionID');">测试</a>
+                                        }
+                                    </td>
+                                </tr>
+                            }
+                        </table>
+                    </td>
 
+                </tr>
+            }
+        }
+        else
+        {
+            <tr>
+                <td>@user.UserName</td>
+                <td colspan="5">
+                    从未连接
+                </td>
             </tr>
         }
-
     }
 </table>
