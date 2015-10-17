@@ -170,6 +170,7 @@
             this.修改库存ToolStripMenuItem = new System.Windows.Forms.ToolStripMenuItem();
             this.全选ToolStripMenuItem = new System.Windows.Forms.ToolStripMenuItem();
             this.刷新列表ToolStripMenuItem = new System.Windows.Forms.ToolStripMenuItem();
+            this.notifyIcon1 = new System.Windows.Forms.NotifyIcon(this.components);
             this.tabControl1.SuspendLayout();
             this.tabPageItemList.SuspendLayout();
             this.panel1.SuspendLayout();
@@ -1216,7 +1217,7 @@
             this.按利润ToolStripMenuItem,
             this.按位置ToolStripMenuItem});
             this.contextMenuStrip1.Name = "contextMenuStrip1";
-            this.contextMenuStrip1.Size = new System.Drawing.Size(161, 368);
+            this.contextMenuStrip1.Size = new System.Drawing.Size(161, 346);
             // 
             // 上架ToolStripMenuItem
             // 
@@ -1345,7 +1346,7 @@
             // 
             this.选择QQ直充ToolStripMenuItem.Image = global::WinFormsClient.Properties.Resources.QQ;
             this.选择QQ直充ToolStripMenuItem.Name = "选择QQ直充ToolStripMenuItem";
-            this.选择QQ直充ToolStripMenuItem.Size = new System.Drawing.Size(152, 22);
+            this.选择QQ直充ToolStripMenuItem.Size = new System.Drawing.Size(148, 22);
             this.选择QQ直充ToolStripMenuItem.Text = "选择QQ直充";
             this.选择QQ直充ToolStripMenuItem.Click += new System.EventHandler(this.qQ直充ToolStripMenuItem2_Click);
             // 
@@ -1353,7 +1354,7 @@
             // 
             this.选择点卡直充ToolStripMenuItem.Image = global::WinFormsClient.Properties.Resources.点卡;
             this.选择点卡直充ToolStripMenuItem.Name = "选择点卡直充ToolStripMenuItem";
-            this.选择点卡直充ToolStripMenuItem.Size = new System.Drawing.Size(152, 22);
+            this.选择点卡直充ToolStripMenuItem.Size = new System.Drawing.Size(148, 22);
             this.选择点卡直充ToolStripMenuItem.Text = "选择点卡直充";
             this.选择点卡直充ToolStripMenuItem.Click += new System.EventHandler(this.点卡直充ToolStripMenuItem2_Click);
             // 
@@ -1361,7 +1362,7 @@
             // 
             this.选择话费直充ToolStripMenuItem.Image = global::WinFormsClient.Properties.Resources.电话;
             this.选择话费直充ToolStripMenuItem.Name = "选择话费直充ToolStripMenuItem";
-            this.选择话费直充ToolStripMenuItem.Size = new System.Drawing.Size(152, 22);
+            this.选择话费直充ToolStripMenuItem.Size = new System.Drawing.Size(148, 22);
             this.选择话费直充ToolStripMenuItem.Text = "选择话费直充";
             this.选择话费直充ToolStripMenuItem.Click += new System.EventHandler(this.话费直充ToolStripMenuItem2_Click);
             // 
@@ -1381,7 +1382,7 @@
             // 
             this.选择正利润ToolStripMenuItem.Image = global::WinFormsClient.Properties.Resources.加号;
             this.选择正利润ToolStripMenuItem.Name = "选择正利润ToolStripMenuItem";
-            this.选择正利润ToolStripMenuItem.Size = new System.Drawing.Size(152, 22);
+            this.选择正利润ToolStripMenuItem.Size = new System.Drawing.Size(136, 22);
             this.选择正利润ToolStripMenuItem.Text = "选择正利润";
             this.选择正利润ToolStripMenuItem.Click += new System.EventHandler(this.正利润ToolStripMenuItem_Click);
             // 
@@ -1389,14 +1390,14 @@
             // 
             this.选择负利润ToolStripMenuItem.Image = global::WinFormsClient.Properties.Resources.减号;
             this.选择负利润ToolStripMenuItem.Name = "选择负利润ToolStripMenuItem";
-            this.选择负利润ToolStripMenuItem.Size = new System.Drawing.Size(152, 22);
+            this.选择负利润ToolStripMenuItem.Size = new System.Drawing.Size(136, 22);
             this.选择负利润ToolStripMenuItem.Text = "选择负利润";
             this.选择负利润ToolStripMenuItem.Click += new System.EventHandler(this.负利润ToolStripMenuItem_Click);
             // 
             // 选择零利润ToolStripMenuItem
             // 
             this.选择零利润ToolStripMenuItem.Name = "选择零利润ToolStripMenuItem";
-            this.选择零利润ToolStripMenuItem.Size = new System.Drawing.Size(152, 22);
+            this.选择零利润ToolStripMenuItem.Size = new System.Drawing.Size(136, 22);
             this.选择零利润ToolStripMenuItem.Text = "选择零利润";
             this.选择零利润ToolStripMenuItem.Click += new System.EventHandler(this.零利润ToolStripMenuItem_Click);
             // 
@@ -1415,7 +1416,7 @@
             // 
             this.选择仓库中ToolStripMenuItem.Image = global::WinFormsClient.Properties.Resources.下架;
             this.选择仓库中ToolStripMenuItem.Name = "选择仓库中ToolStripMenuItem";
-            this.选择仓库中ToolStripMenuItem.Size = new System.Drawing.Size(152, 22);
+            this.选择仓库中ToolStripMenuItem.Size = new System.Drawing.Size(136, 22);
             this.选择仓库中ToolStripMenuItem.Text = "选择仓库中";
             this.选择仓库中ToolStripMenuItem.Click += new System.EventHandler(this.仓库中ToolStripMenuItem_Click);
             // 
@@ -1423,7 +1424,7 @@
             // 
             this.选择出售中ToolStripMenuItem.Image = global::WinFormsClient.Properties.Resources.上架;
             this.选择出售中ToolStripMenuItem.Name = "选择出售中ToolStripMenuItem";
-            this.选择出售中ToolStripMenuItem.Size = new System.Drawing.Size(152, 22);
+            this.选择出售中ToolStripMenuItem.Size = new System.Drawing.Size(136, 22);
             this.选择出售中ToolStripMenuItem.Text = "选择出售中";
             this.选择出售中ToolStripMenuItem.Click += new System.EventHandler(this.销售中ToolStripMenuItem_Click);
             // 
@@ -1538,6 +1539,12 @@
             this.刷新列表ToolStripMenuItem.Size = new System.Drawing.Size(84, 21);
             this.刷新列表ToolStripMenuItem.Text = "刷新列表";
             this.刷新列表ToolStripMenuItem.Click += new System.EventHandler(this.刷新列表ToolStripMenuItem_Click);
+            // 
+            // notifyIcon1
+            // 
+            this.notifyIcon1.BalloonTipIcon = System.Windows.Forms.ToolTipIcon.Info;
+            this.notifyIcon1.Text = "notifyIcon1";
+            this.notifyIcon1.Visible = true;
             // 
             // WinFormsClient
             // 
@@ -1732,6 +1739,7 @@
         private Moonlight.WindowsForms.StateControls.MoonToolStripMenuItem 获取供应商信息ToolStripMenuItem;
         private System.Windows.Forms.Button button开启监控;
         private System.Windows.Forms.Button button自动上架;
+        private System.Windows.Forms.NotifyIcon notifyIcon1;
     }
 }
 

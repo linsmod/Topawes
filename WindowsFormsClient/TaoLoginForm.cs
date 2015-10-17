@@ -66,7 +66,7 @@ namespace WinFormsClient
         {
             const int WM_SYSCOMMAND = 0x0112;
             const int SC_CLOSE = 0xF060;
-
+            const int SC_MINIMIZE = 61472;
             if (msg.Msg == WM_SYSCOMMAND && ((int)msg.WParam == SC_CLOSE))
             {
                 // 点击winform右上关闭按钮 
