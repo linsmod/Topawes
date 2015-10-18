@@ -93,7 +93,11 @@ namespace WinFormsClient.WBMode
                 return;
             }
             CookieHeaders = IECookieHelper.GetCookieHeaderList(WB, CookieHeaders);
-            if (WB.DocumentText.IndexOf("auther('true')") != -1)
+            if (html.IndexOf("secondVerifyRender();") != -1)
+            {
+                return;
+            }
+            if (html.IndexOf("auther('true')") != -1)
             {
                 IHTMLControlElement button = (IHTMLControlElement)doc.getElementById("sub");
                 if (button.clientHeight > 0)

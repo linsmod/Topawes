@@ -23,7 +23,7 @@ namespace WinFormsClient
         /// <returns></returns>
         public static async Task<SuplierInfo> supplierInfo(Microsoft.Phone.Tools.ExtendedWinFormsWebBrowser wb, string spu)
         {
-            var url = "http://chongzhi.taobao.com/item.do?spu={0}&action=edit&method=supplierInfo";
+            var url = "http://chongzhi.taobao.com/item.do?spu={0}&action=edit&method=supplierInfo&_=" + DateTime.Now.Ticks;
             url = string.Format(url, spu);
             var content = await wb.ExecuteTriggerJSONP(url);
             var suplierInfo = JsonConvert.DeserializeObject<SuplierInfo>(content);

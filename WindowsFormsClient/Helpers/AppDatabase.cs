@@ -38,9 +38,6 @@ namespace WinFormsClient
                 {
                     x.ItemName = item.ItemName;
                     x.ItemSubName = item.ItemSubName;
-                    x.一口价 = item.一口价;
-                    x.面值 = item.面值;
-                    x.SpuId = item.SpuId;
                     x.Type = item.Type;
                     x.UpdateAt = DateTime.Now;
                     x.Where = item.Where;

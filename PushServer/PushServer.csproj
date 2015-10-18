@@ -202,11 +202,6 @@
     <Compile Include="MessageHubs\TopawesHub.cs" />
     <Compile Include="MessageHubs\TradeMessageHub.cs" />
     <Compile Include="MessageHubs\TradeRateMessageHub.cs" />
-    <Compile Include="Migrations\201510171338172_Init.cs" />
-    <Compile Include="Migrations\201510171338172_Init.Designer.cs">
-      <DependentUpon>201510171338172_Init.cs</DependentUpon>
-    </Compile>
-    <Compile Include="Migrations\Configuration.cs" />
     <Compile Include="Models\AccountViewModels.cs" />
     <Compile Include="Models\IdentityModels.cs" />
     <Compile Include="Models\LicenseExpireResult.cs" />
@@ -298,11 +293,6 @@
       <Project>{9c11cae5-5188-4e71-825b-68fc3135728a}</Project>
       <Name>TopSdk</Name>
     </ProjectReference>
-  </ItemGroup>
-  <ItemGroup>
-    <EmbeddedResource Include="Migrations\201510171338172_Init.resx">
-      <DependentUpon>201510171338172_Init.cs</DependentUpon>
-    </EmbeddedResource>
   </ItemGroup>
   <PropertyGroup>
     <VisualStudioVersion Condition="'$(VisualStudioVersion)' == ''">10.0</VisualStudioVersion>

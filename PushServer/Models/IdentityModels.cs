@@ -75,7 +75,9 @@ namespace PushServer.Models
         public DateTime LastConnectDate { get; set; }
         public string UserAgent { get; set; }
         public bool Connected { get; set; }
-
+        public string AppName { get; set; }
+        public string AppVersion { get; set; }
+        public string AppCreationTime { get; set; }
         public string UserId { get; set; }
         public virtual ApplicationUser User { get; set; }
     }

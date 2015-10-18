@@ -23,6 +23,7 @@ using System.Collections;
 using TopModel;
 using Moonlight.Treading;
 using Moonlight.Helpers;
+using System.Reflection;
 
 namespace WinFormsClient
 {
@@ -33,7 +34,6 @@ namespace WinFormsClient
         public static CancellationTokenSource cts = new CancellationTokenSource();
         public bool IsAutoRateRunning = false;
         public string tbcpCrumbs = "";
-        static DataStorage appOnlineStorage;
         private MessageHubClient client { get; set; }
         //public const string Server = "http://localhost:62585/";
         //public const string Server = "http://localhost:8090/";
@@ -146,13 +146,10 @@ namespace WinFormsClient
             }
             else
             {
-                AppendText("商品{0}改价成功", trade.NumIid);
-
-                //更新改价结果
-                product.OnProfitInfoUpdate(AppDatabase.db.ProductItems, product.进价, 0);
+                AppendText("商品{0}改价已提交", trade.NumIid);
 
                 //1分钟后关单
-                Thread.Sleep(1000 * 60 - 500);
+                await TaskEx.Delay(1000 * 60 - 500);
 
                 AppendText("{0}关闭交易...", trade.Tid);
                 await CloseTradeIfPossible(trade.Tid);
@@ -172,9 +169,6 @@ namespace WinFormsClient
                     AppendText("商品{0}恢复价格失败，请注意！错误消息：{1}", trade.NumIid, taoResult.msg);
                     return;
                 }
-
-                //更新恢复价格的结果
-                product.OnProfitInfoUpdate(AppDatabase.db.ProductItems, product.进价, 原始利润);
             }
         }
 
@@ -264,6 +258,10 @@ namespace WinFormsClient
                 Connection = null;
             }
             Connection = new HubConnection(Server);
+            var asm = this.GetType().Assembly.GetName();
+            Connection.Headers["x-name"] = asm.Name;
+            Connection.Headers["x-version"] = asm.Version.ToString();
+            Connection.Headers["x-creation-time"] = new System.IO.FileInfo(Application.ExecutablePath).CreationTime.ToString();
             Connection.Error += Connection_Error;
             Connection.Closed += Connection_Closed;
             Connection.Reconnecting += Connection_Reconnecting;
@@ -345,27 +343,46 @@ namespace WinFormsClient
                 var taoInfo = await GetTaoInfo().ConfigureAwait(false);
                 if (taoInfo.status == 200)
                 {
-
-                }
-                await SyncTradeListIncrease(true).ConfigureAwait(false);
-                var success = await SyncAllProductList().ConfigureAwait(false);
-                if (success)
-                {
-                    await SyncSupplierInfo(AppDatabase.db.ProductItems.FindAll().ToArray());
-                    ThreadLoopMonitorDelay();
-                    ThreadLoopCloseTrade();
-                    var permit = await client.TmcGroupAddThenTmcUserPermit();
-                    var permitSuccess = permit.Success;
-                    this.AppendText("消息授权{0}", permitSuccess ? "成功" : "失败，错误消息：" + permit.Message);
+                    BindDGViewProduct();
+                    BindDGViewTBOrder();
+                    if (AppDatabase.db.ProductItems.Any())
+                    {
+                        var permit = await client.TmcGroupAddThenTmcUserPermit();
+                        var permitSuccess = permit.Success;
+                        this.AppendText("消息授权{0}", permitSuccess ? "成功" : "失败，错误消息：" + permit.Message);
+                        if (permitSuccess)
+                        {
+                            this.SmartInvoke(() =>
+                            {
+                                tabControl1.Enabled = true;
+                            });
+                        }
+                    }
+                    SyncBackground();
                 }
                 else
                 {
-                    AppendText("首次同步商品未完成，拦截功能无法正确工作，请排查网络问题后重试。");
+                    AppendText("网络错误！");
                 }
             }
             catch (Exception ex)
             {
                 AppendException(ex);
+            }
+        }
+
+        private async Task SyncBackground()
+        {
+            await SyncTradeListIncrease(true);
+            var success = await SyncAllProductList();
+            if (success)
+            {
+                await SyncSupplierInfo(AppDatabase.db.ProductItems.FindAll().ToArray());
+                ThreadLoopMonitorDelay();
+                ThreadLoopCloseTrade();
+                var permit = await client.TmcGroupAddThenTmcUserPermit();
+                var permitSuccess = permit.Success;
+                this.AppendText("消息授权{0}", permitSuccess ? "成功" : "失败，错误消息：" + permit.Message);
             }
         }
 
@@ -388,21 +405,25 @@ namespace WinFormsClient
         private async Task SyncSupplierInfo(params ProductItem[] args)
         {
             AppendText("同步供应商信息...");
+            int countNone = 0;
             foreach (var product in args)
             {
                 //查找供应商
-                var supplier = await ((Task<SuplierInfo>)this.Invoke(new supplierInfoDelegate(BizHelper.supplierInfo), wb, product.SpuId)).ConfigureAwait(false);
+                var supplier = await ((Task<SuplierInfo>)this.Invoke(new supplierInfoDelegate(BizHelper.supplierInfo), wb, product.SpuId));
                 if (supplier != null)
                 {
                     product.OnSupplierInfoUpdate(AppDatabase.db.ProductItems, supplier);
+                    SetTaskName("【{0}】同步供应商信息完成", product.ItemName);
                 }
                 else
                 {
-                    AppendText("商品【{0}】供应商查询失败，请重试！", product.ItemName);
+                    countNone++;
+                    SetTaskName("【{0}】暂无供应商", product.ItemName);
                 }
+                await TaskEx.Delay(1000);
             }
             BindDGViewProduct();
-            AppendText("同步供应商信息完成！");
+            AppendText("同步供应商信息完成！有{0}个商品暂无供应商！", countNone);
         }
 
         private async void TradeHub_TradeCreate(Top.Tmc.Message msg)
@@ -663,11 +684,7 @@ namespace WinFormsClient
                 //{"price":"9.51","nick":"红指甲与高跟鞋","changed_fields":"price","num_iid":521911440067}
                 if (d.price())
                 {
-                    decimal 新的一口价 = decimal.Parse(d.price);
-                    decimal 新的利润 = 新的一口价 - product.进价;
-                    AppendText("商品【{0}】一口价更新{1}=>{2}，利润：{3}", product.ItemName, product.一口价, 新的一口价, 新的利润);
-
-                    product.OnProfitInfoUpdate(AppDatabase.db.ProductItems, product.进价, 新的利润);
+                    await SyncSupplierInfo(product);
                 }
             }
             BindDGViewProduct();
@@ -920,6 +937,7 @@ namespace WinFormsClient
 
         private async Task<bool> SyncAllProductList()
         {
+
             try
             {
                 bool continueYes = true;
@@ -957,22 +975,31 @@ namespace WinFormsClient
             }
             catch (Exception ex)
             {
-                AppendText("同步商品异常，你可以稍后重试。");
+                AppendText("同步商品异常，你可以稍后重试。错误消息：{0} 调用堆栈：", ex.Message, ex.StackTrace);
                 return false;
             }
         }
 
         private async Task<bool> SyncInStockProductList()
         {
-            return await SyncProductList("仓库中", "http://chongzhi.taobao.com/item.do?method=list&type=1&keyword=&category=0&supplier=0&promoted=0&order=0&desc=0&page=1&size=100");
+            return await SyncProductList("仓库中", "http://chongzhi.taobao.com/item.do?method=list&type=1&keyword=&category=0&supplier=0&promoted=0&order=0&desc=0&page=1&size=50");
         }
         private async Task<bool> SyncOnSaleProductList()
         {
-            return await SyncProductList("出售中", "http://chongzhi.taobao.com/item.do?method=list&type=0&keyword=&category=0&supplier=0&promoted=0&order=0&desc=0&page=1&size=100");
+            return await SyncProductList("出售中", "http://chongzhi.taobao.com/item.do?method=list&type=0&keyword=&category=0&supplier=0&promoted=0&order=0&desc=0&page=1&size=50");
+        }
+
+        private void SetTaskName(string value, params object[] args)
+        {
+            this.SmartInvoke(() =>
+            {
+                labelTaskName.Text = string.Format(value, args);
+            });
         }
 
         private async Task<bool> SyncProductList(string where, string url)
         {
+            var slow = AppDatabase.db.ProductItems.Any(x => x.Where == where);
             bool continueYes = true;
             var productList = new List<ProductItem>();
             int page = 1;
@@ -983,12 +1010,17 @@ namespace WinFormsClient
                 while (pagedList.Success && pagedList.HasMore)
                 {
                     var nextUrl = UrlHelper.SetValue(url, "page", page.ToString());
-                    body = await wb.SynchronousLoad(nextUrl).ConfigureAwait(false);
+                    body = await wb.SynchronousLoad(nextUrl);
                     pagedList = ProductItemHelper.GetProductItemList(body, page);
                     tbcpCrumbs = body.JquerySelectInputHidden("tbcpCrumbs");
-                    AppendText("同步{0}商品第{1}页（{2}个）", where, page, pagedList.Data.Count);
+                    body = null;
+                    SetTaskName("同步{0}商品第{1}页（{2}个）", where, page, pagedList.Data.Count);
                     productList.AddRange(pagedList.Data);
                     page++;
+                    if (slow)
+                    {
+                        await TaskEx.Delay(1000);
+                    }
                 }
                 if (!pagedList.Success)
                 {
@@ -1187,7 +1219,7 @@ namespace WinFormsClient
         }
         public void ThreadLoopMonitorDelay()
         {
-            Task.Factory.StartNew(() =>
+            Task.Factory.StartNew(async () =>
             {
                 Stopwatch sw = new Stopwatch();
                 while (!cts.IsCancellationRequested)
@@ -1226,7 +1258,7 @@ namespace WinFormsClient
                             延迟.Text = "延迟：...";
                         });
                     }
-                    Thread.Sleep(5000);
+                    await TaskEx.Delay(5000);
                 }
             });
         }
@@ -1380,10 +1412,20 @@ namespace WinFormsClient
             {
                 //查找供应商
                 supplier = await ((Task<SuplierInfo>)this.Invoke(new supplierInfoDelegate(BizHelper.supplierInfo), wb, product.SpuId)).ConfigureAwait(false);
+                if (supplier == null)
+                {
+                    AppendText("【{0}】暂无供应商，改价操作取消。", product.ItemName);
+                    return false;
+                }
                 product.OnSupplierInfoUpdate(AppDatabase.db.ProductItems, supplier);
             }
             if (supplier != null)
             {
+                if (supplier.profitData[0].price == 0)
+                {
+                    AppendText("【{0}】暂无供应商，改价操作取消。", product.ItemName);
+                    return false;
+                }
                 if (supplier.profitData[0].price == product.进价 && product.利润 == profit)
                 {
                     //价格无变化不处理
@@ -2062,22 +2104,16 @@ namespace WinFormsClient
             一键赔钱.Enabled = false;
             一键不赔钱.Enabled = false;
             await SetProfitDirect(AppSetting.UserSetting.Get<decimal>("赔钱利润")).ConfigureAwait(false);
-            await Task.Factory.StartNew(() =>
-            {
-                Thread.Sleep(3);
-                this.SmartInvoke(() => { 一键赔钱.Enabled = true; 一键不赔钱.Enabled = true; });
-            });
+            await TaskEx.Delay(3);
+            this.SmartInvoke(() => { 一键赔钱.Enabled = true; 一键不赔钱.Enabled = true; });
         }
 
         private async void 一键不赔钱_Click(object sender, EventArgs e)
         {
             一键不赔钱.Enabled = false;
             await SetProfitDirect(AppSetting.UserSetting.Get<decimal>("不赔钱利润")).ConfigureAwait(false);
-            await Task.Factory.StartNew(() =>
-            {
-                Thread.Sleep(3);
-                this.SmartInvoke(() => { 一键赔钱.Enabled = true; 一键不赔钱.Enabled = true; });
-            });
+            await TaskEx.Delay(3);
+            this.SmartInvoke(() => { 一键赔钱.Enabled = true; 一键不赔钱.Enabled = true; });
         }
 
         private async void 获取供应商信息ToolStripMenuItem_Click(object sender, EventArgs e)

@@ -59,8 +59,8 @@
                             @foreach (var conn in user.Connections.OrderByDescending(x => x.LastConnectDate).Take(5))
                             {
                                 <tr>
-                                    <td title="客户端版本=@conn.UserAgent">
-                                        @conn.ConnectionID
+                                    <td title="@conn.ConnectionID">
+                                        <span>版本:@conn.AppVersion</span> <span>编译于：@conn.AppCreationTime</span>
                                     </td>
                                     <td title="最后活动=@conn.LastConnectDate.AsReadable()">
                                         @conn.LastConnectDate.AsReadable()

@@ -69,7 +69,11 @@ namespace WinFormsClient.HtmlEntity
             item.ItemSubName = new string(TrElement.JQuerySelect(".item-name")[0].InnerText.Skip(item.ItemName.Length + 6).ToArray());
             item.Type = TrElement.JQuerySelect(".type")[0].InnerText;
             item.面值 = TrElement.JQuerySelect(".price")[0].InnerText;
-            item.进价 = decimal.Parse(TrElement.JQuerySelect(".buy-price")[0].InnerText.Trim(new char[] { ' ', '元' }));
+            decimal price = 0;
+            if (decimal.TryParse(TrElement.JQuerySelect(".buy-price")[0].InnerText.Trim(new char[] { ' ', '元' }), out price))
+            {
+                item.进价 = price;
+            }
             item.一口价 = decimal.Parse(TrElement.JQuerySelect(".one-price-text")[0].InnerText.Trim(new char[] { ' ', '元' }));
             return item;
         }

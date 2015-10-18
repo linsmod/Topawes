@@ -43,6 +43,7 @@ namespace PushServer
             //app environment configuration
             using (var db = new ApplicationDbContext())
             {
+                db.Database.CreateIfNotExists();
                 var roleStore = new RoleStore<IdentityRole>(db);
                 var role = roleStore.FindByNameAsync("Admin").Result;
                 if (role == null)

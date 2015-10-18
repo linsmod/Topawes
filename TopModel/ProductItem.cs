@@ -112,21 +112,6 @@ namespace TopModel
         }
 
         /// <summary>
-        /// 更新利润信息
-        /// </summary>
-        /// <param name="productItems"></param>
-        /// <param name="buyPrice"></param>
-        /// <param name="profit"></param>
-        public void OnProfitInfoUpdate(LiteCollection<ProductItem> productItems, decimal buyPrice, decimal profit)
-        {
-            this.利润 = profit;
-            this.进价 = buyPrice;
-            this.一口价 = (buyPrice + profit);
-            this.UpdateAt = DateTime.Now;
-            productItems.Update(this);
-        }
-
-        /// <summary>
         /// 更新供应商信息
         /// </summary>
         /// <param name="productItems"></param>

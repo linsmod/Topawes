@@ -60,11 +60,11 @@ namespace WinFormsClient.Extensions
                 }";
             wb.AppendJsElement("jsonpTrigger", setupJSONPTrigger);
             wb.Document.InvokeScript("triggerJSONP", new object[] { url });
-            Application.DoEvents();
+            await TaskEx.Delay(200);
             object content = null;
             while ((content = wb.Document.InvokeScript("getJSONPContent")) == null || content.ToString() == "")
             {
-                Application.DoEvents();
+                await TaskEx.Delay(200);
                 if (wb.IsBusy)
                     continue;
             }

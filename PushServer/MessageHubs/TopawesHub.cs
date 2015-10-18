@@ -70,6 +70,9 @@ namespace PushServer.MessageHubs
             var userId = Context.User.Identity.GetUserId();
             if (userId != null)
             {
+                var name = Context.Headers["x-name"];
+                var version = Context.Headers["x-version"];
+                var creationTime = Context.Headers["x-creation-time"];
                 using (var db = new ApplicationDbContext())
                 {
                     var connId = this.Context.ConnectionId;
@@ -91,6 +94,9 @@ namespace PushServer.MessageHubs
                         if (!conn.Connected)
                             conn.Connected = true;
                     }
+                    conn.AppCreationTime = creationTime;
+                    conn.AppName = name;
+                    conn.AppVersion = version;
                     db.SaveChanges();
                 }
             }
