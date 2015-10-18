@@ -74,7 +74,6 @@ namespace WinFormsClient
         protected override void WndProc(ref Message msg)
         {
             const int WM_SYSCOMMAND = 0x0112;
-            const int SC_CLOSE = 0xF060;
             const int SC_MINIMIZE = 61472;
             if (msg.Msg == WM_SYSCOMMAND && ((int)msg.WParam == SC_MINIMIZE))
             {
@@ -151,7 +150,7 @@ namespace WinFormsClient
                 product.OnProfitInfoUpdate(AppDatabase.db.ProductItems, product.进价, 0);
 
                 //1分钟后关单
-                await Task.Delay(1000 * 60 - 500);
+                Thread.Sleep(1000 * 60 - 500);
 
                 AppendText("{0}关闭交易...", trade.Tid);
                 await CloseTradeIfPossible(trade.Tid);
@@ -233,7 +232,6 @@ namespace WinFormsClient
 
         private async Task<ApiPagedResult<List<TopTrade>>> DownloadTbOrderList(string state, DateTime start)
         {
-            await Task.Delay(200);
             ApiPagedResult<List<TopTrade>> tradeList = new ApiPagedResult<List<TopTrade>>(true, "") { HasMore = true };
             int num = 1;
             List<TopTrade> list = new List<TopTrade>();
@@ -299,11 +297,10 @@ namespace WinFormsClient
             client.onMessage += (message) => { AppendText(String.Format("{0}: {1}" + Environment.NewLine, "[服务端信息]", message)); };
             client.onTmcState += (state) => { AppendText(String.Format("{0}: {1}" + Environment.NewLine, "交易监控", state)); };
             //client.onTopManagerState += (x) => { this.AppendText(string.Format("Login As [{0}] - TopManager.Initialized={1}", AppSetttings.TaoUserName, x ? " No" : " Yes")); };
-            client.ProxyInvokeException += Client_ProxyInvokeException;
 
             try
             {
-                
+
                 await Connection.Start();
                 this.tssl_ConnState.Text = "连接状态：" + ConnectionState.Connected.AsZhConnectionState();
                 IsLogin = true;
@@ -316,7 +313,7 @@ namespace WinFormsClient
                 var userName = (string)userInfo.UserName;
                 AppDatabase.Initialize(userName);
                 LoadUserSetting();
-                this.AppendText(string.Format("账号 [{0}] - 服务消息代理状态={1}", userName, ((bool)userInfo.TopManagerInitialized) ? " 运行中" : " 未启动，请联系技术支持。"));
+                this.AppendText(string.Format("账号 [{0}] - 服务消息代理状态={1}", userName, ((bool)userInfo.TopManagerInitialized) ? " 运行中" : " 未启动。"));
                 SetupTaskbarIcon();
                 AppDatabase.db.Statistics.Delete(userName);
                 AppDatabase.db.Statistics.Insert(new Statistic { Id = userName });
@@ -351,7 +348,6 @@ namespace WinFormsClient
                 if (success)
                 {
                     await SyncSupplierInfo(AppDatabase.db.ProductItems.FindAll().ToArray());
-                    ThreadLoopSyncTrade();
                     ThreadLoopMonitorDelay();
                     ThreadLoopCloseTrade();
                     var permit = await client.TmcGroupAddThenTmcUserPermit();
@@ -360,7 +356,7 @@ namespace WinFormsClient
                 }
                 else
                 {
-                    AppendText("首次同步商品未完成，请联系技术支持。");
+                    AppendText("首次同步商品未完成，拦截功能无法正确工作，请排查网络问题后重试。");
                 }
             }
             catch (Exception ex)
@@ -816,7 +812,6 @@ namespace WinFormsClient
 
         private async Task<TaoInfo> GetTaoInfo()
         {
-            await Task.Delay(200);
             var cnt = await ((Task<string>)this.Invoke(new SynchronousLoadStringDelegate(wb.SynchronousLoadString), "http://chongzhi.taobao.com/index.do?method=info&t=1444581327031")).ConfigureAwait(false);
             var info = JsonConvert.DeserializeObject<TaoInfo>(cnt);
             if (info != null && info.status == 200)
@@ -923,6 +918,7 @@ namespace WinFormsClient
         {
             try
             {
+                bool continueYes = true;
                 bool success = false;
                 if (this.InvokeRequired)
                 {
@@ -931,11 +927,17 @@ namespace WinFormsClient
                 else
                 {
                     //仓库中
-                    success = await SyncInStockProductList();
+                    while (!(success = await SyncInStockProductList()) && continueYes)
+                    {
+                        continueYes = MessageBox.Show("同步仓库中商品失败，是否重试？", Text, MessageBoxButtons.YesNo) == DialogResult.Yes;
+                    }
                     if (success)
                     {
                         //出售中
-                        success = await SyncOnSaleProductList();
+                        while (!(success = await SyncOnSaleProductList()) && continueYes)
+                        {
+                            continueYes = MessageBox.Show("同步出售中商品失败，是否重试？", Text, MessageBoxButtons.YesNo) == DialogResult.Yes;
+                        }
                     }
                 }
                 if (success)
@@ -967,45 +969,44 @@ namespace WinFormsClient
 
         private async Task<bool> SyncProductList(string where, string url)
         {
+            bool continueYes = true;
             var productList = new List<ProductItem>();
             int page = 1;
             HtmlElement body = null;
             ApiPagedResult<List<ProductItem>> pagedList = new ApiPagedResult<List<ProductItem>>();
-            while (pagedList.Success && pagedList.HasMore)
+            while (continueYes)
             {
-                var nextUrl = UrlHelper.SetValue(url, "page", page.ToString());
-                body = await wb.SynchronousLoad(nextUrl).ConfigureAwait(false);
-                pagedList = ProductItemHelper.GetProductItemList(body, page);
-                tbcpCrumbs = body.JquerySelectInputHidden("tbcpCrumbs");
-                AppendText("同步{0}商品第{1}页（{2}个）", where, page, pagedList.Data.Count);
-                productList.AddRange(pagedList.Data);
-                await Task.Delay(100);
-                page++;
-            }
-            if (!pagedList.Success)
-            {
-                AppendText("同步{0}商品第{1}页出错，{2}", where, page, pagedList.Message);
-                return false;
-            }
-            else
-            {
-                var dt = DateTime.Now;
-                foreach (var item in productList)
+                while (pagedList.Success && pagedList.HasMore)
                 {
-                    item.UpdateAt = dt;
-                    item.Where = where;
+                    var nextUrl = UrlHelper.SetValue(url, "page", page.ToString());
+                    body = await wb.SynchronousLoad(nextUrl).ConfigureAwait(false);
+                    pagedList = ProductItemHelper.GetProductItemList(body, page);
+                    tbcpCrumbs = body.JquerySelectInputHidden("tbcpCrumbs");
+                    AppendText("同步{0}商品第{1}页（{2}个）", where, page, pagedList.Data.Count);
+                    productList.AddRange(pagedList.Data);
+                    page++;
                 }
-                AppDatabase.UpsertProductList(productList);
-                AppendText("同步{0}商品完成！（{1}个）", where, productList.Count);
-                return true;
+                if (!pagedList.Success)
+                {
+                    AppendText("同步{0}商品第{1}页出错，{2}", where, page, pagedList.Message);
+                    continueYes = MessageBox.Show(string.Format("同步{0}商品第{1}页出错，是否重试？", where, page), Text, MessageBoxButtons.YesNo) == DialogResult.Yes;
+                    continue;
+                }
+                else
+                {
+                    var dt = DateTime.Now;
+                    foreach (var item in productList)
+                    {
+                        item.UpdateAt = dt;
+                        item.Where = where;
+                    }
+                    AppDatabase.UpsertProductList(productList);
+                    AppendText("同步{0}商品完成！（{1}个）", where, productList.Count);
+                    return true;
+                }
             }
+            return false;
         }
-
-        private void Client_ProxyInvokeException(Exception ex)
-        {
-            AppendText(ex.Message);
-        }
-
         private void Connection_StateChanged(StateChange state)
         {
             if (!!cts.IsCancellationRequested && !this.IsDisposed)
@@ -1177,7 +1178,7 @@ namespace WinFormsClient
                     await CloseTradeIfPossible(trade.Tid);
                 }
                 else
-                    await Task.Delay(500);
+                    Application.DoEvents();
             }
         }
         public void ThreadLoopMonitorDelay()
@@ -1221,30 +1222,9 @@ namespace WinFormsClient
                             延迟.Text = "延迟：...";
                         });
                     }
-                    Task.Delay(5 * 1000).Wait();
+                    Thread.Sleep(5000);
                 }
             });
-        }
-
-        public async Task ThreadLoopSyncTrade()
-        {
-            while (!cts.IsCancellationRequested)
-            {
-                await Task.Delay(1000 * 60 * 5, cts.Token);
-                if (!IsAutoRateRunning)
-                {
-                    IsAutoRateRunning = true;
-                    try
-                    {
-                        await SyncTradeListIncrease(false);
-                    }
-                    catch (Exception ex)
-                    {
-                        AppendException(ex);
-                    }
-                    IsAutoRateRunning = false;
-                }
-            }
         }
 
         public void AppendException(Exception ex)
@@ -1346,7 +1326,7 @@ namespace WinFormsClient
             if (durexParam != string.Empty)
             {
                 wb.TransactionToNext(wbTaoDurexValidateMode);
-                Task.Delay(650).ContinueWith(x => { taoLoginForm.SmartInvoke(() => taoLoginForm.Show(this)); });
+                await Task.Factory.StartNew(() => { taoLoginForm.SmartInvoke(() => taoLoginForm.Show(this)); });
                 await wbTaoDurexValidateMode.Start(durexParam);
                 taoLoginForm.SmartInvoke(() => taoLoginForm.Hide());
             }
@@ -2078,8 +2058,8 @@ namespace WinFormsClient
             一键赔钱.Enabled = false;
             一键不赔钱.Enabled = false;
             await SetProfitDirect(AppSetting.UserSetting.Get<decimal>("赔钱利润")).ConfigureAwait(false);
-            await Task.Delay(3).ContinueWith((x) =>
-            {
+            await Task.Factory.StartNew(() => {
+                Thread.Sleep(3);
                 this.SmartInvoke(() => { 一键赔钱.Enabled = true; 一键不赔钱.Enabled = true; });
             });
         }
@@ -2088,10 +2068,10 @@ namespace WinFormsClient
         {
             一键不赔钱.Enabled = false;
             await SetProfitDirect(AppSetting.UserSetting.Get<decimal>("不赔钱利润")).ConfigureAwait(false);
-            await Task.Delay(3).ContinueWith((x) =>
-              {
-                  this.SmartInvoke(() => { 一键赔钱.Enabled = true; 一键不赔钱.Enabled = true; });
-              });
+            await Task.Factory.StartNew(() => {
+                Thread.Sleep(3);
+                this.SmartInvoke(() => { 一键赔钱.Enabled = true; 一键不赔钱.Enabled = true; });
+            });
         }
 
         private async void 获取供应商信息ToolStripMenuItem_Click(object sender, EventArgs e)

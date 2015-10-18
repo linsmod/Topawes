@@ -23,7 +23,6 @@ namespace WinFormsClient
         public event Action<bool> onTopManagerState;
         public event Action<string> onTmcState;
         public event Action<string[]> onKeyValues;
-        public event Action<Exception> ProxyInvokeException;
 
         public IHubProxy HubProxy { get; private set; }
         public MessageHubClient(HubConnection conn)
@@ -130,36 +129,11 @@ namespace WinFormsClient
 
         protected async Task<T> ProxyInvoke<T>(string name, params object[] args)
         {
-            try
-            {
-                return await HubProxy.Invoke<T>(name, args);
-            }
-            catch (Exception ex)
-            {
-                OnHubProxyInvokeException(ex);
-                return default(T);
-            }
+            return await HubProxy.Invoke<T>(name, args);
         }
         protected async Task ProxyInvoke(string name, params object[] args)
         {
-            try
-            {
-                await HubProxy.Invoke(name, args);
-            }
-            catch (Exception ex)
-            {
-                OnHubProxyInvokeException(ex);
-            }
-        }
-
-        private void OnHubProxyInvokeException(Exception ex)
-        {
-            var h = this.HubProxyInvokeException;
-            if (h != null)
-            {
-                h(ex); return;
-            }
-            throw ex;
+            await HubProxy.Invoke(name, args);
         }
 
         protected void InvokeEvent<T>(Action<T> proxyEvent, T value)

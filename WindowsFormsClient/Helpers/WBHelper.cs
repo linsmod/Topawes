@@ -109,13 +109,19 @@ namespace WinFormsClient.Helpers
         }
         public async Task SetTimeoutThread(SynchronousNavigationContext snc)
         {
-            await Task.Delay(TimeSpan.FromSeconds(snc.TimeoutSeconds), cancelDelayTokenSource.Token).ContinueWith(x =>
+            var when = DateTime.Now.AddSeconds(snc.TimeoutSeconds);
+            while (when > DateTime.Now)
             {
-                if (x.Status == TaskStatus.RanToCompletion)
+                if (cancelDelayTokenSource.IsCancellationRequested)
                 {
-                    snc.Tcs.TrySetCanceled();
+                    break;
                 }
-            });
+                Application.DoEvents();
+            }
+            if (snc.Tcs.Task.Status == TaskStatus.RanToCompletion)
+            {
+                snc.Tcs.TrySetCanceled();
+            }
             Dispose();
         }
         public async Task<string> SynchronousLoadString(string url, CancellationToken token)

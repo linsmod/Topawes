@@ -35,7 +35,7 @@ namespace WinFormsClient.Extensions
                 {
                     var attrs = prop.GetCustomAttributes(typeof(DisplayAttribute), false);
                     var displayName = attrs.Any() ? ((DisplayAttribute)attrs.First()).Name : prop.Name;
-                    var value = prop.GetValue(item);
+                    var value = prop.GetValue(item, null);
                     row[displayName] = value;
                 }
                 dt.Rows.Add(row);

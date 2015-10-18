@@ -33,7 +33,7 @@
     <WarningLevel>4</WarningLevel>
   </PropertyGroup>
   <ItemGroup>
-    <Reference Include="LiteDB, Version=1.0.3.0, Culture=neutral, processorArchitecture=MSIL">
+    <Reference Include="LiteDB, Version=1.0.4.0, Culture=neutral, processorArchitecture=MSIL">
       <HintPath>..\packages\LiteDB.1.0.3\lib\net40\LiteDB.dll</HintPath>
       <Private>True</Private>
     </Reference>
