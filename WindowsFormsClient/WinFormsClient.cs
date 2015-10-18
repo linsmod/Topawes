@@ -125,8 +125,10 @@ namespace WinFormsClient
                 await ((Task)Invoke(new InterceptTradeDelegate(InterceptTrade), supplier, spu, trade, statistic)).ConfigureAwait(false);
                 return;
             }
-            AppendText("将拦截订单{0}，买家：{1}", trade.Tid, trade.BuyerNick);
 
+            AppendText("将拦截订单{0}，买家：{1}", trade.Tid, trade.BuyerNick);
+            trade.Intercept = true;
+            AppDatabase.db.TopTrades.Update(trade);
             var product = AppDatabase.db.ProductItems.FindById(trade.NumIid);
             //备份用来恢复价格
             var 原始卖价 = product.一口价;
@@ -179,6 +181,8 @@ namespace WinFormsClient
         private async Task CloseTradeIfPossible(long tid)
         {
             var topTrade = AppDatabase.db.TopTrades.FindById(tid);
+            if (!topTrade.Intercept)
+                return;
             var statistic = AppDatabase.db.Statistics.FindById(AppSetting.UserSetting.UserName);
 
             if (topTrade.Status == "TRADE_NO_CREATE_PAY" || topTrade.Status == "WAIT_BUYER_PAY" || string.IsNullOrEmpty(topTrade.Status))
@@ -1173,7 +1177,7 @@ namespace WinFormsClient
                 //亦 (S当前时间-1min>S创建时间)
                 var dts = ServerNow.AddMinutes(-1);
                 var trade = AppDatabase.db.TopTrades.FindOne(x => (x.Status == "WAIT_BUYER_PAY" || x.Status == "TRADE_NO_CREATE_PAY") && dts > x.Created);
-                if (trade != null)
+                if (trade != null && trade.Intercept)
                 {
                     await CloseTradeIfPossible(trade.Tid);
                 }
@@ -2058,7 +2062,8 @@ namespace WinFormsClient
             一键赔钱.Enabled = false;
             一键不赔钱.Enabled = false;
             await SetProfitDirect(AppSetting.UserSetting.Get<decimal>("赔钱利润")).ConfigureAwait(false);
-            await Task.Factory.StartNew(() => {
+            await Task.Factory.StartNew(() =>
+            {
                 Thread.Sleep(3);
                 this.SmartInvoke(() => { 一键赔钱.Enabled = true; 一键不赔钱.Enabled = true; });
             });
@@ -2068,7 +2073,8 @@ namespace WinFormsClient
         {
             一键不赔钱.Enabled = false;
             await SetProfitDirect(AppSetting.UserSetting.Get<decimal>("不赔钱利润")).ConfigureAwait(false);
-            await Task.Factory.StartNew(() => {
+            await Task.Factory.StartNew(() =>
+            {
                 Thread.Sleep(3);
                 this.SmartInvoke(() => { 一键赔钱.Enabled = true; 一键不赔钱.Enabled = true; });
             });

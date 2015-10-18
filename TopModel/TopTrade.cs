@@ -54,6 +54,9 @@ namespace TopModel.Models
         [Display(Name = "最后更新")]
         public DateTime UpdateAt { get; set; }
 
+        [Display(Name = "是否拦截")]
+        public bool Intercept { get; set; }
+
         public bool Equals(TopTrade x, TopTrade y)    //比较x和y对象是否相同，按照订单号比较
         {
             return x.Tid == y.Tid;
