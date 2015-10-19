@@ -6,6 +6,8 @@
 *.user
 *.userosscache
 *.sln.docstates
+*.Debug.config
+*.Release.config
 
 # Build results
 [Dd]ebug/
