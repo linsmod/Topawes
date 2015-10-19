@@ -46,6 +46,14 @@ namespace PushServer.Models
             }
             return string.Empty;
         }
+        public static string AsReadable(this DateTime? dt)
+        {
+            if (!dt.HasValue)
+            {
+                return string.Empty;
+            }
+            return dt.Value.AsReadable();
+        }
         public static string AsReadable(this DateTime dt)
         {
             //估计DateTime中重载了运算符 "-"号 所以能够进行两个DateTime相减
@@ -53,7 +61,7 @@ namespace PushServer.Models
             TimeSpan span = DateTime.Now - dt;
             if (span.TotalDays >= 10 * 365)
             {
-                return "很久很久以前";
+                return dt.ToString("yyyy-MM-dd HH:mm:ss");
             }
             if (span.TotalDays >= 365)
             {

@@ -19,8 +19,8 @@ namespace PushServer
 {
     public partial class Startup
     {
-        public static string AppKey = "23140690";
-        public static string AppSecret = "a84b819688969ee00b5ae44a19b3f1f0";
+        public static string AppKey = ConfigurationManager.AppSettings["top_appkey"];
+        public static string AppSecret = ConfigurationManager.AppSettings["top_appsecret"];
         public void Configuration(IAppBuilder app)
         {
             ConfigureAuth(app);

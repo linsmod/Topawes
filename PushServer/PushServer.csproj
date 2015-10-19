@@ -44,6 +44,10 @@
     <WarningLevel>4</WarningLevel>
   </PropertyGroup>
   <ItemGroup>
+    <Reference Include="LiteDB, Version=1.0.4.0, Culture=neutral, processorArchitecture=MSIL">
+      <HintPath>..\packages\LiteDB.1.0.3\lib\net40\LiteDB.dll</HintPath>
+      <Private>True</Private>
+    </Reference>
     <Reference Include="Microsoft.AspNet.SignalR.Core, Version=2.2.0.0, Culture=neutral, PublicKeyToken=31bf3856ad364e35, processorArchitecture=MSIL">
       <HintPath>..\packages\Microsoft.AspNet.SignalR.Core.2.2.0\lib\net45\Microsoft.AspNet.SignalR.Core.dll</HintPath>
       <Private>True</Private>
@@ -202,6 +206,11 @@
     <Compile Include="MessageHubs\TopawesHub.cs" />
     <Compile Include="MessageHubs\TradeMessageHub.cs" />
     <Compile Include="MessageHubs\TradeRateMessageHub.cs" />
+    <Compile Include="Migrations\201510181501518_CollectClientRuntimeInfo.cs" />
+    <Compile Include="Migrations\201510181501518_CollectClientRuntimeInfo.Designer.cs">
+      <DependentUpon>201510181501518_CollectClientRuntimeInfo.cs</DependentUpon>
+    </Compile>
+    <Compile Include="Migrations\Configuration.cs" />
     <Compile Include="Models\AccountViewModels.cs" />
     <Compile Include="Models\IdentityModels.cs" />
     <Compile Include="Models\LicenseExpireResult.cs" />
@@ -236,15 +245,6 @@
     <Content Include="Scripts\respond.js" />
     <Content Include="Scripts\respond.min.js" />
     <Content Include="Scripts\_references.js" />
-    <Content Include="Web.config">
-      <SubType>Designer</SubType>
-    </Content>
-    <Content Include="Web.Debug.config">
-      <DependentUpon>Web.config</DependentUpon>
-    </Content>
-    <Content Include="Web.Release.config">
-      <DependentUpon>Web.config</DependentUpon>
-    </Content>
     <Content Include="Views\Web.config" />
     <Content Include="Views\_ViewStart.cshtml" />
     <Content Include="Views\Shared\Error.cshtml" />
@@ -285,6 +285,14 @@
     <Content Include="Scripts\jquery-1.10.2.min.map" />
   </ItemGroup>
   <ItemGroup>
+    <ProjectReference Include="..\Moonlight\Moonlight.csproj">
+      <Project>{b38891ef-dfb2-426e-a368-9e76e8221b2e}</Project>
+      <Name>Moonlight</Name>
+    </ProjectReference>
+    <ProjectReference Include="..\System.Extensions\System.Extensions.csproj">
+      <Project>{239ef8b9-f88a-4452-ab8f-2222db1fcbb9}</Project>
+      <Name>System.Extensions</Name>
+    </ProjectReference>
     <ProjectReference Include="..\TopModel\TopModel.csproj">
       <Project>{45c5ccd1-5f44-48e2-a48d-c3803635e350}</Project>
       <Name>TopModel</Name>
@@ -293,6 +301,11 @@
       <Project>{9c11cae5-5188-4e71-825b-68fc3135728a}</Project>
       <Name>TopSdk</Name>
     </ProjectReference>
+  </ItemGroup>
+  <ItemGroup>
+    <EmbeddedResource Include="Migrations\201510181501518_CollectClientRuntimeInfo.resx">
+      <DependentUpon>201510181501518_CollectClientRuntimeInfo.cs</DependentUpon>
+    </EmbeddedResource>
   </ItemGroup>
   <PropertyGroup>
     <VisualStudioVersion Condition="'$(VisualStudioVersion)' == ''">10.0</VisualStudioVersion>

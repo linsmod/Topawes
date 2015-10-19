@@ -27,7 +27,6 @@
             许可证状态
         </th>
         <th>授权时长管理</th>
-        <th>活动连接(最近5次)</th>
     </tr>
     @foreach (var user in Model)
     {
@@ -37,7 +36,7 @@
             {
                 var state = item.Expires.AsLicenseState();
                 <tr>
-                    <td>@item.User.UserName</td>
+                    <td rowspan="2">@item.User.UserName</td>
                     <td>@item.SoftwareId</td>
                     <td>@item.Expires.AsRemainingTime()</td>
                     <td>@item.Expires.AsLicenseState()</td>
@@ -54,21 +53,48 @@
                             </a>
                         }
                     </td>
-                    <td style="padding:0;">
+                </tr>
+                <tr>
+                    <td colspan="4" style="padding:0;">
                         <table class="table table-condensed">
-                            @foreach (var conn in user.Connections.OrderByDescending(x => x.LastConnectDate).Take(5))
+                            <tr>
+                                <td>应用名</td>
+                                <td>应用版本</td>
+                                <td>编译时间</td>
+                                <td>连接建立</td>
+                                <td>OS版本</td>
+                                <td>IE版本</td>
+                                <td>运行时</td>
+                                <td>断线重连</td>
+                                <td>最后连接</td>
+                                <td>上次断开</td>
+                                <td>状态</td>
+                                <td>操作</td>
+                            </tr>
+                            @foreach (var conn in user.Connections.OrderByDescending(x => x.ConnectAt).Take(5))
                             {
-                                <tr>
-                                    <td title="@conn.ConnectionID">
-                                        <span>版本:@conn.AppVersion</span> <span>编译于：@conn.AppCreationTime</span>
-                                    </td>
-                                    <td title="最后活动=@conn.LastConnectDate.AsReadable()">
-                                        @conn.LastConnectDate.AsReadable()
-                                    </td>
-                                    <td title="当前状态=@(conn.Connected ? "在线" : "离线")">
+                                <tr class="@(conn.Connected?"alert alert-success":"")">
+                                    <td>@conn.AppName</td>
+                                    <td>@conn.AppVersion</td>
+                                    @if (!string.IsNullOrEmpty(conn.AppCreationTime))
+                                    {
+                                        <td @DateTime.Parse(conn.AppCreationTime).Year>@DateTime.Parse(conn.AppCreationTime).ToString("yyMMdd HH:mm:ss")</td>
+                                    }
+                                    else
+                                    {
+                                        <td></td>
+                                    }
+                                    <td>@conn.ConnectAt.AsReadable()</td>
+                                    <td>@conn.OSVersion</td>
+                                    <td>@conn.IEVersion</td>
+                                    <td>@conn.RuntimeVersion</td>
+                                    <td>@(conn.ReconnectCount)次</td>
+                                    <td>@conn.ReconnectAt.AsReadable()</td>
+                                    <td>@conn.DisconnectAt.AsReadable()</td>
+                                    <td>
                                         @(conn.Connected ? "在线" : "离线")
                                     </td>
-                                    <td width="40">
+                                    <td>
                                         @if (conn.Connected)
                                         {
                                             <a href="javascript:;" onclick="$.post('/account/heartbeat/@conn.ConnectionID');">测试</a>
@@ -78,7 +104,6 @@
                             }
                         </table>
                     </td>
-
                 </tr>
             }
         }
@@ -86,7 +111,7 @@
         {
             <tr>
                 <td>@user.UserName</td>
-                <td colspan="5">
+                <td colspan="4">
                     从未连接
                 </td>
             </tr>

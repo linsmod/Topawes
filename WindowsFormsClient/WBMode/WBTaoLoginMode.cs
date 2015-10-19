@@ -121,25 +121,19 @@ namespace WinFormsClient.WBMode
                         //可能遇到了javascript跳转逻辑
                         return;
                     }
-                    while (J_Static.clientWidth == 0 && J_QuickLogin.clientWidth == 0)
+                    for (int i = 0; i < 5000; i++)
                     {
-                        doc = (HTMLDocument)WB.Document.DomDocument;
-                        J_QuickLogin = (IHTMLControlElement)doc.getElementById("J_QuickLogin");
-                        J_Static = (IHTMLControlElement)doc.getElementById("J_Static");
-                        Application.DoEvents();
-                        Application.DoEvents();
-                        Application.DoEvents();
-                        Application.DoEvents();
-                        Application.DoEvents();
-                        Application.DoEvents();
-                        Application.DoEvents();
-                        Application.DoEvents();
-                        Application.DoEvents();
-                        Application.DoEvents();
-                        Application.DoEvents();
-                        doc = (HTMLDocument)WB.Document.DomDocument;
-                        J_QuickLogin = (IHTMLControlElement)doc.getElementById("J_QuickLogin");
-                        J_Static = (IHTMLControlElement)doc.getElementById("J_Static");
+                        if (J_Static.clientWidth == 0 && J_QuickLogin.clientWidth == 0)
+                        {
+                            Application.DoEvents();
+                            doc = (HTMLDocument)WB.Document.DomDocument;
+                            J_QuickLogin = (IHTMLControlElement)doc.getElementById("J_QuickLogin");
+                            J_Static = (IHTMLControlElement)doc.getElementById("J_Static");
+                        }
+                        else
+                        {
+                            break;
+                        }
                     }
                     if (J_Static.clientWidth > 0 && J_Static.clientHeight > 0)
                     {

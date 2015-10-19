@@ -262,6 +262,9 @@ namespace WinFormsClient
             Connection.Headers["x-name"] = asm.Name;
             Connection.Headers["x-version"] = asm.Version.ToString();
             Connection.Headers["x-creation-time"] = new System.IO.FileInfo(Application.ExecutablePath).CreationTime.ToString();
+            Connection.Headers["x-os-version"] = Environment.OSVersion.VersionString;
+            Connection.Headers["x-ie-version"] = wb.Version.ToString();
+            Connection.Headers["x-runtime-version"] = Environment.Version.ToString();
             Connection.Error += Connection_Error;
             Connection.Closed += Connection_Closed;
             Connection.Reconnecting += Connection_Reconnecting;
@@ -377,7 +380,11 @@ namespace WinFormsClient
             var success = await SyncAllProductList();
             if (success)
             {
-                await SyncSupplierInfo(AppDatabase.db.ProductItems.FindAll().ToArray());
+                await SyncSupplierInfo(true, AppDatabase.db.ProductItems.FindAll().ToArray());
+                this.SmartInvoke(() =>
+                {
+                    this.一键不赔钱.Enabled = 一键赔钱.Enabled = true;
+                });
                 ThreadLoopMonitorDelay();
                 ThreadLoopCloseTrade();
                 var permit = await client.TmcGroupAddThenTmcUserPermit();
@@ -401,29 +408,44 @@ namespace WinFormsClient
                 };
             }
         }
-
-        private async Task SyncSupplierInfo(params ProductItem[] args)
+        private bool IsSyncingSupplierInfo;
+        private async Task SyncSupplierInfo(bool isSyncOperation, params ProductItem[] args)
         {
-            AppendText("同步供应商信息...");
-            int countNone = 0;
-            foreach (var product in args)
+            if (isSyncOperation)
             {
+                AppendText("同步供应商信息...");
+                if (IsSyncingSupplierInfo)
+                {
+                    AppendText("请等待上次同步任务完成...");
+                    return;
+                }
+                IsSyncingSupplierInfo = true;
+            }
+            int countNone = 0;
+            for (int i = 0; i < args.Length; i++)
+            {
+                var product = args[i];
                 //查找供应商
                 var supplier = await ((Task<SuplierInfo>)this.Invoke(new supplierInfoDelegate(BizHelper.supplierInfo), wb, product.SpuId));
                 if (supplier != null)
                 {
                     product.OnSupplierInfoUpdate(AppDatabase.db.ProductItems, supplier);
-                    SetTaskName("【{0}】同步供应商信息完成", product.ItemName);
+                    
                 }
                 else
                 {
                     countNone++;
-                    SetTaskName("【{0}】暂无供应商", product.ItemName);
                 }
+                ReportTaskProgress(isSyncOperation ? "同步供应商信息..." : "价格更新...", i, args.Length);
                 await TaskEx.Delay(1000);
             }
+            ResetTaskProgress();
             BindDGViewProduct();
-            AppendText("同步供应商信息完成！有{0}个商品暂无供应商！", countNone);
+            if (isSyncOperation)
+            {
+                AppendText("同步供应商信息完成！有{0}个商品暂无供应商！", countNone);
+                IsSyncingSupplierInfo = false;
+            }
         }
 
         private async void TradeHub_TradeCreate(Top.Tmc.Message msg)
@@ -684,7 +706,7 @@ namespace WinFormsClient
                 //{"price":"9.51","nick":"红指甲与高跟鞋","changed_fields":"price","num_iid":521911440067}
                 if (d.price())
                 {
-                    await SyncSupplierInfo(product);
+                    await SyncSupplierInfo(false, product);
                 }
             }
             BindDGViewProduct();
@@ -934,10 +956,14 @@ namespace WinFormsClient
             }
             ResetTaskProgress();
         }
-
+        bool IsSyncProductListAll;
         private async Task<bool> SyncAllProductList()
         {
-
+            if (IsSyncProductListAll)
+            {
+                AppendText("请等待上次同步任务完成...");
+                return true;
+            }
             try
             {
                 bool continueYes = true;
@@ -971,11 +997,13 @@ namespace WinFormsClient
                     });
                 }
                 AppSetting.UserSetting.Set<DateTime?>("LastSyncProductAt", DateTime.Now);
+                IsSyncProductListAll = false;
                 return success;
             }
             catch (Exception ex)
             {
                 AppendText("同步商品异常，你可以稍后重试。错误消息：{0} 调用堆栈：", ex.Message, ex.StackTrace);
+                IsSyncProductListAll = false;
                 return false;
             }
         }
@@ -1655,6 +1683,8 @@ namespace WinFormsClient
             foreach (var item in productList)
             {
                 await client.ItemHub.ItemUpdateDelist(item.Id);
+                item.AutoUpshelf = false;
+                AppDatabase.db.ProductItems.Update(item);
             }
 
             //await WBTaoDurexValidationMode().ConfigureAwait(false);
@@ -2120,7 +2150,7 @@ namespace WinFormsClient
         {
             var ids = GetSelectedProductList();
             var products = AppDatabase.db.ProductItems.FindAll().Where(x => ids.Contains(x.Id));
-            await SyncSupplierInfo(products.ToArray());
+            await SyncSupplierInfo(true, products.ToArray());
         }
 
         private void button自动上架_Click(object sender, EventArgs e)

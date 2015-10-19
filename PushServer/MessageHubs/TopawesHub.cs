@@ -70,9 +70,6 @@ namespace PushServer.MessageHubs
             var userId = Context.User.Identity.GetUserId();
             if (userId != null)
             {
-                var name = Context.Headers["x-name"];
-                var version = Context.Headers["x-version"];
-                var creationTime = Context.Headers["x-creation-time"];
                 using (var db = new ApplicationDbContext())
                 {
                     var connId = this.Context.ConnectionId;
@@ -83,7 +80,7 @@ namespace PushServer.MessageHubs
                         {
                             ConnectionID = connId,
                             Connected = true,
-                            LastConnectDate = DateTime.Now,
+                            ConnectAt = DateTime.Now,
                             UserId = userId,
                             UserAgent = Context.Request.Headers["User-Agent"],
                         };
@@ -94,9 +91,12 @@ namespace PushServer.MessageHubs
                         if (!conn.Connected)
                             conn.Connected = true;
                     }
-                    conn.AppCreationTime = creationTime;
-                    conn.AppName = name;
-                    conn.AppVersion = version;
+                    conn.AppCreationTime = Context.Headers["x-creation-time"];
+                    conn.AppName = Context.Headers["x-name"];
+                    conn.AppVersion = Context.Headers["x-version"];
+                    conn.OSVersion = Context.Headers["x-os-version"];
+                    conn.IEVersion = Context.Headers["x-ie-version"];
+                    conn.RuntimeVersion = Context.Headers["x-runtime-version"];
                     db.SaveChanges();
                 }
             }
@@ -116,6 +116,7 @@ namespace PushServer.MessageHubs
                 var connection = db.Connections.Find(Context.ConnectionId);
                 if (connection != null)
                 {
+                    connection.DisconnectAt = DateTime.Now;
                     connection.Connected = false;
                     db.SaveChanges();
                 }
@@ -133,8 +134,9 @@ namespace PushServer.MessageHubs
                 var connection = db.Connections.Find(Context.ConnectionId);
                 if (connection != null)
                 {
+                    connection.ReconnectAt = DateTime.Now;
                     connection.Connected = true;
-                    connection.LastConnectDate = DateTime.Now;
+                    connection.ReconnectCount++;
                     db.SaveChanges();
                 }
             }
@@ -189,7 +191,7 @@ namespace PushServer.MessageHubs
                         {
                             ConnectionID = connId,
                             Connected = true,
-                            LastConnectDate = DateTime.Now,
+                            ReconnectAt = DateTime.Now,
                             UserId = userId,
                             UserAgent = Context.Request.Headers["User-Agent"],
                         };
@@ -235,7 +237,7 @@ namespace PushServer.MessageHubs
                 if (connection != null)
                 {
                     connection.Connected = true;
-                    connection.LastConnectDate = DateTime.Now;
+                    connection.ReconnectAt = DateTime.Now;
                     db.SaveChanges();
                 }
             }

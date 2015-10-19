@@ -380,6 +380,7 @@
             // 
             // 一键不赔钱
             // 
+            this.一键不赔钱.Enabled = false;
             this.一键不赔钱.ForeColor = System.Drawing.Color.SeaGreen;
             this.一键不赔钱.Location = new System.Drawing.Point(321, 6);
             this.一键不赔钱.Name = "一键不赔钱";
@@ -391,6 +392,7 @@
             // 
             // 一键赔钱
             // 
+            this.一键赔钱.Enabled = false;
             this.一键赔钱.ForeColor = System.Drawing.Color.OrangeRed;
             this.一键赔钱.Location = new System.Drawing.Point(182, 6);
             this.一键赔钱.Name = "一键赔钱";

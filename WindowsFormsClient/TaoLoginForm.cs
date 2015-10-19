@@ -39,12 +39,6 @@ namespace WinFormsClient
             this.Controls.Add(wbMode.WB);
 
             this.Text += " [IE v" + wbMode.WB.Version.ToString() + "]";
-            this.HelpButtonClicked += TaoLoginForm_HelpButtonClicked;
-        }
-
-        private void TaoLoginForm_HelpButtonClicked(object sender, CancelEventArgs e)
-        {
-            MessageBox.Show("自动登陆卡顿超过5秒请按F5刷新。");
         }
 
         private void TaoLoginForm_VisibleChanged(object sender, EventArgs e)
@@ -71,52 +65,6 @@ namespace WinFormsClient
                 this.DialogResult = DialogResult.Cancel;
             }
             base.WndProc(ref msg);
-        }
-
-
-        private void WB_DocumentCompleted(object sender, WebBrowserDocumentCompletedEventArgs e)
-        {
-            if (e.Url.ToString() == "http://container.api.taobao.com/container?appkey=23140690")
-            {
-                if (wbMode.WB.DocumentText.IndexOf("auther('true')") != -1)
-                {
-                    wbMode.WB.Document.InvokeScript("auther", new object[] { "true" });
-                    return;
-                }
-            }
-            if (e.Url.ToString().IndexOf("https://login.taobao.com/member/login.jhtml") != 1)
-            {
-                var userNameEl = wbMode.WB.Document.GetElementById("TPL_username_1");
-
-                if (userNameEl != null)
-                {
-                    var passwordEl = wbMode.WB.Document.GetElementById("TPL_password_1");
-                    userNameEl.SetAttribute("value", this.UserName);
-                    passwordEl.SetAttribute("value", this.Password);
-
-                    //如果验证码窗口没有显示就点击提交按钮
-                    if (wbMode.WB.Document.Body.JQuerySelect(".field-checkcode.hidden").Any())
-                    {
-                        wbMode.WB.Document.All["J_SubmitStatic"].InvokeMember("click");
-                    }
-                    return;
-                }
-            }
-            var html = HtmlHelper.GetDocumentText(wbMode.WB);
-            if (html.IndexOf("选择其中一个已登录的账户") != -1)
-            {
-                this.OnAskSelectAccount();
-                //J_SubmitQuick
-            }
-        }
-
-        private void OnAskSelectAccount()
-        {
-            var h = this.AskSelectAccount;
-            if (h != null)
-            {
-                h();
-            }
         }
     }
 }
