@@ -121,7 +121,7 @@ namespace WinFormsClient.WBMode
                         //可能遇到了javascript跳转逻辑
                         return;
                     }
-                    for (int i = 0; i < 5000; i++)
+                    for (int i = 0; i < 3000; i++)
                     {
                         if (J_Static.clientWidth == 0 && J_QuickLogin.clientWidth == 0)
                         {

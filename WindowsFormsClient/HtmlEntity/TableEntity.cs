@@ -70,11 +70,14 @@ namespace WinFormsClient.HtmlEntity
             item.Type = TrElement.JQuerySelect(".type")[0].InnerText;
             item.面值 = TrElement.JQuerySelect(".price")[0].InnerText;
             decimal price = 0;
-            if (decimal.TryParse(TrElement.JQuerySelect(".buy-price")[0].InnerText.Trim(new char[] { ' ', '元' }), out price))
+            if (decimal.TryParse(TrElement.JQuerySelect(".buy-price em")[0].InnerText.Trim(new char[] { ' ', '元' }), out price))
             {
                 item.进价 = price;
             }
-            item.一口价 = decimal.Parse(TrElement.JQuerySelect(".one-price-text")[0].InnerText.Trim(new char[] { ' ', '元' }));
+            var onePriceElements = TrElement.JQuerySelect(".one-price-text");
+            if (onePriceElements.Any()) {
+                item.一口价 = decimal.Parse(TrElement.JQuerySelect(".one-price-text em")[0].InnerText.Trim(new char[] { ' ', '元' }));
+            }
             return item;
         }
     }

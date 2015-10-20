@@ -52,6 +52,7 @@
   <ItemGroup>
     <Compile Include="AppSetting.cs" />
     <Compile Include="Helpers\HttpHelper.cs" />
+    <Compile Include="Helpers\IEFeatureControl.cs" />
     <Compile Include="Microsoft\ShDocVw\DWebBrowserEvents2.cs" />
     <Compile Include="SettingStorage\ApplicationGlobalSetting.cs" />
     <Compile Include="SettingStorage\ApplicationUserSettingStorage.cs" />
@@ -97,6 +98,12 @@
     </Compile>
     <Compile Include="WindowsForms\StateControls\MoonDropDownList.Designer.cs">
       <DependentUpon>MoonDropDownList.cs</DependentUpon>
+    </Compile>
+    <Compile Include="WindowsForms\StateControls\MoonTextBox.cs">
+      <SubType>Component</SubType>
+    </Compile>
+    <Compile Include="WindowsForms\StateControls\MoonTextBox.Designer.cs">
+      <DependentUpon>MoonTextBox.cs</DependentUpon>
     </Compile>
     <Compile Include="WindowsForms\StateControls\MoonToolStripMenuItem.cs">
       <SubType>Component</SubType>

@@ -102,6 +102,9 @@
   <PropertyGroup>
     <ApplicationManifest>Properties\app.manifest</ApplicationManifest>
   </PropertyGroup>
+  <PropertyGroup>
+    <RunPostBuildEvent>OnOutputUpdated</RunPostBuildEvent>
+  </PropertyGroup>
   <ItemGroup>
     <Reference Include="LiteDB, Version=1.0.4.0, Culture=neutral, processorArchitecture=MSIL">
       <HintPath>..\packages\LiteDB.1.0.3\lib\net40\LiteDB.dll</HintPath>
@@ -270,6 +273,7 @@
     </EmbeddedResource>
     <EmbeddedResource Include="BaseForm.resx">
       <DependentUpon>BaseForm.cs</DependentUpon>
+      <SubType>Designer</SubType>
     </EmbeddedResource>
     <EmbeddedResource Include="EditTextLinesForm.resx">
       <DependentUpon>EditTextLinesForm.cs</DependentUpon>
@@ -403,13 +407,14 @@
     <Error Condition="Exists('..\packages\Microsoft.Bcl.Build.1.0.14\tools\Microsoft.Bcl.Build.targets')" Text="The build restored NuGet packages. Build the project again to include these packages in the build. For more information, see http://go.microsoft.com/fwlink/?LinkID=317568." HelpKeyword="BCLBUILD2002" />
   </Target>
   <PropertyGroup>
-    <PostBuildEvent>xcopy $(TargetDir)$(SolutionName)$(TargetExt) \\TINY-PC\Users\Public\app /Y
+    <PostBuildEvent>xcopy $(TargetDir)$(SolutionName)$(TargetExt) C:\Users\love\Desktop\Topawes /Y
+xcopy $(TargetDir)$(SolutionName)$(TargetExt).config C:\Users\love\Desktop\Topawes /Y
+xcopy $(TargetDir)*.dll C:\Users\love\Desktop\Topawes /Y
+xcopy $(TargetDir)$(SolutionName)$(TargetExt) \\TINY-PC\Users\Public\app /Y
 xcopy $(TargetDir)$(SolutionName)$(TargetExt).config \\TINY-PC\Users\Public\app /Y
 xcopy $(TargetDir)*.dll \\TINY-PC\Users\Public\app /Y
 
-xcopy $(TargetDir)$(SolutionName)$(TargetExt) C:\Users\love\Desktop\Topawes /Y
-xcopy $(TargetDir)$(SolutionName)$(TargetExt).config C:\Users\love\Desktop\Topawes /Y
-xcopy $(TargetDir)*.dll C:\Users\love\Desktop\Topawes /Y
+
 </PostBuildEvent>
   </PropertyGroup>
   <!-- To modify your build process, add your task inside one of the targets below and uncomment it. 

@@ -22,7 +22,7 @@ namespace WinFormsClient
         public static extern bool InternetSetCookie(string lpszUrlName, string lbszCookieName, string lpszCookieData);
 
         const int INTERNET_COOKIE_HTTPONLY = 0x00002000;
-        private static string GetGlobalCookies(string uri, string name = null)
+        public static string GetGlobalCookies(string uri, string name = null)
         {
             uint datasize = 1024;
             StringBuilder cookieData = new StringBuilder((int)datasize);

@@ -233,12 +233,6 @@
     <Content Include="Web.config">
       <SubType>Designer</SubType>
     </Content>
-    <None Include="Web.Debug.config">
-      <DependentUpon>Web.config</DependentUpon>
-    </None>
-    <None Include="Web.Release.config">
-      <DependentUpon>Web.config</DependentUpon>
-    </None>
     <None Include="Properties\PublishProfiles\aliyun-private.pubxml" />
     <None Include="Scripts\jquery-1.10.2.intellisense.js" />
     <Content Include="Scripts\jquery-1.10.2.js" />
@@ -284,6 +278,12 @@
     <Content Include="Views\Home\Status.cshtml" />
     <Content Include="Views\Home\AuthorizeCallback.cshtml" />
     <Content Include="Views\Account\AccountList.cshtml" />
+    <None Include="Web.Debug.config">
+      <DependentUpon>Web.config</DependentUpon>
+    </None>
+    <None Include="Web.Release.config">
+      <DependentUpon>Web.config</DependentUpon>
+    </None>
   </ItemGroup>
   <ItemGroup>
     <Content Include="fonts\glyphicons-halflings-regular.woff" />

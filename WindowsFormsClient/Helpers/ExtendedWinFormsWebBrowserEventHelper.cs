@@ -1,6 +1,8 @@
 ﻿using Microsoft.ShDocVw;
 using System.Diagnostics;
 using System.Runtime.InteropServices;
+using System;
+
 namespace Microsoft.Phone.Tools
 {
     [DebuggerStepThrough]
@@ -17,10 +19,22 @@ namespace Microsoft.Phone.Tools
         public void BeforeNavigate2(object pDisp, ref object URL, ref object Flags, ref object TargetFrameName, ref object PostData, ref object Headers, ref bool Cancel)
         {
         }
+
+        public void ClientToHostWindow([In, Out] ref long cx, [In, Out] ref long cy)
+        {
+            
+        }
+
         [DebuggerHidden]
         public void ClientToHostWindow(ref int CX, ref int CY)
         {
         }
+
+        public void CommandStateChange([In] long command, [In] bool enable)
+        {
+            
+        }
+
         [DebuggerHidden]
         public void CommandStateChange(int Command, bool Enable)
         {

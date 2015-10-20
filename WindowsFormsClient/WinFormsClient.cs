@@ -30,6 +30,7 @@ namespace WinFormsClient
 
     public partial class WinFormsClient : BaseForm
     {
+
         public TimeSpan DateDifference = TimeSpan.Zero;
         public static CancellationTokenSource cts = new CancellationTokenSource();
         public bool IsAutoRateRunning = false;
@@ -305,29 +306,28 @@ namespace WinFormsClient
 
             try
             {
-
                 await Connection.Start();
                 this.tssl_ConnState.Text = "连接状态：" + ConnectionState.Connected.AsZhConnectionState();
                 IsLogin = true;
-                this.SmartInvoke(() =>
+                this.SmartInvokeAsync(() =>
                 {
                     //登录完成后导航到这个页面，方便后面AJAX直接使用这个浏览器取数据
                     wb.Navigate("http://chongzhi.taobao.com/index.do?spm=0.0.0.0.OR0khk&method=index");
+                    WBHelper.InitWBHelper(tabPageWB, "http://chongzhi.taobao.com/index.do?spm=0.0.0.0.OR0khk&method=index");
                 });
                 var userInfo = await client.UserInfo();
                 var userName = (string)userInfo.UserName;
+                AppSetting.InitializeUserSetting(userName);
                 AppDatabase.Initialize(userName);
                 LoadUserSetting();
-                this.AppendText(string.Format("账号 [{0}] - 服务消息代理状态={1}", userName, ((bool)userInfo.TopManagerInitialized) ? " 运行中" : " 未启动。"));
                 SetupTaskbarIcon();
                 AppDatabase.db.Statistics.Delete(userName);
                 AppDatabase.db.Statistics.Insert(new Statistic { Id = userName });
                 var statistic = AppDatabase.db.Statistics.FindById(userName);
                 OnStatisticUpdate(statistic);
-
                 this.SmartInvoke(() =>
                 {
-                    Text = title + " 授权给：" + userName +
+                    this.Text = title + " 授权给：" + userName +
                     " 过期时间：" + userInfo.LicenseExpires;
                 });
                 if (userInfo.LicenseExpires == null)
@@ -346,6 +346,7 @@ namespace WinFormsClient
                 var taoInfo = await GetTaoInfo().ConfigureAwait(false);
                 if (taoInfo.status == 200)
                 {
+                    AppSetting.UserSetting.Set("TaoInfo", taoInfo);
                     BindDGViewProduct();
                     BindDGViewTBOrder();
                     if (AppDatabase.db.ProductItems.Any())
@@ -380,11 +381,10 @@ namespace WinFormsClient
             var success = await SyncAllProductList();
             if (success)
             {
-                await SyncSupplierInfo(true, AppDatabase.db.ProductItems.FindAll().ToArray());
-                this.SmartInvoke(() =>
-                {
-                    this.一键不赔钱.Enabled = 一键赔钱.Enabled = true;
-                });
+                //var x = this.SmartInvoke(async () =>
+                // {
+                //     await SyncSupplierInfo(true, AppDatabase.db.ProductItems.FindAll().ToArray());
+                // });
                 ThreadLoopMonitorDelay();
                 ThreadLoopCloseTrade();
                 var permit = await client.TmcGroupAddThenTmcUserPermit();
@@ -397,7 +397,7 @@ namespace WinFormsClient
         {
             if (this.notifyIcon1.Icon == null)
             {
-                this.notifyIcon1.Icon = this.Icon;
+                this.notifyIcon1.Icon = (Icon)this.Icon.Clone();
                 this.notifyIcon1.Text = AppSetting.UserSetting.UserName;
                 this.notifyIcon1.BalloonTipText = AppSetting.UserSetting.UserName;
                 this.notifyIcon1.DoubleClick += (s, e) =>
@@ -421,31 +421,41 @@ namespace WinFormsClient
                 }
                 IsSyncingSupplierInfo = true;
             }
-            int countNone = 0;
-            for (int i = 0; i < args.Length; i++)
+            this.SmartInvoke(async () =>
             {
-                var product = args[i];
-                //查找供应商
-                var supplier = await ((Task<SuplierInfo>)this.Invoke(new supplierInfoDelegate(BizHelper.supplierInfo), wb, product.SpuId));
-                if (supplier != null)
+                int countNone = 0;
+                using (var helper = new WBHelper())
                 {
-                    product.OnSupplierInfoUpdate(AppDatabase.db.ProductItems, supplier);
-                    
+                    for (int i = 0; i < args.Length; i++)
+                    {
+
+                        var product = args[i];
+                        //查找供应商
+                        //var supplier = await ((Task<SuplierInfo>)this.Invoke(new supplierInfoDelegate(BizHelper.supplierInfo), wb, product.SpuId));
+                        var url = string.Format("http://chongzhi.taobao.com/item.do?spu={0}&action=edit&method=supplierInfo&_=" + DateTime.Now.Ticks, product.SpuId);
+                        var supplier = await helper.WB.ExecuteTriggerJSONP(url);
+                        if (!string.IsNullOrEmpty(supplier))
+                        {
+                            product.OnSupplierInfoUpdate(AppDatabase.db.ProductItems, Newtonsoft.Json.JsonConvert.DeserializeObject<SuplierInfo>(supplier));
+                        }
+                        else
+                        {
+                            countNone++;
+                        }
+                        if (isSyncOperation)
+                            ReportTaskProgress(isSyncOperation ? "同步供应商信息..." : "价格更新...", i, args.Length);
+
+                    }
                 }
-                else
+
+                ResetTaskProgress();
+                BindDGViewProduct();
+                if (isSyncOperation)
                 {
-                    countNone++;
+                    AppendText("同步供应商信息完成！有{0}个商品暂无供应商！", countNone);
+                    IsSyncingSupplierInfo = false;
                 }
-                ReportTaskProgress(isSyncOperation ? "同步供应商信息..." : "价格更新...", i, args.Length);
-                await TaskEx.Delay(1000);
-            }
-            ResetTaskProgress();
-            BindDGViewProduct();
-            if (isSyncOperation)
-            {
-                AppendText("同步供应商信息完成！有{0}个商品暂无供应商！", countNone);
-                IsSyncingSupplierInfo = false;
-            }
+            });
         }
 
         private async void TradeHub_TradeCreate(Top.Tmc.Message msg)
@@ -808,14 +818,14 @@ namespace WinFormsClient
             BindDGViewProduct();
         }
 
-        private async Task<ProductItem> FindProductById(long itemId)
+        private Task<ProductItem> FindProductById(long itemId)
         {
             var product = AppDatabase.db.ProductItems.FindById(itemId);
             if (product == null)
             {
-                await SyncAllProductList().ConfigureAwait(false);
+                //await SyncAllProductList().ConfigureAwait(false);
             }
-            return product;
+            return TaskEx.FromResult(product);
         }
         public class InterceptMode
         {
@@ -1027,7 +1037,6 @@ namespace WinFormsClient
 
         private async Task<bool> SyncProductList(string where, string url)
         {
-            var slow = AppDatabase.db.ProductItems.Any(x => x.Where == where);
             bool continueYes = true;
             var productList = new List<ProductItem>();
             int page = 1;
@@ -1037,17 +1046,27 @@ namespace WinFormsClient
             {
                 while (pagedList.Success && pagedList.HasMore)
                 {
-                    var nextUrl = UrlHelper.SetValue(url, "page", page.ToString());
-                    body = await wb.SynchronousLoad(nextUrl);
-                    pagedList = ProductItemHelper.GetProductItemList(body, page);
-                    tbcpCrumbs = body.JquerySelectInputHidden("tbcpCrumbs");
-                    body = null;
-                    SetTaskName("同步{0}商品第{1}页（{2}个）", where, page, pagedList.Data.Count);
-                    productList.AddRange(pagedList.Data);
-                    page++;
-                    if (slow)
+                    try
                     {
-                        await TaskEx.Delay(1000);
+                        var nextUrl = UrlHelper.SetValue(url, "page", page.ToString());
+                        var xwb = new Moonlight.WindowsForms.Controls.ExtendedWinFormsWebBrowser();
+                        xwb.ScriptErrorsSuppressed = true;
+                        this.tabPageWB.Controls.Add(xwb);
+                        using (var helper = new WBHelper())
+                        {
+                            body = await helper.SynchronousLoadDocument(nextUrl);
+                            this.tabPageWB.Controls.Remove(xwb);
+                            pagedList = ProductItemHelper.GetProductItemList(body, page);
+                            tbcpCrumbs = body.JquerySelectInputHidden("tbcpCrumbs");
+                            body = null;
+                            SetTaskName("同步{0}商品第{1}页（{2}个）", where, page, pagedList.Data.Count);
+                            productList.AddRange(pagedList.Data);
+                            page++;
+                        }
+                    }
+                    catch (Exception ex)
+                    {
+
                     }
                 }
                 if (!pagedList.Success)
@@ -1065,6 +1084,7 @@ namespace WinFormsClient
                         item.Where = where;
                     }
                     AppDatabase.UpsertProductList(productList);
+                    SetTaskName("就绪");
                     AppendText("同步{0}商品完成！（{1}个）", where, productList.Count);
                     return true;
                 }
@@ -1242,7 +1262,7 @@ namespace WinFormsClient
                     await CloseTradeIfPossible(trade.Tid);
                 }
                 else
-                    Application.DoEvents();
+                    await TaskEx.Delay(1000);
             }
         }
         public void ThreadLoopMonitorDelay()
@@ -1405,12 +1425,15 @@ namespace WinFormsClient
                 exWb.ScriptErrorsSuppressed = true;
                 tabPageWB.Controls.Add(exWb);
             });
-            var body = await WBHelper.GetWBHeper(exWb, true).SynchronousLoadDocument("http://chongzhi.taobao.com/item.do?method=list&type=1&keyword=&category=0&supplier=0&promoted=0&order=0&desc=0&page=1&size=20").ConfigureAwait(false);
-            tabPageWB.SmartInvoke(() =>
+            using (var helper = new WBHelper())
             {
-                tabPageWB.Controls.Remove(exWb);
-                tbcpCrumbs = body.JquerySelectInputHidden("tbcpCrumbs");
-            });
+                var body = await helper.SynchronousLoadDocument("http://chongzhi.taobao.com/item.do?method=list&type=1&keyword=&category=0&supplier=0&promoted=0&order=0&desc=0&page=1&size=20").ConfigureAwait(false);
+                tabPageWB.SmartInvoke(() =>
+                {
+                    tabPageWB.Controls.Remove(exWb);
+                    tbcpCrumbs = body.JquerySelectInputHidden("tbcpCrumbs");
+                });
+            }
         }
 
         private async void UpProduct(object sender, EventArgs e)
@@ -2132,25 +2155,22 @@ namespace WinFormsClient
         private async void 一键赔钱_Click(object sender, EventArgs e)
         {
             一键赔钱.Enabled = false;
-            一键不赔钱.Enabled = false;
             await SetProfitDirect(AppSetting.UserSetting.Get<decimal>("赔钱利润")).ConfigureAwait(false);
-            await TaskEx.Delay(3);
-            this.SmartInvoke(() => { 一键赔钱.Enabled = true; 一键不赔钱.Enabled = true; });
+            this.SmartInvoke(async () => { await TaskEx.Delay(3); 一键赔钱.Enabled = true; 一键不赔钱.Enabled = true; });
         }
 
         private async void 一键不赔钱_Click(object sender, EventArgs e)
         {
             一键不赔钱.Enabled = false;
             await SetProfitDirect(AppSetting.UserSetting.Get<decimal>("不赔钱利润")).ConfigureAwait(false);
-            await TaskEx.Delay(3);
-            this.SmartInvoke(() => { 一键赔钱.Enabled = true; 一键不赔钱.Enabled = true; });
+            this.SmartInvoke(async () => { await TaskEx.Delay(3); 一键赔钱.Enabled = true; 一键不赔钱.Enabled = true; });
         }
 
         private async void 获取供应商信息ToolStripMenuItem_Click(object sender, EventArgs e)
         {
             var ids = GetSelectedProductList();
             var products = AppDatabase.db.ProductItems.FindAll().Where(x => ids.Contains(x.Id));
-            await SyncSupplierInfo(true, products.ToArray());
+            await SyncSupplierInfo(false, products.ToArray());
         }
 
         private void button自动上架_Click(object sender, EventArgs e)

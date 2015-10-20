@@ -121,9 +121,9 @@ namespace WinFormsClient
         /// <summary>
         /// 获取用户信息
         /// </summary>
-        public Task<dynamic> UserInfo()
+        public Task<TopModel.UserInfo> UserInfo()
         {
-            return ProxyInvoke<dynamic>("userInfo");
+            return ProxyInvoke<TopModel.UserInfo>("userInfo");
         }
 
 

@@ -15,10 +15,11 @@ namespace Moonlight.WindowsForms.Controls
         private ExtendedWinFormsWebBrowserEventHelper helper;
         public event EventHandler<EventArgs> NavigationError;
         public event ProgressChangedEventHandler ProgressChanged2;
-        public event EventHandler<HttpDownloadProgressChangedEventArgs> DownloadProgressChanged;
-        public event EventHandler<HttpDownloadCompletedEventArgs> DownloadCompleted;
-        public event EventHandler DownloadStatusChanged;
+        public EventHandler<HttpDownloadProgressChangedEventArgs> DownloadProgressChanged;
+        public EventHandler<HttpDownloadCompletedEventArgs> DownloadCompleted;
+        public EventHandler DownloadStatusChanged;
         public const int SET_FEATURE_ON_PROCESS = 2;
+        public string Cookie { get; set; }
         public ExtendedWinFormsWebBrowser()
         {
             NativeMethods.CoInternetSetFeatureEnabled((int)INTERNETFEATURELIST.FEATURE_MIME_HANDLING, (uint)SET_FEATURE_ON_PROCESS, true);
@@ -37,10 +38,7 @@ namespace Moonlight.WindowsForms.Controls
             public ExtendedWebBrowserSite(ExtendedWinFormsWebBrowser host) : base(host)
             {
                 this.host = host;
-                _manager = new IEDownloadManager(GetHostCookie);
-                _manager.DownloadCompleted += host.DownloadCompleted;
-                _manager.DownloadProgressChanged += host.DownloadProgressChanged;
-                _manager.StatusChanged += host.DownloadStatusChanged;
+                _manager = new IEDownloadManager(GetHostCookie, host);
             }
             Guid serviceId = new Guid("bdb9c34c-d0ca-448e-b497-8de62e709744");
             Guid interfaceId = new Guid("988934A4-064B-11D3-BB80-00104B35E7F9");
@@ -57,7 +55,7 @@ namespace Moonlight.WindowsForms.Controls
 
             private string GetHostCookie(string url)
             {
-                return host.Document.Cookie + ";" + IECookieHelper.GetGlobalCookies(url);
+                return host.Cookie; ;
             }
         }
 

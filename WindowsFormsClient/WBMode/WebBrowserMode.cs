@@ -68,16 +68,6 @@ namespace WinFormsClient.WBMode
                 OnProgressChanged(0);
             }
         }
-        private void Delay(int Millisecond) //延迟系统时间，但系统又能同时能执行其它任务；
-        {
-            DateTime current = DateTime.Now;
-            while (current.AddMilliseconds(Millisecond) > DateTime.Now)
-            {
-                Application.DoEvents();//转让控制权            
-            }
-            return;
-        }
-
 
         protected abstract void EnterModeInternal(ExtendedWinFormsWebBrowser webBrowser);
         protected abstract void LeaveModeInternal(ExtendedWinFormsWebBrowser webBrowser);

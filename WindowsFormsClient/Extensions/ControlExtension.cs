@@ -26,30 +26,14 @@ namespace WinFormsClient.Extensions
             return (TResult)d.DynamicInvoke(args);
         }
 
-        /// <summary>
-        /// 如果InvokeRequired，自动调用Control.Invoke执行delegate
-        /// </summary>
-        /// <param name="control"></param>
-        /// <param name="d"></param>
-        /// <param name="args"></param>
-        public static void SmartInvoke(this Control control, Delegate d, params object[] args)
+        public static object SmartInvoke(this Control control, Action d)
         {
             if (control.InvokeRequired)
             {
-                control.Invoke(d, args);
+                return control.Invoke(d);
             }
             else
-                d.DynamicInvoke(args);
-        }
-
-        public static void SmartInvoke(this Control control, Action d)
-        {
-            if (control.InvokeRequired)
-            {
-                control.Invoke(d);
-            }
-            else
-                d.Invoke();
+                d.Invoke(); return null;
         }
 
         public static void SmartInvokeAsync(this Control control, Action d)

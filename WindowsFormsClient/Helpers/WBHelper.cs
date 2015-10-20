@@ -12,26 +12,63 @@ using WinFormsClient.Extensions;
 using Moonlight.WindowsForms.Controls;
 using CSWebDownloader;
 using TopModel;
+using Moonlight.Treading;
 
 namespace WinFormsClient.Helpers
 {
     public class WBHelper : IDisposable
     {
-        private WBHelper() { }
-        ExtendedWinFormsWebBrowser WB;
+        static BlockingQueue<Moonlight.WindowsForms.Controls.ExtendedWinFormsWebBrowser> wbQueue = new BlockingQueue<Moonlight.WindowsForms.Controls.ExtendedWinFormsWebBrowser>();
+        public ExtendedWinFormsWebBrowser WB;
         SynchronousNavigationContext SyncNavContext;
         CancellationTokenSource cancelDelayTokenSource = new CancellationTokenSource();
-        public bool DisposeAfterUse;
-        public WBHelper(ExtendedWinFormsWebBrowser exWb, bool disposeAfterUse)
+        public static void InitWBHelper(Control parent, string initUrl)
         {
+            if (wbQueue.Count == 0)
+            {
+                foreach (var item in parent.Controls)
+                {
+                    var wb = item as ExtendedWinFormsWebBrowser;
+                    if (wb != null)
+                    {
+                        wb.ScriptErrorsSuppressed = true;
+                        wb.Navigate(initUrl);
+                        wbQueue.Enqueue(wb);
+                        TaskEx.Delay(200).Wait();
+                    }
+                }
+            }
+        }
+        public WBHelper()
+        {
+            ExtendedWinFormsWebBrowser exWb = wbQueue.Dequeue();
             if (exWb.Parent == null)
             {
                 throw new Exception("在使用前必须将浏览器放入某个控件");
             }
             this.WB = exWb;
-            DisposeAfterUse = disposeAfterUse;
             WB.DownloadCompleted += WB_DownloadCompleted;
             WB.DocumentCompleted += WB_DocumentCompleted;
+            WB.Navigated += WB_Navigated;
+        }
+
+        private void WB_Navigated(object sender, WebBrowserNavigatedEventArgs e)
+        {
+            if (!SyncNavContext.Tcs.Task.IsCompleted && SyncNavContext.EndUrl == WB.Document.Url.AbsoluteUri)
+            {
+                if (DateTime.Now.Subtract(SyncNavContext.StartAt).TotalSeconds > SyncNavContext.TimeoutSeconds)
+                {
+                    SyncNavContext.Tcs.TrySetResult(SynchronousLoadResult.GetWebBrowserResult(false));
+                }
+                else if ((int)SyncNavContext.Tcs.Task.Status <= 3)
+                {
+                    SyncNavContext.Tcs.TrySetResult(SynchronousLoadResult.GetWebBrowserResult(true));
+                }
+                else
+                {
+                    SyncNavContext.Tcs.TrySetResult(SynchronousLoadResult.GetWebBrowserResult(false));
+                }
+            }
         }
 
         private void WB_NewWindow(object sender, System.ComponentModel.CancelEventArgs e)
@@ -45,7 +82,7 @@ namespace WinFormsClient.Helpers
         {
             var client = (sender as HttpDownloadClient);
             var url = client.Url;
-            if (SyncNavContext.EndUrl == url.AbsoluteUri)
+            if (SyncNavContext.EndUrl == url.AbsoluteUri && e.Error == null)
             {
                 SyncNavContext.Tcs.TrySetResult(SynchronousLoadResult.GetFileDownloadResult(true, client.DownloadPath));
             }
@@ -91,9 +128,8 @@ namespace WinFormsClient.Helpers
 
             using (token.Register(() => SyncNavContext.Tcs.TrySetCanceled(), useSynchronizationContext: false))
             {
-                this.WB.Navigate(url);
-
                 SetTimeoutThread(SyncNavContext);
+                this.WB.Navigate(url);
                 var result = await SyncNavContext.Tcs.Task;
                 cancelDelayTokenSource.Cancel();
 
@@ -116,7 +152,7 @@ namespace WinFormsClient.Helpers
                 {
                     break;
                 }
-                Application.DoEvents();
+                await TaskEx.Delay(50);
             }
             if (snc.Tcs.Task.Status == TaskStatus.RanToCompletion)
             {
@@ -136,16 +172,20 @@ namespace WinFormsClient.Helpers
 
             using (token.Register(() => SyncNavContext.Tcs.TrySetCanceled(), useSynchronizationContext: false))
             {
-                this.WB.Navigate(url, null, null, @"Accept: */*");
                 SetTimeoutThread(SyncNavContext);
+                this.WB.Navigate(url, null, null, @"Accept: */*");
                 var result = await SyncNavContext.Tcs.Task;
                 cancelDelayTokenSource.Cancel();
                 if (result.Success) // wait for DocumentCompleted
                 {
                     if (result.IsWebBrowserResult)
                         return WB.DocumentText;
-                    else
-                        return System.IO.File.ReadAllText(result.FilePath);
+                    else if (System.IO.File.Exists(result.FilePath))
+                    {
+                        var content = System.IO.File.ReadAllText(result.FilePath);
+                        System.IO.File.Delete(result.FilePath);
+                        return content;
+                    }
                 }
             }
             return string.Empty;
@@ -207,17 +247,12 @@ namespace WinFormsClient.Helpers
             return tbcpCrumbs;
         }
 
-        public static WBHelper GetWBHeper(ExtendedWinFormsWebBrowser exWb, bool disposeAfterUse)
-        {
-            return new WBHelper(exWb, disposeAfterUse);
-        }
-
         public void Dispose()
         {
-            if (DisposeAfterUse)
-            {
-
-            }
+            WB.DownloadCompleted -= WB_DownloadCompleted;
+            WB.DocumentCompleted -= WB_DocumentCompleted;
+            WB.Navigated -= WB_Navigated;
+            wbQueue.Enqueue(WB);
         }
     }
 }

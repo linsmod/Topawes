@@ -39,6 +39,7 @@ using System.Threading;
 using System.Collections.Generic;
 using System.Linq;
 using System.Text.RegularExpressions;
+using Moonlight;
 
 namespace CSWebDownloader
 {
@@ -222,7 +223,6 @@ namespace CSWebDownloader
                 throw new ApplicationException(
                     "The file could be checked only in Idle status.");
             }
-
             // Check the file information on the remote server.
             var webRequest = (HttpWebRequest)WebRequest.Create(Url);
             webRequest.Headers["Cookie"] = this.Cookie;
@@ -304,8 +304,7 @@ namespace CSWebDownloader
             // Only idle download client can be started.
             if (this.Status != HttpDownloadClientStatus.Checked)
             {
-                throw new ApplicationException(
-                     "Only Checked downloader can be started. ");
+                this.OnDownloadCompleted(new HttpDownloadCompletedEventArgs(-1, -1, TimeSpan.Zero, new Exception("资源预检查失败。")));
             }
 
             // Start to download in a background thread.
@@ -510,6 +509,11 @@ namespace CSWebDownloader
                     return;
                 }
 
+            }
+            catch (Exception ex)
+            {
+                this.OnDownloadCompleted(new HttpDownloadCompletedEventArgs(
+                                -1, -1, this.TotalUsedTime, ex));
             }
             finally
             {

@@ -40,7 +40,6 @@
             this.Name = "BaseForm";
             this.Text = "BaseForm";
             this.ResumeLayout(false);
-
         }
 
         #endregion

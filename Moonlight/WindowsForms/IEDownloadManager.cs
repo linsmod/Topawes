@@ -14,22 +14,15 @@ namespace Moonlight.WindowsForms
     [System.Runtime.InteropServices.Guid("bdb9c34c-d0ca-448e-b497-8de62e709744")]
     public class IEDownloadManager : IDownloadManager
     {
-        public event EventHandler<HttpDownloadProgressChangedEventArgs> DownloadProgressChanged;
-
-        public event EventHandler<HttpDownloadCompletedEventArgs> DownloadCompleted;
-
         public event EventHandler StatusChanged;
-
+        ExtendedWinFormsWebBrowser wb;
         HttpDownloadClient downloadClient;
         Func<string, string> GetCookie;
-        public IEDownloadManager()
-        {
 
-        }
-
-        public IEDownloadManager(Func<string, string> getCookie)
+        public IEDownloadManager(Func<string, string> getCookie, ExtendedWinFormsWebBrowser wb)
         {
             this.GetCookie = getCookie;
+            this.wb = wb;
         }
 
         /// <summary>
@@ -51,9 +44,9 @@ namespace Moonlight.WindowsForms
                     NativeMethods.CreateBindCtx(0, out pbc);
 
                     downloadClient = new HttpDownloadClient(url.AbsoluteUri);
-                    downloadClient.DownloadCompleted += DownloadCompleted;
-                    downloadClient.DownloadProgressChanged += DownloadProgressChanged;
-                    downloadClient.StatusChanged += StatusChanged;
+                    downloadClient.DownloadCompleted += (s,e)=> { if (wb.DownloadCompleted != null) wb.DownloadCompleted(s, e); } ;
+                    downloadClient.DownloadProgressChanged += (s, e) => { if (wb.DownloadProgressChanged != null) wb.DownloadProgressChanged(s, e); };
+                    downloadClient.StatusChanged += (s, e) => { if (wb.DownloadStatusChanged != null) wb.DownloadStatusChanged(s, e); };
                     downloadClient.OverWriteExsitFile = true;
                     if (this.GetCookie != null)
                     {
@@ -63,20 +56,19 @@ namespace Moonlight.WindowsForms
                     downloadClient.CheckUrl(out filename);
                     if (downloadClient.Status == HttpDownloadClientStatus.Completed)
                         return 0;
-                    if (string.IsNullOrEmpty(filename))
-                    {
-                        downloadClient.DownloadPath = string.Format("{0}\\{1}",
-                            Environment.GetFolderPath(Environment.SpecialFolder.MyDocuments),
-                            downloadClient.Url.Segments.Last());
-                    }
-                    else
-                    {
-                        downloadClient.DownloadPath = string.Format("{0}\\{1}",
-                            Environment.GetFolderPath(Environment.SpecialFolder.MyDocuments),
-                            filename);
-                    }
-                    //var path = Path.GetTempFileName();
-                    //downloadClient.DownloadPath = path;
+                    //if (string.IsNullOrEmpty(filename))
+                    //{
+                    //    downloadClient.DownloadPath = string.Format("{0}\\{1}",
+                    //        Environment.GetFolderPath(Environment.SpecialFolder.MyDocuments),
+                    //        downloadClient.Url.Segments.Last());
+                    //}
+                    //else
+                    //{
+                    //    downloadClient.DownloadPath = string.Format("{0}\\{1}",
+                    //        Environment.GetFolderPath(Environment.SpecialFolder.MyDocuments),
+                    //        filename);
+                    //}
+                    downloadClient.DownloadPath = Path.GetTempFileName();
 
                     downloadClient.Start();
                     //RegisterCallback(pbc, url);

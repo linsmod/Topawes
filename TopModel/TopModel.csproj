@@ -88,6 +88,7 @@
     <Compile Include="Properties\AssemblyInfo.cs" />
     <Compile Include="SuplierInfo.cs" />
     <Compile Include="TopTrade.cs" />
+    <Compile Include="UserInfo.cs" />
   </ItemGroup>
   <ItemGroup>
     <None Include="app.config" />

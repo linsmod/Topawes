@@ -85,13 +85,13 @@ namespace PushServer
         }
 
         [Authorize]
-        public object UserInfo()
+        public TopModel.UserInfo UserInfo()
         {
             var userId = Context.User.Identity.GetUserId();
             var user = UserManager.FindById(userId);
             var license = user.SoftwareLicenses.FirstOrDefault(x => x.SoftwareId == SoftwareId);
             DateTime? licenseExpires = license == null ? (DateTime?)null : license.Expires;
-            return new { UserName = Context.User.Identity.Name, LicenseExpires = licenseExpires, TopManagerInitialized = TopManager.Initialized };
+            return new TopModel.UserInfo { TopManagerInitialized = TopManager.Initialized, UserName = Context.User.Identity.Name, LicenseExpires = licenseExpires };
         }
 
         public bool Authorize()

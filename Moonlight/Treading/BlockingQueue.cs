@@ -46,6 +46,14 @@ namespace Moonlight.Treading
             mSemaphore.Release();
         }
 
+        public int Count
+        {
+            get
+            {
+                return mQueue.Count;
+            }
+        }
+
         public T Dequeue()
         {
             // wait until there is an item in the queue
