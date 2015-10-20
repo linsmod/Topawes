@@ -18,28 +18,40 @@ namespace WinFormsClient.Helpers
 {
     public class WBHelper : IDisposable
     {
-        static BlockingQueue<Moonlight.WindowsForms.Controls.ExtendedWinFormsWebBrowser> wbQueue = new BlockingQueue<Moonlight.WindowsForms.Controls.ExtendedWinFormsWebBrowser>();
+        public static BlockingQueue<Moonlight.WindowsForms.Controls.ExtendedWinFormsWebBrowser> wbQueue = new BlockingQueue<Moonlight.WindowsForms.Controls.ExtendedWinFormsWebBrowser>();
+        public static BlockingQueue<Moonlight.WindowsForms.Controls.ExtendedWinFormsWebBrowser> ajaxWbQueue = new BlockingQueue<Moonlight.WindowsForms.Controls.ExtendedWinFormsWebBrowser>();
         public ExtendedWinFormsWebBrowser WB;
-        SynchronousNavigationContext SyncNavContext;
         CancellationTokenSource cancelDelayTokenSource = new CancellationTokenSource();
-        public static void InitWBHelper(Control parent, string initUrl)
+        internal static string Cookie;
+
+        internal SynchronousNavigationContext SyncNavContext { get; private set; }
+
+        public static void InitWBHelper(Control parent, string initUrl, int count)
         {
-            if (wbQueue.Count == 0)
+            if (wbQueue.Count <= 1)
             {
+                int i = 0;
                 foreach (var item in parent.Controls)
                 {
                     var wb = item as ExtendedWinFormsWebBrowser;
                     if (wb != null)
                     {
                         wb.ScriptErrorsSuppressed = true;
-                        wb.Navigate(initUrl);
-                        wbQueue.Enqueue(wb);
+                        if (i + 1 < count)
+                        {
+                            wbQueue.Enqueue(wb);
+                        }
+                        else
+                        {
+                            ajaxWbQueue.Enqueue(wb);
+                            wb.Navigate(initUrl);
+                        }
                         TaskEx.Delay(200).Wait();
                     }
                 }
             }
         }
-        public WBHelper()
+        public WBHelper(bool ajax)
         {
             ExtendedWinFormsWebBrowser exWb = wbQueue.Dequeue();
             if (exWb.Parent == null)
@@ -56,11 +68,7 @@ namespace WinFormsClient.Helpers
         {
             if (!SyncNavContext.Tcs.Task.IsCompleted && SyncNavContext.EndUrl == WB.Document.Url.AbsoluteUri)
             {
-                if (DateTime.Now.Subtract(SyncNavContext.StartAt).TotalSeconds > SyncNavContext.TimeoutSeconds)
-                {
-                    SyncNavContext.Tcs.TrySetResult(SynchronousLoadResult.GetWebBrowserResult(false));
-                }
-                else if ((int)SyncNavContext.Tcs.Task.Status <= 3)
+                if ((int)SyncNavContext.Tcs.Task.Status <= 3)
                 {
                     SyncNavContext.Tcs.TrySetResult(SynchronousLoadResult.GetWebBrowserResult(true));
                 }
@@ -96,11 +104,7 @@ namespace WinFormsClient.Helpers
         {
             if (!SyncNavContext.Tcs.Task.IsCompleted && SyncNavContext.EndUrl == WB.Document.Url.AbsoluteUri)
             {
-                if (DateTime.Now.Subtract(SyncNavContext.StartAt).TotalSeconds > SyncNavContext.TimeoutSeconds)
-                {
-                    SyncNavContext.Tcs.TrySetResult(SynchronousLoadResult.GetWebBrowserResult(false));
-                }
-                else if ((int)SyncNavContext.Tcs.Task.Status <= 3)
+                if ((int)SyncNavContext.Tcs.Task.Status <= 3)
                 {
                     SyncNavContext.Tcs.TrySetResult(SynchronousLoadResult.GetWebBrowserResult(true));
                 }
@@ -123,12 +127,12 @@ namespace WinFormsClient.Helpers
                 EndUrl = endUrl,
                 Tcs = new TaskCompletionSource<SynchronousLoadResult>(),
                 TimeoutSeconds = timeoutSeconds,
-
             };
 
             using (token.Register(() => SyncNavContext.Tcs.TrySetCanceled(), useSynchronizationContext: false))
             {
                 SetTimeoutThread(SyncNavContext);
+                this.WB.Cookie = Cookie;
                 this.WB.Navigate(url);
                 var result = await SyncNavContext.Tcs.Task;
                 cancelDelayTokenSource.Cancel();
@@ -143,23 +147,31 @@ namespace WinFormsClient.Helpers
             }
             return null;
         }
-        public async Task SetTimeoutThread(SynchronousNavigationContext snc)
+        public void SetTimeoutThread(SynchronousNavigationContext snc)
         {
-            var when = DateTime.Now.AddSeconds(snc.TimeoutSeconds);
-            while (when > DateTime.Now)
+            Task.Factory.StartNew(async () =>
             {
-                if (cancelDelayTokenSource.IsCancellationRequested)
+                var when = DateTime.Now.AddSeconds(snc.TimeoutSeconds);
+                while (when > DateTime.Now && (int)snc.Tcs.Task.Status <= 3)
                 {
-                    break;
+                    if (cancelDelayTokenSource.IsCancellationRequested)
+                    {
+                        break;
+                    }
+                    await TaskEx.Delay(50);
                 }
-                await TaskEx.Delay(50);
-            }
-            if (snc.Tcs.Task.Status == TaskStatus.RanToCompletion)
-            {
-                snc.Tcs.TrySetCanceled();
-            }
-            Dispose();
+                if (snc.Tcs.Task.Status != TaskStatus.RanToCompletion)
+                {
+                    snc.Tcs.TrySetCanceled();
+                }
+            });
         }
+
+        public async Task<string> SynchronousLoadString(string url)
+        {
+            return await SynchronousLoadString(url, CancellationToken.None);
+        }
+
         public async Task<string> SynchronousLoadString(string url, CancellationToken token)
         {
             this.SyncNavContext = new SynchronousNavigationContext
@@ -167,13 +179,14 @@ namespace WinFormsClient.Helpers
                 StartUrl = url,
                 EndUrl = url,
                 Tcs = new TaskCompletionSource<SynchronousLoadResult>(),
-                TimeoutSeconds = 5
+                TimeoutSeconds = 60
             };
 
             using (token.Register(() => SyncNavContext.Tcs.TrySetCanceled(), useSynchronizationContext: false))
             {
                 SetTimeoutThread(SyncNavContext);
-                this.WB.Navigate(url, null, null, @"Accept: */*");
+                this.WB.Cookie = Cookie;
+                this.WB.Navigate(url);
                 var result = await SyncNavContext.Tcs.Task;
                 cancelDelayTokenSource.Cancel();
                 if (result.Success) // wait for DocumentCompleted
@@ -253,6 +266,14 @@ namespace WinFormsClient.Helpers
             WB.DocumentCompleted -= WB_DocumentCompleted;
             WB.Navigated -= WB_Navigated;
             wbQueue.Enqueue(WB);
+        }
+
+        public async Task PrepareIfNoneDocument(string v)
+        {
+            if (WB.Document == null)
+            {
+                await this.SynchronousLoadString(v);
+            }
         }
     }
 }

@@ -1,4 +1,4 @@
-﻿using Microsoft.Phone.Tools;
+﻿
 using mshtml;
 using System;
 using System.Collections.Generic;

@@ -16,13 +16,17 @@ namespace Moonlight
 
         public static void InitializeUserSetting(string userName, string connectionString = "user.bin")
         {
+            InitializeUserSetting(userName, new LiteDB.LiteDatabase(connectionString));
+        }
+        public static void InitializeUserSetting(string userName, LiteDB.LiteDatabase db)
+        {
             if (UserSetting != null)
             {
+                if(UserSetting.UserName != userName)
                 UserSetting.Dispose();
                 UserSetting = null;
             }
-            UserSetting = new ApplicationUserSettingStorage(userName, connectionString);
-            UserSettingInitialized = true;
+            UserSetting = new ApplicationUserSettingStorage(userName, db);
         }
 
         public static void Uninitialize()

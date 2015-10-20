@@ -50,7 +50,7 @@ namespace Moonlight.SettingStorage
             if (value == null || string.IsNullOrEmpty(value.ToString()))
             {
                 if (entity != null)
-                    Entity<ApplicationGlobalSetting>().Delete(entity.Id);
+                    Entity<ApplicationUserSetting>().Delete(entity.Id);
             }
             else
             {

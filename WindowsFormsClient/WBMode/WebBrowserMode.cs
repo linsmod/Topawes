@@ -1,4 +1,5 @@
-﻿using Microsoft.Phone.Tools;
+﻿
+using Moonlight.WindowsForms.Controls;
 using System;
 using System.Collections.Generic;
 using System.ComponentModel;
@@ -37,21 +38,8 @@ namespace WinFormsClient.WBMode
         public bool IsFileDownloadResult { get; private set; }
         public string FilePath { get; set; }
     }
-    public sealed class SynchronousNavigationContext
-    {
-        public int POLL_DELAY = 250;
-        public string StartUrl { get; set; }
-        public TaskCompletionSource<SynchronousLoadResult> Tcs { get; set; }
-        public string EndUrl { get; set; }
-        public double TimeoutSeconds { get; set; }
-
-        public DateTime StartAt = DateTime.Now;
-    }
     public abstract class WebBrowserMode<T> : IWebBrowserMode where T : IWebBrowserMode
     {
-        public static object syncObj = new object();
-        public bool IsSynchronousNavigating { get; set; }
-        SynchronousNavigationContext SyncNavContext;
         public bool IsActive { get; protected set; }
         internal ExtendedWinFormsWebBrowser WB;
         public WebBrowserMode()
@@ -102,30 +90,6 @@ namespace WinFormsClient.WBMode
             {
                 var html = HtmlHelper.GetDocumentText(WB);
                 var url = e.Url.AbsoluteUri;
-                if (IsSynchronousNavigating)
-                {
-                    lock (syncObj)
-                    {
-                        if (IsSynchronousNavigating)
-                        {
-                            if (!SyncNavContext.Tcs.Task.IsCompleted && SyncNavContext.EndUrl == url)
-                            {
-                                if (DateTime.Now.Subtract(SyncNavContext.StartAt).TotalSeconds > SyncNavContext.TimeoutSeconds)
-                                {
-                                    SyncNavContext.Tcs.TrySetResult(SynchronousLoadResult.GetWebBrowserResult(false));
-                                }
-                                else if (SyncNavContext.Tcs.Task.Status != TaskStatus.Canceled
-                                    && SyncNavContext.Tcs.Task.Status != TaskStatus.Faulted
-                                    && SyncNavContext.Tcs.Task.Status != TaskStatus.RanToCompletion)
-                                {
-                                    SyncNavContext.Tcs.TrySetResult(SynchronousLoadResult.GetWebBrowserResult(true));
-                                }
-                                IsSynchronousNavigating = false;
-                            }
-                        }
-                    }
-
-                }
                 Application.DoEvents();
                 if (!WB.IsDisposed)
                     OnDocumentCompleted(html, url);
@@ -175,62 +139,9 @@ namespace WinFormsClient.WBMode
             WB.OnProgressChanged(this, new ProgressChangedEventArgs(percentage, null));
         }
 
-        public async Task<HtmlElement> SynchronousLoadDocument(string url, string endUrl, int timeoutSeconds, CancellationToken token)
-        {
-            lock (syncObj)
-            {
-                IsSynchronousNavigating = true;
-            }
-            this.SyncNavContext = new SynchronousNavigationContext
-            {
-                StartUrl = url,
-                EndUrl = endUrl,
-                Tcs = new TaskCompletionSource<SynchronousLoadResult>(),
-                TimeoutSeconds = timeoutSeconds
-            };
-            using (token.Register(() => SyncNavContext.Tcs.TrySetCanceled(), useSynchronizationContext: false))
-            {
-                this.WB.Navigate(url);
-                if ((await SyncNavContext.Tcs.Task).Success) // wait for DocumentCompleted
-                {
-                    return WB.Document.Body;
-                }
-            }
-            return null;
-        }
-        public async Task<string> SynchronousLoadString(string url, CancellationToken token)
-        {
-            lock (syncObj)
-            {
-                IsSynchronousNavigating = true;
-            }
-            this.SyncNavContext = new SynchronousNavigationContext
-            {
-                StartUrl = url,
-                EndUrl = url,
-                Tcs = new TaskCompletionSource<SynchronousLoadResult>(),
-                TimeoutSeconds = 5
-            };
-            using (token.Register(() => SyncNavContext.Tcs.TrySetCanceled(), useSynchronizationContext: false))
-            {
-                this.WB.Navigate(url);
-                if ((await SyncNavContext.Tcs.Task).Success) // wait for DocumentCompleted
-                {
-                    return WB.DocumentText;
-                }
-            }
-            return string.Empty;
-        }
-
         public void Navigate(string url)
         {
             this.WB.Navigate(url);
-        }
-
-        public T Active()
-        {
-            WB.TransactionToNext(this);
-            return (T)WB.CurrentMode;
         }
     }
 
@@ -238,12 +149,5 @@ namespace WinFormsClient.WBMode
     {
         void Enter(ExtendedWinFormsWebBrowser extendedWinFormsWebBrowser);
         void Leave(ExtendedWinFormsWebBrowser extendedWinFormsWebBrowser);
-        Task<HtmlElement> SynchronousLoadDocument(string url, string endUrl, int timeoutSeconds, CancellationToken token);
-        Task<string> SynchronousLoadString(string url, CancellationToken token);
-    }
-
-    public interface IModeActivator<T>
-    {
-        T Active();
     }
 }

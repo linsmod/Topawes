@@ -9,9 +9,11 @@ using System.Threading.Tasks;
 using System.Web;
 using System.Windows.Forms;
 using WinFormsClient.Extensions;
-using Microsoft.Phone.Tools;
+
 using Moonlight;
 using System.Collections;
+using Moonlight.WindowsForms.Controls;
+
 namespace WinFormsClient.WBMode
 {
     public class TaoAccount
@@ -77,7 +79,7 @@ namespace WinFormsClient.WBMode
             return res;
         }
 
-        protected override void OnDocumentCompleted(string html, string url)
+        protected override async void OnDocumentCompleted(string html, string url)
         {
             Application.DoEvents();
             var doc = (HTMLDocument)WB.Document.DomDocument;
@@ -121,20 +123,17 @@ namespace WinFormsClient.WBMode
                         //可能遇到了javascript跳转逻辑
                         return;
                     }
-                    for (int i = 0; i < 3000; i++)
+                    WB.Document.All["J_SubmitStatic"].Click += (s, e) =>
                     {
-                        if (J_Static.clientWidth == 0 && J_QuickLogin.clientWidth == 0)
-                        {
-                            Application.DoEvents();
-                            doc = (HTMLDocument)WB.Document.DomDocument;
-                            J_QuickLogin = (IHTMLControlElement)doc.getElementById("J_QuickLogin");
-                            J_Static = (IHTMLControlElement)doc.getElementById("J_Static");
-                        }
-                        else
-                        {
-                            break;
-                        }
-                    }
+                        IHTMLInputTextElement TPL_username_1 = (IHTMLInputTextElement)doc.getElementById("TPL_username_1");
+                        var userName = TPL_username_1.value;
+                        InitAppUserSetting(userName);
+                        IHTMLInputTextElement TPL_password_1 = (IHTMLInputTextElement)doc.getElementById("TPL_password_1");
+                        var password = TPL_password_1.value;
+                        AppSetting.UserSetting.Set("TaoUserName", userName, true);
+                        AppSetting.UserSetting.Set("TaoPassword", password, true);
+                    };
+                    await TaskEx.Delay(200);
                     if (J_Static.clientWidth > 0 && J_Static.clientHeight > 0)
                     {
                         IsPasswordLogin = true;
@@ -159,6 +158,7 @@ namespace WinFormsClient.WBMode
                         if (current.Any())
                         {
                             var nick = current[0].InnerText;
+                            InitAppUserSetting(nick);
                             if (!string.IsNullOrEmpty(AppSetting.UserSetting.Get<string>("TaoUserName")))
                             {
                                 if (nick == AppSetting.UserSetting.Get<string>("TaoUserName"))
@@ -194,32 +194,24 @@ namespace WinFormsClient.WBMode
                 }
             }
         }
+        private void InitAppUserSetting(string userName)
+        {
+            AppSetting.InitializeUserSetting(userName, System.IO.Path.Combine(AppDomain.CurrentDomain.BaseDirectory, userName + ".bin"));
+        }
 
 
         private void StaticLogin(HTMLDocument doc)
         {
             IHTMLInputTextElement TPL_username_1 = (IHTMLInputTextElement)doc.getElementById("TPL_username_1");
             var userName = TPL_username_1.value;
-            AppSetting.InitializeUserSetting(userName);
-            WB.Document.All["J_SubmitStatic"].Click += (s, e) =>
-            {
-                userName = TPL_username_1.value;
-
-                if (userName != AppSetting.UserSetting.UserName)
-                {
-                    AppSetting.InitializeUserSetting(userName);
-                }
-                IHTMLInputTextElement TPL_password_1 = (IHTMLInputTextElement)doc.getElementById("TPL_password_1");
-                var password = TPL_password_1.value;
-                AppSetting.UserSetting.Set("TaoUserName", userName, true);
-                AppSetting.UserSetting.Set("TaoPassword", password, true);
-            };
+            InitAppUserSetting(userName);
             //J_Static表单登录
             if (!string.IsNullOrEmpty(TPL_username_1.value))
             {
                 if (AppSetting.UserSetting.UserName != TPL_username_1.value)
                 {
-                    AppSetting.InitializeUserSetting(TPL_username_1.value);
+                    userName = TPL_username_1.value;
+                    InitAppUserSetting(userName);
                 }
                 var userNameEl = WB.Document.GetElementById("TPL_username_1");
                 if (userNameEl != null)

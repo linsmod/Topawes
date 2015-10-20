@@ -49,6 +49,7 @@ namespace Moonlight.WindowsForms.Controls
                     ppvObject = Marshal.GetComInterfaceForObject(_manager, typeof(IDownloadManager));
                     return 0;
                 }
+
                 ppvObject = IntPtr.Zero;
                 return -1;
             }
@@ -84,7 +85,7 @@ namespace Moonlight.WindowsForms.Controls
             }
         }
 
-        internal void OnProgressChanged(object sender, ProgressChangedEventArgs e)
+        public void OnProgressChanged(object sender, ProgressChangedEventArgs e)
         {
             var h = ProgressChanged2;
             if (h != null)

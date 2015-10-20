@@ -88,6 +88,24 @@
             this.label9 = new System.Windows.Forms.Label();
             this.label7 = new System.Windows.Forms.Label();
             this.tabPageWB = new System.Windows.Forms.TabPage();
+            this.panel2 = new System.Windows.Forms.Panel();
+            this.wbMain = new Moonlight.WindowsForms.Controls.ExtendedWinFormsWebBrowser();
+            this.wb16 = new Moonlight.WindowsForms.Controls.ExtendedWinFormsWebBrowser();
+            this.wb8 = new Moonlight.WindowsForms.Controls.ExtendedWinFormsWebBrowser();
+            this.wb15 = new Moonlight.WindowsForms.Controls.ExtendedWinFormsWebBrowser();
+            this.wb14 = new Moonlight.WindowsForms.Controls.ExtendedWinFormsWebBrowser();
+            this.wb7 = new Moonlight.WindowsForms.Controls.ExtendedWinFormsWebBrowser();
+            this.wb13 = new Moonlight.WindowsForms.Controls.ExtendedWinFormsWebBrowser();
+            this.wb6 = new Moonlight.WindowsForms.Controls.ExtendedWinFormsWebBrowser();
+            this.wb12 = new Moonlight.WindowsForms.Controls.ExtendedWinFormsWebBrowser();
+            this.wb5 = new Moonlight.WindowsForms.Controls.ExtendedWinFormsWebBrowser();
+            this.wb11 = new Moonlight.WindowsForms.Controls.ExtendedWinFormsWebBrowser();
+            this.wb4 = new Moonlight.WindowsForms.Controls.ExtendedWinFormsWebBrowser();
+            this.wb10 = new Moonlight.WindowsForms.Controls.ExtendedWinFormsWebBrowser();
+            this.wb3 = new Moonlight.WindowsForms.Controls.ExtendedWinFormsWebBrowser();
+            this.wb9 = new Moonlight.WindowsForms.Controls.ExtendedWinFormsWebBrowser();
+            this.wb2 = new Moonlight.WindowsForms.Controls.ExtendedWinFormsWebBrowser();
+            this.wb1 = new Moonlight.WindowsForms.Controls.ExtendedWinFormsWebBrowser();
             this.statusStrip1 = new System.Windows.Forms.StatusStrip();
             this.tssl_ConnState = new System.Windows.Forms.ToolStripStatusLabel();
             this.toolStripStatusLabel仓库中 = new System.Windows.Forms.ToolStripStatusLabel();
@@ -171,22 +189,6 @@
             this.全选ToolStripMenuItem = new System.Windows.Forms.ToolStripMenuItem();
             this.刷新列表ToolStripMenuItem = new System.Windows.Forms.ToolStripMenuItem();
             this.notifyIcon1 = new System.Windows.Forms.NotifyIcon(this.components);
-            this.wb1 = new Moonlight.WindowsForms.Controls.ExtendedWinFormsWebBrowser();
-            this.wb2 = new Moonlight.WindowsForms.Controls.ExtendedWinFormsWebBrowser();
-            this.wb3 = new Moonlight.WindowsForms.Controls.ExtendedWinFormsWebBrowser();
-            this.wb4 = new Moonlight.WindowsForms.Controls.ExtendedWinFormsWebBrowser();
-            this.wb5 = new Moonlight.WindowsForms.Controls.ExtendedWinFormsWebBrowser();
-            this.wb6 = new Moonlight.WindowsForms.Controls.ExtendedWinFormsWebBrowser();
-            this.wb7 = new Moonlight.WindowsForms.Controls.ExtendedWinFormsWebBrowser();
-            this.wb8 = new Moonlight.WindowsForms.Controls.ExtendedWinFormsWebBrowser();
-            this.wb9 = new Moonlight.WindowsForms.Controls.ExtendedWinFormsWebBrowser();
-            this.wb10 = new Moonlight.WindowsForms.Controls.ExtendedWinFormsWebBrowser();
-            this.wb11 = new Moonlight.WindowsForms.Controls.ExtendedWinFormsWebBrowser();
-            this.wb12 = new Moonlight.WindowsForms.Controls.ExtendedWinFormsWebBrowser();
-            this.wb13 = new Moonlight.WindowsForms.Controls.ExtendedWinFormsWebBrowser();
-            this.wb14 = new Moonlight.WindowsForms.Controls.ExtendedWinFormsWebBrowser();
-            this.wb15 = new Moonlight.WindowsForms.Controls.ExtendedWinFormsWebBrowser();
-            this.wb16 = new Moonlight.WindowsForms.Controls.ExtendedWinFormsWebBrowser();
             this.tabControl1.SuspendLayout();
             this.tabPageItemList.SuspendLayout();
             this.panel1.SuspendLayout();
@@ -205,6 +207,7 @@
             this.groupBox1.SuspendLayout();
             ((System.ComponentModel.ISupportInitialize)(this.QQ直充库存锁定数量)).BeginInit();
             this.tabPageWB.SuspendLayout();
+            this.panel2.SuspendLayout();
             this.statusStrip1.SuspendLayout();
             this.ChatPanel.SuspendLayout();
             this.contextMenuStrip1.SuspendLayout();
@@ -896,6 +899,7 @@
             // 
             // tabPageWB
             // 
+            this.tabPageWB.Controls.Add(this.panel2);
             this.tabPageWB.Controls.Add(this.wb16);
             this.tabPageWB.Controls.Add(this.wb8);
             this.tabPageWB.Controls.Add(this.wb15);
@@ -919,6 +923,185 @@
             this.tabPageWB.TabIndex = 6;
             this.tabPageWB.Text = "调试页面，拒绝手贱";
             this.tabPageWB.UseVisualStyleBackColor = true;
+            // 
+            // panel2
+            // 
+            this.panel2.Controls.Add(this.wbMain);
+            this.panel2.Location = new System.Drawing.Point(832, 6);
+            this.panel2.Name = "panel2";
+            this.panel2.Size = new System.Drawing.Size(84, 187);
+            this.panel2.TabIndex = 2;
+            // 
+            // wbMain
+            // 
+            this.wbMain.Cookie = null;
+            this.wbMain.Dock = System.Windows.Forms.DockStyle.Fill;
+            this.wbMain.Location = new System.Drawing.Point(0, 0);
+            this.wbMain.MinimumSize = new System.Drawing.Size(20, 20);
+            this.wbMain.Name = "wbMain";
+            this.wbMain.ScriptErrorsSuppressed = true;
+            this.wbMain.Size = new System.Drawing.Size(84, 187);
+            this.wbMain.TabIndex = 0;
+            // 
+            // wb16
+            // 
+            this.wb16.Cookie = null;
+            this.wb16.Location = new System.Drawing.Point(729, 101);
+            this.wb16.MinimumSize = new System.Drawing.Size(20, 20);
+            this.wb16.Name = "wb16";
+            this.wb16.ScriptErrorsSuppressed = true;
+            this.wb16.Size = new System.Drawing.Size(97, 92);
+            this.wb16.TabIndex = 0;
+            // 
+            // wb8
+            // 
+            this.wb8.Cookie = null;
+            this.wb8.Location = new System.Drawing.Point(729, 3);
+            this.wb8.MinimumSize = new System.Drawing.Size(20, 20);
+            this.wb8.Name = "wb8";
+            this.wb8.ScriptErrorsSuppressed = true;
+            this.wb8.Size = new System.Drawing.Size(97, 92);
+            this.wb8.TabIndex = 0;
+            // 
+            // wb15
+            // 
+            this.wb15.Cookie = null;
+            this.wb15.Location = new System.Drawing.Point(626, 101);
+            this.wb15.MinimumSize = new System.Drawing.Size(20, 20);
+            this.wb15.Name = "wb15";
+            this.wb15.ScriptErrorsSuppressed = true;
+            this.wb15.Size = new System.Drawing.Size(97, 92);
+            this.wb15.TabIndex = 0;
+            // 
+            // wb14
+            // 
+            this.wb14.Cookie = null;
+            this.wb14.Location = new System.Drawing.Point(523, 101);
+            this.wb14.MinimumSize = new System.Drawing.Size(20, 20);
+            this.wb14.Name = "wb14";
+            this.wb14.ScriptErrorsSuppressed = true;
+            this.wb14.Size = new System.Drawing.Size(97, 92);
+            this.wb14.TabIndex = 0;
+            // 
+            // wb7
+            // 
+            this.wb7.Cookie = null;
+            this.wb7.Location = new System.Drawing.Point(626, 3);
+            this.wb7.MinimumSize = new System.Drawing.Size(20, 20);
+            this.wb7.Name = "wb7";
+            this.wb7.ScriptErrorsSuppressed = true;
+            this.wb7.Size = new System.Drawing.Size(97, 92);
+            this.wb7.TabIndex = 0;
+            // 
+            // wb13
+            // 
+            this.wb13.Cookie = null;
+            this.wb13.Location = new System.Drawing.Point(420, 104);
+            this.wb13.MinimumSize = new System.Drawing.Size(20, 20);
+            this.wb13.Name = "wb13";
+            this.wb13.ScriptErrorsSuppressed = true;
+            this.wb13.Size = new System.Drawing.Size(97, 92);
+            this.wb13.TabIndex = 0;
+            // 
+            // wb6
+            // 
+            this.wb6.Cookie = null;
+            this.wb6.Location = new System.Drawing.Point(523, 3);
+            this.wb6.MinimumSize = new System.Drawing.Size(20, 20);
+            this.wb6.Name = "wb6";
+            this.wb6.ScriptErrorsSuppressed = true;
+            this.wb6.Size = new System.Drawing.Size(97, 92);
+            this.wb6.TabIndex = 0;
+            // 
+            // wb12
+            // 
+            this.wb12.Cookie = null;
+            this.wb12.Location = new System.Drawing.Point(317, 104);
+            this.wb12.MinimumSize = new System.Drawing.Size(20, 20);
+            this.wb12.Name = "wb12";
+            this.wb12.ScriptErrorsSuppressed = true;
+            this.wb12.Size = new System.Drawing.Size(97, 92);
+            this.wb12.TabIndex = 0;
+            // 
+            // wb5
+            // 
+            this.wb5.Cookie = null;
+            this.wb5.Location = new System.Drawing.Point(420, 6);
+            this.wb5.MinimumSize = new System.Drawing.Size(20, 20);
+            this.wb5.Name = "wb5";
+            this.wb5.ScriptErrorsSuppressed = true;
+            this.wb5.Size = new System.Drawing.Size(97, 92);
+            this.wb5.TabIndex = 0;
+            // 
+            // wb11
+            // 
+            this.wb11.Cookie = null;
+            this.wb11.Location = new System.Drawing.Point(214, 104);
+            this.wb11.MinimumSize = new System.Drawing.Size(20, 20);
+            this.wb11.Name = "wb11";
+            this.wb11.ScriptErrorsSuppressed = true;
+            this.wb11.Size = new System.Drawing.Size(97, 92);
+            this.wb11.TabIndex = 0;
+            // 
+            // wb4
+            // 
+            this.wb4.Cookie = null;
+            this.wb4.Location = new System.Drawing.Point(317, 6);
+            this.wb4.MinimumSize = new System.Drawing.Size(20, 20);
+            this.wb4.Name = "wb4";
+            this.wb4.ScriptErrorsSuppressed = true;
+            this.wb4.Size = new System.Drawing.Size(97, 92);
+            this.wb4.TabIndex = 0;
+            // 
+            // wb10
+            // 
+            this.wb10.Cookie = null;
+            this.wb10.Location = new System.Drawing.Point(111, 104);
+            this.wb10.MinimumSize = new System.Drawing.Size(20, 20);
+            this.wb10.Name = "wb10";
+            this.wb10.ScriptErrorsSuppressed = true;
+            this.wb10.Size = new System.Drawing.Size(97, 92);
+            this.wb10.TabIndex = 0;
+            // 
+            // wb3
+            // 
+            this.wb3.Cookie = null;
+            this.wb3.Location = new System.Drawing.Point(214, 6);
+            this.wb3.MinimumSize = new System.Drawing.Size(20, 20);
+            this.wb3.Name = "wb3";
+            this.wb3.ScriptErrorsSuppressed = true;
+            this.wb3.Size = new System.Drawing.Size(97, 92);
+            this.wb3.TabIndex = 0;
+            // 
+            // wb9
+            // 
+            this.wb9.Cookie = null;
+            this.wb9.Location = new System.Drawing.Point(8, 104);
+            this.wb9.MinimumSize = new System.Drawing.Size(20, 20);
+            this.wb9.Name = "wb9";
+            this.wb9.ScriptErrorsSuppressed = true;
+            this.wb9.Size = new System.Drawing.Size(97, 92);
+            this.wb9.TabIndex = 0;
+            // 
+            // wb2
+            // 
+            this.wb2.Cookie = null;
+            this.wb2.Location = new System.Drawing.Point(111, 6);
+            this.wb2.MinimumSize = new System.Drawing.Size(20, 20);
+            this.wb2.Name = "wb2";
+            this.wb2.ScriptErrorsSuppressed = true;
+            this.wb2.Size = new System.Drawing.Size(97, 92);
+            this.wb2.TabIndex = 0;
+            // 
+            // wb1
+            // 
+            this.wb1.Cookie = null;
+            this.wb1.Location = new System.Drawing.Point(8, 6);
+            this.wb1.MinimumSize = new System.Drawing.Size(20, 20);
+            this.wb1.Name = "wb1";
+            this.wb1.ScriptErrorsSuppressed = true;
+            this.wb1.Size = new System.Drawing.Size(97, 92);
+            this.wb1.TabIndex = 0;
             // 
             // statusStrip1
             // 
@@ -1579,135 +1762,6 @@
             this.notifyIcon1.Text = "notifyIcon1";
             this.notifyIcon1.Visible = true;
             // 
-            // wb1
-            // 
-            this.wb1.Location = new System.Drawing.Point(8, 6);
-            this.wb1.MinimumSize = new System.Drawing.Size(20, 20);
-            this.wb1.Name = "wb1";
-            this.wb1.Size = new System.Drawing.Size(97, 92);
-            this.wb1.TabIndex = 0;
-            // 
-            // wb2
-            // 
-
-            this.wb2.Location = new System.Drawing.Point(111, 6);
-            this.wb2.MinimumSize = new System.Drawing.Size(20, 20);
-            this.wb2.Name = "wb2";
-            this.wb2.Size = new System.Drawing.Size(97, 92);
-            this.wb2.TabIndex = 0;
-            // 
-            // wb3
-            // 
-            this.wb3.Location = new System.Drawing.Point(214, 6);
-            this.wb3.MinimumSize = new System.Drawing.Size(20, 20);
-            this.wb3.Name = "wb3";
-            this.wb3.Size = new System.Drawing.Size(97, 92);
-            this.wb3.TabIndex = 0;
-            // 
-            // wb4
-            // 
-            this.wb4.Location = new System.Drawing.Point(317, 6);
-            this.wb4.MinimumSize = new System.Drawing.Size(20, 20);
-            this.wb4.Name = "wb4";
-            this.wb4.Size = new System.Drawing.Size(97, 92);
-            this.wb4.TabIndex = 0;
-            // 
-            // wb5
-            // 
-            this.wb5.Location = new System.Drawing.Point(420, 6);
-            this.wb5.MinimumSize = new System.Drawing.Size(20, 20);
-            this.wb5.Name = "wb5";
-            this.wb5.Size = new System.Drawing.Size(97, 92);
-            this.wb5.TabIndex = 0;
-            // 
-            // wb6
-            // 
-            this.wb6.Location = new System.Drawing.Point(523, 3);
-            this.wb6.MinimumSize = new System.Drawing.Size(20, 20);
-            this.wb6.Name = "wb6";
-            this.wb6.Size = new System.Drawing.Size(97, 92);
-            this.wb6.TabIndex = 0;
-            // 
-            // wb7
-            // 
-            this.wb7.Location = new System.Drawing.Point(626, 3);
-            this.wb7.MinimumSize = new System.Drawing.Size(20, 20);
-            this.wb7.Name = "wb7";
-            this.wb7.Size = new System.Drawing.Size(97, 92);
-            this.wb7.TabIndex = 0;
-            // 
-            // wb8
-            // 
-            this.wb8.Location = new System.Drawing.Point(729, 3);
-            this.wb8.MinimumSize = new System.Drawing.Size(20, 20);
-            this.wb8.Name = "wb8";
-            this.wb8.Size = new System.Drawing.Size(97, 92);
-            this.wb8.TabIndex = 0;
-            // 
-            // wb9
-            // 
-            this.wb9.Location = new System.Drawing.Point(8, 104);
-            this.wb9.MinimumSize = new System.Drawing.Size(20, 20);
-            this.wb9.Name = "wb9";
-            this.wb9.Size = new System.Drawing.Size(97, 92);
-            this.wb9.TabIndex = 0;
-            // 
-            // wb10
-            // 
-            this.wb10.Location = new System.Drawing.Point(111, 104);
-            this.wb10.MinimumSize = new System.Drawing.Size(20, 20);
-            this.wb10.Name = "wb10";
-            this.wb10.Size = new System.Drawing.Size(97, 92);
-            this.wb10.TabIndex = 0;
-            // 
-            // wb11
-            // 
-            this.wb11.Location = new System.Drawing.Point(214, 104);
-            this.wb11.MinimumSize = new System.Drawing.Size(20, 20);
-            this.wb11.Name = "wb11";
-            this.wb11.Size = new System.Drawing.Size(97, 92);
-            this.wb11.TabIndex = 0;
-            // 
-            // wb12
-            // 
-            this.wb12.Location = new System.Drawing.Point(317, 104);
-            this.wb12.MinimumSize = new System.Drawing.Size(20, 20);
-            this.wb12.Name = "wb12";
-            this.wb12.Size = new System.Drawing.Size(97, 92);
-            this.wb12.TabIndex = 0;
-            // 
-            // wb13
-            // 
-            this.wb13.Location = new System.Drawing.Point(420, 104);
-            this.wb13.MinimumSize = new System.Drawing.Size(20, 20);
-            this.wb13.Name = "wb13";
-            this.wb13.Size = new System.Drawing.Size(97, 92);
-            this.wb13.TabIndex = 0;
-            // 
-            // wb14
-            // 
-            this.wb14.Location = new System.Drawing.Point(523, 101);
-            this.wb14.MinimumSize = new System.Drawing.Size(20, 20);
-            this.wb14.Name = "wb14";
-            this.wb14.Size = new System.Drawing.Size(97, 92);
-            this.wb14.TabIndex = 0;
-            // 
-            // wb15
-            // 
-            this.wb15.Location = new System.Drawing.Point(626, 101);
-            this.wb15.MinimumSize = new System.Drawing.Size(20, 20);
-            this.wb15.Name = "wb15";
-            this.wb15.Size = new System.Drawing.Size(97, 92);
-            this.wb15.TabIndex = 0;
-            // 
-            // wb16
-            // 
-            this.wb16.Location = new System.Drawing.Point(729, 101);
-            this.wb16.MinimumSize = new System.Drawing.Size(20, 20);
-            this.wb16.Name = "wb16";
-            this.wb16.Size = new System.Drawing.Size(97, 92);
-            this.wb16.TabIndex = 0;
-            // 
             // WinFormsClient
             // 
             this.AcceptButton = this.ButtonSend;
@@ -1748,6 +1802,7 @@
             this.groupBox1.PerformLayout();
             ((System.ComponentModel.ISupportInitialize)(this.QQ直充库存锁定数量)).EndInit();
             this.tabPageWB.ResumeLayout(false);
+            this.panel2.ResumeLayout(false);
             this.statusStrip1.ResumeLayout(false);
             this.statusStrip1.PerformLayout();
             this.ChatPanel.ResumeLayout(false);
@@ -1919,6 +1974,8 @@
         private Moonlight.WindowsForms.Controls.ExtendedWinFormsWebBrowser wb9;
         private Moonlight.WindowsForms.Controls.ExtendedWinFormsWebBrowser wb2;
         private Moonlight.WindowsForms.Controls.ExtendedWinFormsWebBrowser wb1;
+        private System.Windows.Forms.Panel panel2;
+        private Moonlight.WindowsForms.Controls.ExtendedWinFormsWebBrowser wbMain;
     }
 }
 

@@ -29,7 +29,7 @@
     <TargetFrameworkProfile />
   </PropertyGroup>
   <PropertyGroup Condition=" '$(Configuration)|$(Platform)' == 'Debug|AnyCPU' ">
-    <PlatformTarget>AnyCPU</PlatformTarget>
+    <PlatformTarget>x86</PlatformTarget>
     <DebugSymbols>true</DebugSymbols>
     <DebugType>full</DebugType>
     <Optimize>false</Optimize>
@@ -48,34 +48,6 @@
     <DefineConstants>TRACE</DefineConstants>
     <ErrorReport>prompt</ErrorReport>
     <WarningLevel>4</WarningLevel>
-  </PropertyGroup>
-  <PropertyGroup Condition="'$(Configuration)|$(Platform)' == 'Debug|x86'">
-    <DebugSymbols>true</DebugSymbols>
-    <OutputPath>bin\x86\Debug\</OutputPath>
-    <DefineConstants>DEBUG;TRACE</DefineConstants>
-    <DebugType>full</DebugType>
-    <PlatformTarget>x86</PlatformTarget>
-    <ErrorReport>prompt</ErrorReport>
-    <CodeAnalysisRuleSet>MinimumRecommendedRules.ruleset</CodeAnalysisRuleSet>
-    <Prefer32Bit>true</Prefer32Bit>
-  </PropertyGroup>
-  <PropertyGroup Condition="'$(Configuration)|$(Platform)' == 'Release|x86'">
-    <OutputPath>bin\x86\Release\</OutputPath>
-    <DefineConstants>TRACE</DefineConstants>
-    <Optimize>true</Optimize>
-    <DebugType>pdbonly</DebugType>
-    <PlatformTarget>x86</PlatformTarget>
-    <ErrorReport>prompt</ErrorReport>
-    <CodeAnalysisRuleSet>MinimumRecommendedRules.ruleset</CodeAnalysisRuleSet>
-    <Prefer32Bit>true</Prefer32Bit>
-  </PropertyGroup>
-  <PropertyGroup Condition="'$(Configuration)|$(Platform)' == 'Debug|x64'">
-    <PlatformTarget>x64</PlatformTarget>
-    <OutputPath>bin\x64\Debug\</OutputPath>
-  </PropertyGroup>
-  <PropertyGroup Condition="'$(Configuration)|$(Platform)' == 'Release|x64'">
-    <PlatformTarget>x64</PlatformTarget>
-    <OutputPath>bin\x64\Release\</OutputPath>
   </PropertyGroup>
   <PropertyGroup>
     <ApplicationIcon>basket_buy_red_sell_shopping_128px_225_easyicon.net.ico</ApplicationIcon>
@@ -104,6 +76,15 @@
   </PropertyGroup>
   <PropertyGroup>
     <RunPostBuildEvent>OnOutputUpdated</RunPostBuildEvent>
+  </PropertyGroup>
+  <PropertyGroup Condition="'$(Configuration)|$(Platform)' == 'Debug|x86'">
+    <PlatformTarget>x86</PlatformTarget>
+    <OutputPath>bin\x86\Debug\</OutputPath>
+    <DefineConstants>DEBUG</DefineConstants>
+  </PropertyGroup>
+  <PropertyGroup Condition="'$(Configuration)|$(Platform)' == 'Release|x86'">
+    <PlatformTarget>x86</PlatformTarget>
+    <OutputPath>bin\x86\Release\</OutputPath>
   </PropertyGroup>
   <ItemGroup>
     <Reference Include="LiteDB, Version=1.0.4.0, Culture=neutral, processorArchitecture=MSIL">
@@ -195,6 +176,7 @@
     <Compile Include="Extensions\LiteDbExtension.cs" />
     <Compile Include="Extensions\StringExtensions.cs" />
     <Compile Include="Helpers\ProductItemHelper.cs" />
+    <Compile Include="Helpers\SynchronousNavigationContext.cs" />
     <Compile Include="Helpers\WBHelper.cs" />
     <Compile Include="Models\ProductItem.cs" />
     <Compile Include="Models\Statistic.cs" />
@@ -231,22 +213,12 @@
     </Compile>
     <Compile Include="Helpers\DWebBrowserEvents2.cs" />
     <Compile Include="Helpers\Encryption.cs" />
-    <Compile Include="Helpers\ExtendedWinFormsWebBrowser.cs">
-      <SubType>Component</SubType>
-    </Compile>
-    <Compile Include="Helpers\ExtendedWinFormsWebBrowserEventHelper.cs" />
     <Compile Include="Extensions\HtmlElementExtension.cs" />
     <Compile Include="Extensions\WebBrowserExtension.cs" />
     <Compile Include="HtmlEntity\TableEntity.cs" />
     <Compile Include="Helpers\HtmlHelper.cs" />
     <Compile Include="Helpers\IECookieHelper.cs" />
     <Compile Include="Helpers\IEFeatureControl.cs" />
-    <Compile Include="LocalLoginForm.cs">
-      <SubType>Form</SubType>
-    </Compile>
-    <Compile Include="LocalLoginForm.Designer.cs">
-      <DependentUpon>LocalLoginForm.cs</DependentUpon>
-    </Compile>
     <Compile Include="MessageHubClient.cs" />
     <Compile Include="Models\TaoJsonpResult.cs" />
     <Compile Include="WBMode\WBTaoChongZhiBrowserMode.cs" />
@@ -289,9 +261,6 @@
     </EmbeddedResource>
     <EmbeddedResource Include="BlackListForm.resx">
       <DependentUpon>BlackListForm.cs</DependentUpon>
-    </EmbeddedResource>
-    <EmbeddedResource Include="LocalLoginForm.resx">
-      <DependentUpon>LocalLoginForm.cs</DependentUpon>
     </EmbeddedResource>
     <EmbeddedResource Include="TaoLoginForm.resx">
       <DependentUpon>TaoLoginForm.cs</DependentUpon>

@@ -9,6 +9,9 @@ using Top.Tmc;
 
 namespace TopModel.MessageHubClients
 {
+    /// <summary>
+    /// 交易消息及逻辑
+    /// </summary>
     public class TradeHubProxy : HubProxyInvoker
     {
         /// <summary>
@@ -36,6 +39,11 @@ namespace TopModel.MessageHubClients
         ///还会发创建支付宝订单消息”taobao_trade_TradeAlipayCreate”
         ///</remarks>
         public event Action<Message> TradeCreate;
+
+        /// <summary>
+        /// 交易消息及逻辑
+        /// </summary>
+        /// <param name="connection"></param>
         public TradeHubProxy(HubConnection connection) : base(connection, "TradeMessageHub")
         {
             HubProxy.On<Message>("TradeClose", x => InvokeEvent(TradeClose, x));
