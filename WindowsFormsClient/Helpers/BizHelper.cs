@@ -50,14 +50,13 @@ namespace WinFormsClient
         /// <param name="price">一口价</param>
         /// <param name="itemId"></param>
         /// <returns></returns>
-        public static async Task<TaoJsonpResult> supplierSave(WBHelper helper, string sup, string spu, string profitMin, string profitMax, string price, long itemId, string tbcpCrumbs)
+        public static async Task<TaoJsonpResult> supplierSave(WBHelper helper, string sup, string spu, string profit,string price, long itemId, string tbcpCrumbs)
         {
             //profitMode=0 保证我赚钱
             //profitMode=2 自定义
             var url = "http://chongzhi.taobao.com/item.do?method=supplierSave&sup={0}&mode=2&spu={1}&itemId={2}&profitMode=2&profitMin={3}&profitMax={4}&price={5}&tbcpCrumbs={6}";
-            url = string.Format(url, sup, spu, itemId, profitMin, profitMax, price, tbcpCrumbs);
+            url = string.Format(url, sup, spu, itemId, profit, profit, price, tbcpCrumbs);
             var content = await helper.SynchronousLoadString(url);
-            //var content = await wb.ExecuteTriggerJSONP(url);
             return JsonConvert.DeserializeObject<TaoJsonpResult>(content);
         }
     }

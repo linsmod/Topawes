@@ -9,7 +9,7 @@ using System.Text;
 using System.Threading.Tasks;
 using System.Windows.Forms;
 using WinFormsClient.Helpers;
-
+using WinFormsClient.Extensions;
 namespace WinFormsClient
 {
 
@@ -59,7 +59,7 @@ namespace WinFormsClient
         private async void 确定button_Click(object sender, EventArgs e)
         {
             var list = AppDatabase.db.ProductItems.FindAll().Where(x => ProductIds.Contains(x.Id));
-            await (Task)(Owner as WinFormsClient).Invoke(new SetProfitBySubNameDelegate((Owner as WinFormsClient).SetProfitBySubName), list.ToList());
+            await (Task)(Owner as WinFormsClient).InvokeTask((Owner as WinFormsClient).SetProfitBySubName, list.ToList());
             this.Close();
         }
     }
