@@ -187,7 +187,6 @@
             this.话费直充ToolStripMenuItem1 = new System.Windows.Forms.ToolStripMenuItem();
             this.修改库存ToolStripMenuItem = new System.Windows.Forms.ToolStripMenuItem();
             this.全选ToolStripMenuItem = new System.Windows.Forms.ToolStripMenuItem();
-            this.刷新列表ToolStripMenuItem = new System.Windows.Forms.ToolStripMenuItem();
             this.notifyIcon1 = new System.Windows.Forms.NotifyIcon(this.components);
             this.tabControl1.SuspendLayout();
             this.tabPageItemList.SuspendLayout();
@@ -1433,7 +1432,7 @@
             this.按利润ToolStripMenuItem,
             this.按位置ToolStripMenuItem});
             this.contextMenuStrip1.Name = "contextMenuStrip1";
-            this.contextMenuStrip1.Size = new System.Drawing.Size(161, 346);
+            this.contextMenuStrip1.Size = new System.Drawing.Size(161, 368);
             // 
             // 上架ToolStripMenuItem
             // 
@@ -1748,14 +1747,6 @@
             this.全选ToolStripMenuItem.Text = "全选";
             this.全选ToolStripMenuItem.Click += new System.EventHandler(this.全选ToolStripMenuItem_Click);
             // 
-            // 刷新列表ToolStripMenuItem
-            // 
-            this.刷新列表ToolStripMenuItem.Image = global::WinFormsClient.Properties.Resources.刷新;
-            this.刷新列表ToolStripMenuItem.Name = "刷新列表ToolStripMenuItem";
-            this.刷新列表ToolStripMenuItem.Size = new System.Drawing.Size(84, 21);
-            this.刷新列表ToolStripMenuItem.Text = "刷新列表";
-            this.刷新列表ToolStripMenuItem.Click += new System.EventHandler(this.刷新列表ToolStripMenuItem_Click);
-            // 
             // notifyIcon1
             // 
             this.notifyIcon1.BalloonTipIcon = System.Windows.Forms.ToolTipIcon.Info;
@@ -1844,7 +1835,6 @@
         private System.Windows.Forms.ToolStripMenuItem 点卡直充ToolStripMenuItem1;
         private System.Windows.Forms.ToolStripSeparator toolStripSeparator5;
         private System.Windows.Forms.ToolStripSeparator toolStripSeparator4;
-        private System.Windows.Forms.ToolStripMenuItem 刷新列表ToolStripMenuItem;
         private System.Windows.Forms.Label labelTaskName;
         private Moonlight.WindowsForms.StateControls.MoonCheckBox 自动好评交易checkBoxAuto;
         private System.Windows.Forms.TabPage tabPage1;

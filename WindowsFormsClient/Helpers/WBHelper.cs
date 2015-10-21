@@ -44,8 +44,8 @@ namespace WinFormsClient.Helpers
                         else
                         {
                             ajaxWbQueue.Enqueue(wb);
-                            wb.Navigate(initUrl);
                         }
+                        wb.Navigate(initUrl);
                         TaskEx.Delay(200).Wait();
                     }
                 }
@@ -61,7 +61,7 @@ namespace WinFormsClient.Helpers
             this.WB = exWb;
             WB.DownloadCompleted += WB_DownloadCompleted;
             WB.DocumentCompleted += WB_DocumentCompleted;
-            WB.Navigated += WB_Navigated;
+            //WB.Navigated += WB_Navigated;
         }
 
         private void WB_Navigated(object sender, WebBrowserNavigatedEventArgs e)
@@ -115,11 +115,11 @@ namespace WinFormsClient.Helpers
             }
         }
 
-        public async Task<HtmlElement> SynchronousLoadDocument(string url)
+        public async Task<HtmlDocument> SynchronousLoadDocument(string url)
         {
             return await SynchronousLoadDocument(url, url, 15, CancellationToken.None);
         }
-        public async Task<HtmlElement> SynchronousLoadDocument(string url, string endUrl, int timeoutSeconds, CancellationToken token)
+        public async Task<HtmlDocument> SynchronousLoadDocument(string url, string endUrl, int timeoutSeconds, CancellationToken token)
         {
             this.SyncNavContext = new SynchronousNavigationContext
             {
@@ -140,7 +140,7 @@ namespace WinFormsClient.Helpers
                 if (result.Success) // wait for DocumentCompleted
                 {
                     if (result.IsWebBrowserResult)
-                        return WB.Document.Body;
+                        return WB.Document;
                     else
                         throw new NotSupportedException("无法将文件转换为HtmlElement");
                 }
@@ -255,9 +255,10 @@ namespace WinFormsClient.Helpers
         /// <returns></returns>
         public async Task<string> GettbcpCrumbs()
         {
-            var body = await SynchronousLoadDocument("http://chongzhi.taobao.com/item.do?method=list&type=1&keyword=&category=0&supplier=0&promoted=0&order=0&desc=0&page=1&size=20").ConfigureAwait(false);
-            var tbcpCrumbs = body.JquerySelectInputHidden("tbcpCrumbs");
-            return tbcpCrumbs;
+            //var doc = await SynchronousLoadDocument("http://chongzhi.taobao.com/item.do?method=list&type=1&keyword=&category=0&supplier=0&promoted=0&order=0&desc=0&page=1&size=20").ConfigureAwait(false);
+            //var tbcpCrumbs = doc.Body.JquerySelectInputHidden("tbcpCrumbs");
+            //return tbcpCrumbs;
+            return null;
         }
 
         public void Dispose()

@@ -91,7 +91,7 @@ namespace Moonlight.SettingStorage
             var entity = this.Entity<ApplicationUserSetting>().FindOne(x => x.Key == key && x.UserName == UserName);
             if (entity != null)
             {
-                Entity<ApplicationGlobalSetting>().Delete(entity.Id);
+                Entity<ApplicationUserSetting>().Delete(entity.Id);
             }
         }
     }

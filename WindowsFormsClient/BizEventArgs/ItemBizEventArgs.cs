@@ -26,32 +26,33 @@ namespace WinFormsClient.BizEventArgs
         }
         public static ItemBizEventArgs FromWebBrowser(ExtendedWinFormsWebBrowser webBrowser)
         {
-            var args = new ItemBizEventArgs();
-            args.webBrowser = webBrowser;
-            var url = webBrowser.Url.ToString();
+            return null;
+            //var args = new ItemBizEventArgs();
+            //args.webBrowser = webBrowser;
+            //var url = webBrowser.Url.ToString();
 
-            args.UrlParameters["type"] = UrlHelper.GetIntValue(url, "type");
-            args.UrlParameters["keyword"] = UrlHelper.GetStringValue(url, "keyword");
-            args.UrlParameters["category"] = UrlHelper.GetIntValue(url, "category");
-            args.UrlParameters["supplier"] = UrlHelper.GetIntValue(url, "supplier");
-            args.UrlParameters["promoted"] = UrlHelper.GetIntValue(url, "promoted");
-            args.UrlParameters["order"] = UrlHelper.GetIntValue(url, "order");
-            args.UrlParameters["desc"] = UrlHelper.GetIntValue(url, "desc");
-            args.UrlParameters["page"] = UrlHelper.GetIntValue(url, "page");
-            args.UrlParameters["size"] = UrlHelper.GetIntValue(url, "size");
+            //args.UrlParameters["type"] = UrlHelper.GetIntValue(url, "type");
+            //args.UrlParameters["keyword"] = UrlHelper.GetStringValue(url, "keyword");
+            //args.UrlParameters["category"] = UrlHelper.GetIntValue(url, "category");
+            //args.UrlParameters["supplier"] = UrlHelper.GetIntValue(url, "supplier");
+            //args.UrlParameters["promoted"] = UrlHelper.GetIntValue(url, "promoted");
+            //args.UrlParameters["order"] = UrlHelper.GetIntValue(url, "order");
+            //args.UrlParameters["desc"] = UrlHelper.GetIntValue(url, "desc");
+            //args.UrlParameters["page"] = UrlHelper.GetIntValue(url, "page");
+            //args.UrlParameters["size"] = UrlHelper.GetIntValue(url, "size");
 
-            var tables = webBrowser.Document.All.JQuerySelect("table.stock-table");
-            var hiddens = webBrowser.Document.Body.JQuerySelect("input[type=hidden]");
-            foreach (var item in hiddens)
-            {
-                var name = string.IsNullOrEmpty(item.Name) ? item.Id : item.Name;
-                args.HiddenInputValues[name] = item.GetAttribute("value");
-            }
-            if (tables.Any())
-            {
-                args.TableEntity = new TableEntity(tables[0]);
-            }
-            return args;
+            //var tables = webBrowser.Document.All.JQuerySelect("table.stock-table");
+            //var hiddens = webBrowser.Document.Body.JQuerySelect("input[type=hidden]");
+            //foreach (var item in hiddens)
+            //{
+            //    var name = string.IsNullOrEmpty(item.Name) ? item.Id : item.Name;
+            //    args.HiddenInputValues[name] = item.GetAttribute("value");
+            //}
+            //if (tables.Any())
+            //{
+            //    //args.TableEntity = new TableEntity(tables[0]);
+            //}
+            //return args;
         }
     }
 }

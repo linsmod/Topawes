@@ -33,6 +33,12 @@ namespace WinFormsClient
                 return Entity<TopTrade>();
             }
         }
+
+        public LiteCollection<TaskInfo> TaskInfos {
+            get {
+                return Entity<TaskInfo>();
+            }
+        }
         public LiteCollection<Statistic> Statistics
         {
             get

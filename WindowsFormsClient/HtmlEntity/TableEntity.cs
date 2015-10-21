@@ -1,4 +1,5 @@
-﻿using System;
+﻿using Nx.EasyHtml.Html;
+using System;
 using System.Collections.Generic;
 using System.Diagnostics;
 using System.Linq;
@@ -16,33 +17,33 @@ namespace WinFormsClient.HtmlEntity
     /// </summary>
     public class TableEntity
     {
-        public TableEntity(HtmlElement tableElement)
+        public TableEntity(IHtmlElement tableElement)
         {
-            var head = tableElement.JQuerySelect("thead");
-            this.THead = new THeadEntity(head[0]);
+            var head = tableElement.FindFirst("thead");
+            this.THead = new THeadEntity(head);
 
-            var headTrList = head.JQuerySelect("tr");
+            var headTrList = head.Find("tr");
             foreach (var tr in headTrList)
             {
                 var trEntity = new TrEntity(tr);
-                var tdList = tr.Children.ToList();
+                var tdList = tr.Find("td").ToList();
                 foreach (var td in tdList)
                 {
-                    trEntity.TdList.Add(new TdEntity(td) { Text = td.InnerText });
+                    trEntity.TdList.Add(new TdEntity(td) { Text = td.InnerText() });
                 }
                 this.THead.TrList.Add(trEntity);
             }
-            var body = tableElement.JQuerySelect("tbody");
-            this.TBody = new TBodyEntity(body[0]);
+            var body = tableElement.FindFirst("tbody");
+            this.TBody = new TBodyEntity(body);
 
-            var bodyTrList = body.JQuerySelect("tr");
+            var bodyTrList = body.Find("tr");
             foreach (var tr in bodyTrList)
             {
                 var trEntity = new TrEntity(tr);
-                var tdList = tr.Children.ToList();
+                var tdList = tr.Find("td").ToList();
                 foreach (var td in tdList)
                 {
-                    trEntity.TdList.Add(new TdEntity(td) { Text = td.InnerText });
+                    trEntity.TdList.Add(new TdEntity(td) { Text = td.InnerText() });
                 }
                 this.TBody.TrList.Add(trEntity);
             }
@@ -54,29 +55,30 @@ namespace WinFormsClient.HtmlEntity
     [DebuggerDisplay("Count={TdList.Count}", Name = "TrEntity", TargetTypeName = "TrEntity")]
     public class TrEntity
     {
-        public TrEntity(HtmlElement tr)
+        public TrEntity(IHtmlElement tr)
         {
             this.TrElement = tr;
         }
-        public HtmlElement TrElement { get; private set; }
+        public IHtmlElement TrElement { get; private set; }
         public List<TdEntity> TdList = new List<TdEntity>();
         public ProductItem GetProductItem()
         {
             var item = new ProductItem();
-            item.Id = long.Parse(TrElement.GetAttribute("data-id"));
-            item.SpuId = TrElement.GetAttribute("data-spuid");
-            item.ItemName = TrElement.JQuerySelect(".item-name a")[0].InnerText;
-            item.ItemSubName = new string(TrElement.JQuerySelect(".item-name")[0].InnerText.Skip(item.ItemName.Length + 6).ToArray());
-            item.Type = TrElement.JQuerySelect(".type")[0].InnerText;
-            item.面值 = TrElement.JQuerySelect(".price")[0].InnerText;
+            item.Id = long.Parse(TrElement.Attribute("data-id").AttributeValue);
+            item.SpuId = TrElement.Attribute("data-spuid").AttributeValue;
+            item.ItemName = TrElement.FindFirst(".item-name a").InnerText();
+            item.ItemSubName = new string(TrElement.FindFirst(".item-name").InnerText().Skip(item.ItemName.Length + 7).ToArray());
+            item.Type = TrElement.FindFirst(".type").InnerText();
+            item.面值 = TrElement.FindFirst(".price").InnerText();
             decimal price = 0;
-            if (decimal.TryParse(TrElement.JQuerySelect(".buy-price em")[0].InnerText.Trim(new char[] { ' ', '元' }), out price))
+            if (decimal.TryParse(TrElement.FindFirst(".buy-price em").InnerText().Trim(new char[] { ' ', '元' }), out price))
             {
                 item.进价 = price;
             }
-            var onePriceElements = TrElement.JQuerySelect(".one-price-text");
-            if (onePriceElements.Any()) {
-                item.一口价 = decimal.Parse(TrElement.JQuerySelect(".one-price-text em")[0].InnerText.Trim(new char[] { ' ', '元' }));
+            var onePriceElements = TrElement.Find(".one-price-text");
+            if (onePriceElements.Any())
+            {
+                item.一口价 = decimal.Parse(TrElement.FindFirst(".one-price-text em").InnerText().Trim(new char[] { ' ', '元' }));
             }
             return item;
         }
@@ -85,33 +87,33 @@ namespace WinFormsClient.HtmlEntity
     [DebuggerDisplay("Count={TrList.Count}", Name = "THeadEntity", TargetTypeName = "THeadEntity")]
     public class THeadEntity
     {
-        public THeadEntity(HtmlElement theadElement)
+        public THeadEntity(IHtmlElement theadElement)
         {
             this.THeadElement = theadElement;
         }
-        public HtmlElement THeadElement { get; private set; }
+        public IHtmlElement THeadElement { get; private set; }
         public List<TrEntity> TrList = new List<TrEntity>();
     }
 
     [DebuggerDisplay("Count={TrList.Count}", Name = "TBodyEntity", TargetTypeName = "TBodyEntity")]
     public class TBodyEntity
     {
-        public TBodyEntity(HtmlElement tbodyElement)
+        public TBodyEntity(IHtmlElement tbodyElement)
         {
             this.TBodyElement = tbodyElement;
         }
-        public HtmlElement TBodyElement { get; private set; }
+        public IHtmlElement TBodyElement { get; private set; }
         public List<TrEntity> TrList = new List<TrEntity>();
     }
 
     [DebuggerDisplay("{Text}", Name = "TdEntity", TargetTypeName = "TdEntity")]
     public class TdEntity
     {
-        public TdEntity(HtmlElement tdElement)
+        public TdEntity(IHtmlElement tdElement)
         {
             this.TdElement = tdElement;
         }
-        public HtmlElement TdElement { get; private set; }
+        public IHtmlElement TdElement { get; private set; }
         public string Text { get; set; }
 
         public override string ToString()

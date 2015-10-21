@@ -1,13 +1,10 @@
-﻿
-using Moonlight.WindowsForms.Controls;
-using System;
+﻿using System;
 using System.Collections.Generic;
 using System.Linq;
 using System.Text;
 using System.Threading.Tasks;
-using System.Windows.Forms;
 
-namespace WinFormsClient.Extensions
+namespace System.Windows.Forms
 {
     public static class WebBrowserExtension
     {
@@ -115,7 +112,7 @@ namespace WinFormsClient.Extensions
             }
         }
 
-        public static void XHRGet(this ExtendedWinFormsWebBrowser wb, string url)
+        public static void XHRGet(this WebBrowser wb, string url)
         {
             wb.createXHR();
             wb.createXHRDataElement();
@@ -141,27 +138,6 @@ namespace WinFormsClient.Extensions
             wb.Document.InvokeScript("xhrGet", new string[] { url });
         }
 
-
-        /// <summary>
-        /// 向浏览器注入脚本
-        /// </summary>
-        /// <param name="webBrowser"></param>
-        /// <param name="javascriptFunction">脚本内容</param>
-        /// <returns></returns>
-        public static DynamicJavascript InjectJavascript(this WebBrowser webBrowser, string javascriptFunction)
-        {
-            var id = "dynamicjs_" + DateTime.Now.Ticks;
-            HtmlElement script = webBrowser.Document.CreateElement("script");
-            script.SetAttribute("type", "text/javascript");
-            script.SetAttribute("id", id);
-            if (!string.IsNullOrEmpty(javascriptFunction))
-            {
-                script.SetAttribute("text", javascriptFunction);
-            }
-            HtmlElement head = webBrowser.Document.Body.AppendChild(script);
-            return new DynamicJavascript(id, webBrowser);
-        }
-
         private static void AppendJsElement(this WebBrowser wb, string id, string content)
         {
             HtmlElement JSElement = wb.Document.GetElementById(id);
@@ -173,35 +149,6 @@ namespace WinFormsClient.Extensions
                 JSElement.SetAttribute("text", content);
                 wb.Document.Body.AppendChild(JSElement);
             }
-        }
-    }
-
-    /// <summary>
-    /// 动态插入文档Body内的脚本
-    /// </summary>
-    public class DynamicJavascript
-    {
-        private WebBrowser wb;
-        public string JavascriptElementId { get; set; }
-        public DynamicJavascript(string id, WebBrowser webBrowser)
-        {
-            JavascriptElementId = id;
-            this.wb = webBrowser;
-        }
-
-        /// <summary>
-        /// 执行js方法并返回结果
-        /// </summary>
-        /// <param name="functionName"></param>
-        /// <returns></returns>
-        public object Execute(string functionName)
-        {
-            return this.wb.Document.InvokeScript(functionName);
-        }
-
-        public void SetJavascriptSrc(string src)
-        {
-            wb.Document.GetElementById(JavascriptElementId).SetAttribute("src", src);
         }
     }
 }

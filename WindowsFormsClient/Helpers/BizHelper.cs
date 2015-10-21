@@ -9,7 +9,7 @@ using WinFormsClient.Extensions;
 using WinFormsClient.Helpers;
 using TopModel;
 using Moonlight.WindowsForms.Controls;
-
+using System.Windows.Forms;
 namespace WinFormsClient
 {
     public class BizHelper

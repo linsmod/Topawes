@@ -229,7 +229,6 @@ namespace WinFormsClient.WBMode
                             //如果验证码窗口没有显示就点击提交按钮，否则用户自己去点
                             if (WB.Document.Body.JQuerySelect(".field-checkcode.hidden").Any())
                             {
-
                                 WB.Document.All["J_SubmitStatic"].InvokeMember("click");
                             }
                             return;
