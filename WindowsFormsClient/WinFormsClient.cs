@@ -1437,7 +1437,7 @@ namespace WinFormsClient
             {
                 using (var wbHelper = new WBHelper(true))
                 {
-                    await wbHelper.PrepareIfNoneDocument(IndexUrl);
+                    await this.InvokeTask(wbHelper.PrepareIfNoneDocument, IndexUrl);
                     //查找供应商
                     supplier = await this.InvokeTask(BizHelper.supplierInfo, wbHelper, product.SpuId);
                     if (supplier == null || !supplier.profitData.Any())
@@ -1467,7 +1467,7 @@ namespace WinFormsClient
                 var oneprice = (supplier.profitData[0].price + profit).ToString("f2");
                 using (var wbHelper = new WBHelper(false))
                 {
-                    await wbHelper.PrepareIfNoneDocument(IndexUrl);
+                    await this.InvokeTask(wbHelper.PrepareIfNoneDocument, IndexUrl);
                     var save = await this.InvokeTask(BizHelper.supplierSave, wbHelper, supplier.profitData[0].id, product.SpuId, profitString, oneprice, product.Id, tbcpCrumbs);
                     if (save.status != 200)
                     {
