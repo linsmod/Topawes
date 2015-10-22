@@ -95,7 +95,6 @@ namespace WinFormsClient
 
         private static void Application_ApplicationExit(object sender, EventArgs e)
         {
-            mainForm.SyncSupplierQueue.Dispose();
             AppSetting.Uninitialize();
         }
 

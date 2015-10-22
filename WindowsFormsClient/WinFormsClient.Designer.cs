@@ -106,6 +106,7 @@
             this.wb9 = new Moonlight.WindowsForms.Controls.ExtendedWinFormsWebBrowser();
             this.wb2 = new Moonlight.WindowsForms.Controls.ExtendedWinFormsWebBrowser();
             this.wb1 = new Moonlight.WindowsForms.Controls.ExtendedWinFormsWebBrowser();
+            this.tabPage2 = new System.Windows.Forms.TabPage();
             this.statusStrip1 = new System.Windows.Forms.StatusStrip();
             this.tssl_ConnState = new System.Windows.Forms.ToolStripStatusLabel();
             this.toolStripStatusLabel仓库中 = new System.Windows.Forms.ToolStripStatusLabel();
@@ -145,9 +146,10 @@
             this.toolStripSeparator7 = new System.Windows.Forms.ToolStripSeparator();
             this.toolStripSeparator8 = new System.Windows.Forms.ToolStripSeparator();
             this.ChatPanel = new System.Windows.Forms.Panel();
+            this.splitContainer1 = new System.Windows.Forms.SplitContainer();
+            this.RichTextBoxConsole = new System.Windows.Forms.RichTextBox();
             this.labelTaskName = new System.Windows.Forms.Label();
             this.progressBar1 = new System.Windows.Forms.ProgressBar();
-            this.RichTextBoxConsole = new System.Windows.Forms.RichTextBox();
             this.TextBoxMessage = new System.Windows.Forms.TextBox();
             this.contextMenuStrip1 = new System.Windows.Forms.ContextMenuStrip(this.components);
             this.上架ToolStripMenuItem = new Moonlight.WindowsForms.StateControls.MoonToolStripMenuItem();
@@ -175,6 +177,7 @@
             this.按位置ToolStripMenuItem = new Moonlight.WindowsForms.StateControls.MoonToolStripMenuItem();
             this.选择仓库中ToolStripMenuItem = new System.Windows.Forms.ToolStripMenuItem();
             this.选择出售中ToolStripMenuItem = new System.Windows.Forms.ToolStripMenuItem();
+            this.进入商品页ToolStripMenuItem = new Moonlight.WindowsForms.StateControls.MoonToolStripMenuItem();
             this.menuStrip1 = new System.Windows.Forms.MenuStrip();
             this.菜单ToolStripMenuItem = new System.Windows.Forms.ToolStripMenuItem();
             this.切换账号ToolStripMenuItem = new System.Windows.Forms.ToolStripMenuItem();
@@ -209,6 +212,10 @@
             this.panel2.SuspendLayout();
             this.statusStrip1.SuspendLayout();
             this.ChatPanel.SuspendLayout();
+            ((System.ComponentModel.ISupportInitialize)(this.splitContainer1)).BeginInit();
+            this.splitContainer1.Panel1.SuspendLayout();
+            this.splitContainer1.Panel2.SuspendLayout();
+            this.splitContainer1.SuspendLayout();
             this.contextMenuStrip1.SuspendLayout();
             this.menuStrip1.SuspendLayout();
             this.SuspendLayout();
@@ -286,18 +293,17 @@
             // 
             // tabControl1
             // 
-            this.tabControl1.Anchor = ((System.Windows.Forms.AnchorStyles)((((System.Windows.Forms.AnchorStyles.Top | System.Windows.Forms.AnchorStyles.Bottom) 
-            | System.Windows.Forms.AnchorStyles.Left) 
-            | System.Windows.Forms.AnchorStyles.Right)));
             this.tabControl1.Controls.Add(this.tabPageItemList);
             this.tabControl1.Controls.Add(this.tabPageOrders);
             this.tabControl1.Controls.Add(this.tabPage1);
             this.tabControl1.Controls.Add(this.tabPageWB);
+            this.tabControl1.Controls.Add(this.tabPage2);
+            this.tabControl1.Dock = System.Windows.Forms.DockStyle.Fill;
             this.tabControl1.Enabled = false;
-            this.tabControl1.Location = new System.Drawing.Point(0, 28);
+            this.tabControl1.Location = new System.Drawing.Point(0, 0);
             this.tabControl1.Name = "tabControl1";
             this.tabControl1.SelectedIndex = 0;
-            this.tabControl1.Size = new System.Drawing.Size(932, 295);
+            this.tabControl1.Size = new System.Drawing.Size(926, 328);
             this.tabControl1.TabIndex = 6;
             // 
             // tabPageItemList
@@ -307,7 +313,7 @@
             this.tabPageItemList.Location = new System.Drawing.Point(4, 22);
             this.tabPageItemList.Name = "tabPageItemList";
             this.tabPageItemList.Padding = new System.Windows.Forms.Padding(3);
-            this.tabPageItemList.Size = new System.Drawing.Size(924, 269);
+            this.tabPageItemList.Size = new System.Drawing.Size(918, 302);
             this.tabPageItemList.TabIndex = 1;
             this.tabPageItemList.Text = "商品列表";
             this.tabPageItemList.UseVisualStyleBackColor = true;
@@ -325,9 +331,9 @@
             this.panel1.Controls.Add(this.buttonUpAll);
             this.panel1.Controls.Add(this.buttonDownAll);
             this.panel1.Dock = System.Windows.Forms.DockStyle.Bottom;
-            this.panel1.Location = new System.Drawing.Point(3, 230);
+            this.panel1.Location = new System.Drawing.Point(3, 263);
             this.panel1.Name = "panel1";
-            this.panel1.Size = new System.Drawing.Size(918, 36);
+            this.panel1.Size = new System.Drawing.Size(912, 36);
             this.panel1.TabIndex = 2;
             // 
             // button开启监控
@@ -463,7 +469,7 @@
             this.dataGridViewItem.ReadOnly = true;
             this.dataGridViewItem.RowTemplate.Height = 23;
             this.dataGridViewItem.SelectionMode = System.Windows.Forms.DataGridViewSelectionMode.FullRowSelect;
-            this.dataGridViewItem.Size = new System.Drawing.Size(918, 222);
+            this.dataGridViewItem.Size = new System.Drawing.Size(912, 255);
             this.dataGridViewItem.TabIndex = 0;
             // 
             // tabPageOrders
@@ -472,7 +478,7 @@
             this.tabPageOrders.Location = new System.Drawing.Point(4, 22);
             this.tabPageOrders.Name = "tabPageOrders";
             this.tabPageOrders.Padding = new System.Windows.Forms.Padding(3);
-            this.tabPageOrders.Size = new System.Drawing.Size(924, 269);
+            this.tabPageOrders.Size = new System.Drawing.Size(918, 302);
             this.tabPageOrders.TabIndex = 4;
             this.tabPageOrders.Text = "订单信息";
             this.tabPageOrders.UseVisualStyleBackColor = true;
@@ -489,7 +495,7 @@
             this.dataGridViewTbOrder.Name = "dataGridViewTbOrder";
             this.dataGridViewTbOrder.ReadOnly = true;
             this.dataGridViewTbOrder.RowTemplate.Height = 23;
-            this.dataGridViewTbOrder.Size = new System.Drawing.Size(918, 263);
+            this.dataGridViewTbOrder.Size = new System.Drawing.Size(912, 296);
             this.dataGridViewTbOrder.TabIndex = 0;
             // 
             // tabPage1
@@ -505,7 +511,7 @@
             this.tabPage1.Location = new System.Drawing.Point(4, 22);
             this.tabPage1.Name = "tabPage1";
             this.tabPage1.Padding = new System.Windows.Forms.Padding(3);
-            this.tabPage1.Size = new System.Drawing.Size(924, 269);
+            this.tabPage1.Size = new System.Drawing.Size(918, 302);
             this.tabPage1.TabIndex = 5;
             this.tabPage1.Text = "选项";
             // 
@@ -918,7 +924,7 @@
             this.tabPageWB.Location = new System.Drawing.Point(4, 22);
             this.tabPageWB.Name = "tabPageWB";
             this.tabPageWB.Padding = new System.Windows.Forms.Padding(3);
-            this.tabPageWB.Size = new System.Drawing.Size(924, 269);
+            this.tabPageWB.Size = new System.Drawing.Size(918, 302);
             this.tabPageWB.TabIndex = 6;
             this.tabPageWB.Text = "调试页面，拒绝手贱";
             this.tabPageWB.UseVisualStyleBackColor = true;
@@ -1101,6 +1107,16 @@
             this.wb1.ScriptErrorsSuppressed = true;
             this.wb1.Size = new System.Drawing.Size(97, 92);
             this.wb1.TabIndex = 0;
+            // 
+            // tabPage2
+            // 
+            this.tabPage2.Location = new System.Drawing.Point(4, 22);
+            this.tabPage2.Name = "tabPage2";
+            this.tabPage2.Padding = new System.Windows.Forms.Padding(3);
+            this.tabPage2.Size = new System.Drawing.Size(918, 302);
+            this.tabPage2.TabIndex = 7;
+            this.tabPage2.Text = "浏览器操作";
+            this.tabPage2.UseVisualStyleBackColor = true;
             // 
             // statusStrip1
             // 
@@ -1360,9 +1376,9 @@
             // 
             // ChatPanel
             // 
+            this.ChatPanel.Controls.Add(this.splitContainer1);
             this.ChatPanel.Controls.Add(this.labelTaskName);
             this.ChatPanel.Controls.Add(this.progressBar1);
-            this.ChatPanel.Controls.Add(this.RichTextBoxConsole);
             this.ChatPanel.Controls.Add(this.TextBoxMessage);
             this.ChatPanel.Controls.Add(this.ButtonSend);
             this.ChatPanel.Dock = System.Windows.Forms.DockStyle.Fill;
@@ -1370,6 +1386,37 @@
             this.ChatPanel.Name = "ChatPanel";
             this.ChatPanel.Size = new System.Drawing.Size(932, 581);
             this.ChatPanel.TabIndex = 4;
+            // 
+            // splitContainer1
+            // 
+            this.splitContainer1.Anchor = ((System.Windows.Forms.AnchorStyles)((((System.Windows.Forms.AnchorStyles.Top | System.Windows.Forms.AnchorStyles.Bottom) 
+            | System.Windows.Forms.AnchorStyles.Left) 
+            | System.Windows.Forms.AnchorStyles.Right)));
+            this.splitContainer1.Location = new System.Drawing.Point(3, 28);
+            this.splitContainer1.Name = "splitContainer1";
+            this.splitContainer1.Orientation = System.Windows.Forms.Orientation.Horizontal;
+            // 
+            // splitContainer1.Panel1
+            // 
+            this.splitContainer1.Panel1.Controls.Add(this.tabControl1);
+            // 
+            // splitContainer1.Panel2
+            // 
+            this.splitContainer1.Panel2.Controls.Add(this.RichTextBoxConsole);
+            this.splitContainer1.Size = new System.Drawing.Size(926, 467);
+            this.splitContainer1.SplitterDistance = 328;
+            this.splitContainer1.TabIndex = 10;
+            // 
+            // RichTextBoxConsole
+            // 
+            this.RichTextBoxConsole.BackColor = System.Drawing.Color.WhiteSmoke;
+            this.RichTextBoxConsole.Dock = System.Windows.Forms.DockStyle.Fill;
+            this.RichTextBoxConsole.Location = new System.Drawing.Point(0, 0);
+            this.RichTextBoxConsole.Name = "RichTextBoxConsole";
+            this.RichTextBoxConsole.ReadOnly = true;
+            this.RichTextBoxConsole.Size = new System.Drawing.Size(926, 135);
+            this.RichTextBoxConsole.TabIndex = 3;
+            this.RichTextBoxConsole.Text = "";
             // 
             // labelTaskName
             // 
@@ -1389,18 +1436,6 @@
             this.progressBar1.Name = "progressBar1";
             this.progressBar1.Size = new System.Drawing.Size(912, 5);
             this.progressBar1.TabIndex = 8;
-            // 
-            // RichTextBoxConsole
-            // 
-            this.RichTextBoxConsole.Anchor = ((System.Windows.Forms.AnchorStyles)(((System.Windows.Forms.AnchorStyles.Bottom | System.Windows.Forms.AnchorStyles.Left) 
-            | System.Windows.Forms.AnchorStyles.Right)));
-            this.RichTextBoxConsole.BackColor = System.Drawing.Color.WhiteSmoke;
-            this.RichTextBoxConsole.Location = new System.Drawing.Point(8, 329);
-            this.RichTextBoxConsole.Name = "RichTextBoxConsole";
-            this.RichTextBoxConsole.ReadOnly = true;
-            this.RichTextBoxConsole.Size = new System.Drawing.Size(912, 166);
-            this.RichTextBoxConsole.TabIndex = 3;
-            this.RichTextBoxConsole.Text = "";
             // 
             // TextBoxMessage
             // 
@@ -1430,7 +1465,8 @@
             this.反选ToolStripMenuItem1,
             this.按类别ToolStripMenuItem,
             this.按利润ToolStripMenuItem,
-            this.按位置ToolStripMenuItem});
+            this.按位置ToolStripMenuItem,
+            this.进入商品页ToolStripMenuItem});
             this.contextMenuStrip1.Name = "contextMenuStrip1";
             this.contextMenuStrip1.Size = new System.Drawing.Size(161, 368);
             // 
@@ -1643,6 +1679,16 @@
             this.选择出售中ToolStripMenuItem.Text = "选择出售中";
             this.选择出售中ToolStripMenuItem.Click += new System.EventHandler(this.销售中ToolStripMenuItem_Click);
             // 
+            // 进入商品页ToolStripMenuItem
+            // 
+            this.进入商品页ToolStripMenuItem.AppUserSettingProtect = false;
+            this.进入商品页ToolStripMenuItem.Enabled = false;
+            this.进入商品页ToolStripMenuItem.Image = global::WinFormsClient.Properties.Resources.网络;
+            this.进入商品页ToolStripMenuItem.Name = "进入商品页ToolStripMenuItem";
+            this.进入商品页ToolStripMenuItem.Size = new System.Drawing.Size(160, 22);
+            this.进入商品页ToolStripMenuItem.Text = "进入商品页";
+            this.进入商品页ToolStripMenuItem.Click += new System.EventHandler(this.进入商品页ToolStripMenuItem_Click);
+            // 
             // menuStrip1
             // 
             this.menuStrip1.Items.AddRange(new System.Windows.Forms.ToolStripItem[] {
@@ -1759,7 +1805,6 @@
             this.AutoScaleDimensions = new System.Drawing.SizeF(6F, 12F);
             this.AutoScaleMode = System.Windows.Forms.AutoScaleMode.Font;
             this.ClientSize = new System.Drawing.Size(932, 581);
-            this.Controls.Add(this.tabControl1);
             this.Controls.Add(this.statusStrip1);
             this.Controls.Add(this.menuStrip1);
             this.Controls.Add(this.ChatPanel);
@@ -1798,6 +1843,10 @@
             this.statusStrip1.PerformLayout();
             this.ChatPanel.ResumeLayout(false);
             this.ChatPanel.PerformLayout();
+            this.splitContainer1.Panel1.ResumeLayout(false);
+            this.splitContainer1.Panel2.ResumeLayout(false);
+            ((System.ComponentModel.ISupportInitialize)(this.splitContainer1)).EndInit();
+            this.splitContainer1.ResumeLayout(false);
             this.contextMenuStrip1.ResumeLayout(false);
             this.menuStrip1.ResumeLayout(false);
             this.menuStrip1.PerformLayout();
@@ -1966,6 +2015,9 @@
         private Moonlight.WindowsForms.Controls.ExtendedWinFormsWebBrowser wb1;
         private System.Windows.Forms.Panel panel2;
         private Moonlight.WindowsForms.Controls.ExtendedWinFormsWebBrowser wbMain;
+        private Moonlight.WindowsForms.StateControls.MoonToolStripMenuItem 进入商品页ToolStripMenuItem;
+        private System.Windows.Forms.TabPage tabPage2;
+        private System.Windows.Forms.SplitContainer splitContainer1;
     }
 }
 

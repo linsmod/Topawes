@@ -58,6 +58,20 @@ namespace Moonlight.WindowsForms.Controls
             {
                 this.ContextMenuStrip.Opening -= ContextMenuStrip_Opening;
                 this.ContextMenuStrip.Opening += ContextMenuStrip_Opening;
+                this.ContextMenuStrip.Closing -= ContextMenuStrip_Closing;
+                this.ContextMenuStrip.Closing += ContextMenuStrip_Closing;
+            }
+        }
+
+        private void ContextMenuStrip_Closing(object sender, ToolStripDropDownClosingEventArgs e)
+        {
+            foreach (var item in ContextMenuStrip.Items)
+            {
+                var moonItem = item as Moonlight.WindowsForms.StateControls.MoonToolStripMenuItem;
+                if (moonItem != null)
+                {
+                    moonItem.OnContextMenuStripClosing();
+                }
             }
         }
 
@@ -70,14 +84,15 @@ namespace Moonlight.WindowsForms.Controls
                 var moonItem = item as Moonlight.WindowsForms.StateControls.MoonToolStripMenuItem;
                 if (moonItem != null)
                 {
-                    moonItem.OnShownOnContext(this.SelectedRows);
+                    moonItem.OnContextMenuStripOpening(this.SelectedRows);
                 }
             }
         }
 
         private void dataGridView1_RowPostPaint(object sender, DataGridViewRowPostPaintEventArgs e)
         {
-            if (this.Rows[e.RowIndex].Tag == null) {
+            if (this.Rows[e.RowIndex].Tag == null)
+            {
                 Rectangle rectangle = new Rectangle(e.RowBounds.Location.X, e.RowBounds.Location.Y, RowHeadersWidth - 4, e.RowBounds.Height);
                 TextRenderer.DrawText(e.Graphics, (e.RowIndex + 1).ToString(),
                     RowHeadersDefaultCellStyle.Font,

@@ -131,7 +131,7 @@ namespace TopModel.MessageHubClients
         /// <param name="num"></param>
         /// <param name="listTime"></param>
         /// <returns></returns>
-        public async Task<ApiResult> ItemUpdateListWhenTime(long itemId, long? num, DateTime listTime)
+        public async Task<ApiResult> ItemUpdateListWhenTime(long itemId, long? num, DateTime? listTime = null)
         {
             return await ProxyInvoke<ApiResult>("ItemUpdateListWhenTime", itemId, num, listTime);
         }

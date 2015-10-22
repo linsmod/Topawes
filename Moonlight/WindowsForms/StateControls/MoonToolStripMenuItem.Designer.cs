@@ -1,4 +1,7 @@
-﻿namespace Moonlight.WindowsForms.StateControls
+﻿using System;
+using System.Windows.Forms;
+
+namespace Moonlight.WindowsForms.StateControls
 {
     partial class MoonToolStripMenuItem
     {

@@ -12,7 +12,7 @@ namespace Moonlight.WindowsForms.StateControls
 {
     public partial class MoonToolStripMenuItem : ToolStripMenuItem
     {
-        public StateItemShowingOption ShowingOption = StateItemShowingOption.EnableAlwasy | StateItemShowingOption.ShowAlwasy;
+        public StateItemControlOption ControlOptions = new StateItemControlOption();
         public event EventHandler<StripMenuItemShownOnContextEventArgs> Showing;
         public event EventHandler<AppUserSettingChangedEventArgs> AppUserSettingChanged;
         public MoonToolStripMenuItem()
@@ -137,16 +137,24 @@ namespace Moonlight.WindowsForms.StateControls
 
         public bool AppUserSettingProtect { get; set; }
 
+        private bool EnabledOrg;
+        private bool AvailableOrg;
+        public void OnContextMenuStripClosing()
+        {
+            //restore original state
+            this.Enabled = EnabledOrg;
+            this.Available = AvailableOrg;
+        }
         /// <summary>
         /// 触发一个ShownOnContext事件，让订阅ShownOnContext事件的用户决定此控件的表现方式
         /// </summary>
         /// <param name="targets"></param>
-        public void OnShownOnContext(IEnumerable targets)
+        public void OnContextMenuStripOpening(IEnumerable targets)
         {
-            this.Available = true;
-            this.Enabled = true;
-            CheckAvailableOption(targets);
-            CheckShowingOption(targets);
+            //backup original state
+            this.EnabledOrg = Enabled;
+            this.AvailableOrg = Available;
+            ApplyControlOption(targets);
             var h = Showing;
             if (h != null)
             {
@@ -171,216 +179,75 @@ namespace Moonlight.WindowsForms.StateControls
             }
         }
 
-        private void CheckAvailableOption(IEnumerable targets)
+        private void ApplyControlOption(IEnumerable targets)
         {
-            if (ShowingOption.HasFlag(StateItemShowingOption.ShowAlwasy))
+            var items = targets.AsList<object>();
+            if (!items.Any())
             {
-                this.Available = true;
+                SetEnableControlValue(ControlOptions.WhenNone.Enabled);
+                SetAvailableControlValue(ControlOptions.WhenNone.Avaiable);
             }
             else
             {
-                var items = targets.AsList<object>();
-                if (!items.Any())
+                if (items.Count == 1)
                 {
-                    if (ShowingOption.HasFlag(StateItemShowingOption.HideIfNoneTarget))
-                    {
-                        this.Available = false;
-                    }
-                    else if (ShowingOption.HasFlag(StateItemShowingOption.ShowIfNoneTarget))
-                    {
-                        this.Available = true;
-                    }
+                    SetEnableControlValue(ControlOptions.WhenSingle.Enabled);
+                    SetAvailableControlValue(ControlOptions.WhenSingle.Avaiable);
                 }
                 else
                 {
-                    if (ShowingOption.HasFlag(StateItemShowingOption.HideIfAnyTarget))
-                    {
-                        this.Available = false;
-                    }
-                    else if (ShowingOption.HasFlag(StateItemShowingOption.ShowIfAnyTarget))
-                    {
-                        this.Available = true;
-                    }
-                    else
-                    {
-                        if (items.Count == 1)
-                        {
-                            if (ShowingOption.HasFlag(StateItemShowingOption.HideIfSingleTarget))
-                            {
-                                this.Available = false;
-                            }
-                            else if (ShowingOption.HasFlag(StateItemShowingOption.ShowIfSingleTarget))
-                            {
-                                this.Available = true;
-                            }
-                        }
-                        else
-                        {
-                            if (ShowingOption.HasFlag(StateItemShowingOption.HideIfMultiTargets))
-                            {
-                                this.Available = false;
-                            }
-                            else if (ShowingOption.HasFlag(StateItemShowingOption.ShowIfMultiTargets))
-                            {
-                                this.Available = true;
-                            }
-                        }
-                    }
+                    SetEnableControlValue(ControlOptions.WhenMulti.Enabled);
+                    SetAvailableControlValue(ControlOptions.WhenMulti.Avaiable);
                 }
+                SetEnableControlValue(ControlOptions.WhenAny.Enabled);
+                SetAvailableControlValue(ControlOptions.WhenAny.Avaiable);
             }
         }
 
-        private void CheckShowingOption(IEnumerable targets)
+        private void SetEnableControlValue(bool? input)
         {
-            if (ShowingOption.HasFlag(StateItemShowingOption.EnableAlwasy))
+            if (input.HasValue)
             {
-                this.Enabled = true;
-            }
-            else
-            {
-                var items = targets.AsList<object>();
-                if (!items.Any())
-                {
-                    if (ShowingOption.HasFlag(StateItemShowingOption.DisableIfNoneTarget))
-                    {
-                        this.Enabled = false;
-                    }
-                    else if (ShowingOption.HasFlag(StateItemShowingOption.EnableIfNoneTarget))
-                    {
-                        this.Enabled = true;
-                    }
-                }
-                else
-                {
-                    if (ShowingOption.HasFlag(StateItemShowingOption.DisableIfAnyTarget))
-                    {
-                        this.Enabled = false;
-                    }
-                    else if (ShowingOption.HasFlag(StateItemShowingOption.EnableIfAnyTarget))
-                    {
-                        this.Enabled = true;
-                    }
-                    else
-                    {
-                        if (items.Count == 1)
-                        {
-                            if (ShowingOption.HasFlag(StateItemShowingOption.DisableIfSingleTarget))
-                            {
-                                this.Enabled = false;
-                            }
-                            else if (ShowingOption.HasFlag(StateItemShowingOption.EnableIfSingleTarget))
-                            {
-                                this.Enabled = true;
-                            }
-                        }
-                        else
-                        {
-                            if (ShowingOption.HasFlag(StateItemShowingOption.DisableIfMultiTargets))
-                            {
-                                this.Enabled = false;
-                            }
-                            else if (ShowingOption.HasFlag(StateItemShowingOption.EnableIfMultiTargets))
-                            {
-                                this.Enabled = true;
-                            }
-                        }
-                    }
-                }
+                this.Enabled = input.Value;
             }
         }
-        
+
+        private void SetAvailableControlValue(bool? input)
+        {
+            if (input.HasValue)
+            {
+                this.Available = input.Value;
+            }
+        }
+
     }
 
-    [Flags]
-    public enum StateItemShowingOption
+    public class StateItemControlOption
     {
-        /// <summary>
-        /// 没有目标的时候禁用
-        /// </summary>
-        DisableIfNoneTarget = 1,
+        internal StateItemControlOption() { }
 
         /// <summary>
-        /// 没有目标的时候启用
+        /// 单个元素的时候
         /// </summary>
-        EnableIfNoneTarget = 2,
+        public SceneControl WhenSingle = new SceneControl { };
         /// <summary>
-        /// 没有目标的时候不显示
+        /// 多个元素的时候
         /// </summary>
-        HideIfNoneTarget = 4,
+        public SceneControl WhenMulti = new SceneControl { };
+        /// <summary>
+        /// 没有元素的时候
+        /// </summary>
+        public SceneControl WhenNone = new SceneControl { };
 
         /// <summary>
-        /// 没有目标的时候显示
+        /// 当有任何元素的时候，比WhenNone和WhenMulti权重高
         /// </summary>
-        ShowIfNoneTarget = 8,
+        public SceneControl WhenAny = new SceneControl { };
 
-        /// <summary>
-        /// 单个目标的时候禁用
-        /// </summary>
-        DisableIfSingleTarget = 16,
-
-        /// <summary>
-        /// 单个目标的时候启用
-        /// </summary>
-        EnableIfSingleTarget = 32,
-
-        /// <summary>
-        /// 单个目标的时候隐藏
-        /// </summary>
-        HideIfSingleTarget = 64,
-
-        /// <summary>
-        /// 单个目标时候显示
-        /// </summary>
-        ShowIfSingleTarget = 128,
-        /// <summary>
-        /// 多个目标的时候禁用
-        /// </summary>
-        DisableIfMultiTargets = 256,
-
-        /// <summary>
-        /// 多个目标时候启用
-        /// </summary>
-        EnableIfMultiTargets = 512,
-        /// <summary>
-        /// 多个目标的时候隐藏
-        /// </summary>
-        HideIfMultiTargets = 1024,
-
-        /// <summary>
-        /// 多个目标的时候显示
-        /// </summary>
-        ShowIfMultiTargets = 2048,
-
-
-        /// <summary>
-        /// 有任何目标的时候禁用
-        /// </summary>
-        DisableIfAnyTarget = DisableIfSingleTarget | DisableIfMultiTargets,
-
-        /// <summary>
-        /// 有任何目标的时候隐藏
-        /// </summary>
-        HideIfAnyTarget = HideIfSingleTarget | HideIfMultiTargets,
-
-
-        /// <summary>
-        /// 有任何目标的时候启用
-        /// </summary>
-        EnableIfAnyTarget = EnableIfSingleTarget | EnableIfMultiTargets,
-
-        /// <summary>
-        /// 有任何目标的时候显示
-        /// </summary>
-        ShowIfAnyTarget = ShowIfSingleTarget | ShowIfMultiTargets,
-
-        /// <summary>
-        /// 始终启用
-        /// </summary>
-        EnableAlwasy = EnableIfNoneTarget | EnableIfAnyTarget,
-
-        /// <summary>
-        /// 始终显示
-        /// </summary>
-        ShowAlwasy = ShowIfNoneTarget | ShowIfAnyTarget,
+        public class SceneControl
+        {
+            public bool? Enabled { get; set; }
+            public bool? Avaiable { get; set; }
+        }
     }
 }

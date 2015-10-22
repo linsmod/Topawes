@@ -103,7 +103,7 @@ namespace WinFormsClient
             taoLoginForm = new TaoLoginForm(wbLoginMode);
             wbLoginMode.AskShowUI += () => { taoLoginForm.Show(this); };
             wbLoginMode.RequireLogin += () => { /*AppSetting.UserSetting.Set("Autorized", false);*/ };
-            wbLoginMode.LoginSuccess += () => { WBHelper.Cookie = string.Join("; ", wbLoginMode.CookieHeaders); AppendText("服务登录完成！"); this.InvokeAction(() => { this.Visible = true; tabPageWB.Controls.Add(wb); });/*使用cookie连接*/ ConnectAsync(); };
+            wbLoginMode.LoginSuccess += () => { WBHelper.Cookie = string.Join("; ", wbLoginMode.CookieHeaders); AppendText("服务登录完成！"); this.InvokeAction(() => { this.Visible = true; tabPage2.Controls.Add(wb); });/*使用cookie连接*/ ConnectAsync(); };
             wbLoginMode.UserCancelLogin += () => { taoLoginForm.DialogResult = DialogResult.Cancel; this.Close(); };
 
             //wbTaoChongZhiMode.AskLogin += () => { wb.TransactionToNext(wbLoginMode); taoLoginForm.Show(this); };
@@ -307,6 +307,7 @@ namespace WinFormsClient
                 {
                     //登录完成后导航到这个页面，方便后面AJAX直接使用这个浏览器取数据
                     wbMain.Navigate("http://chongzhi.taobao.com/index.do?spm=0.0.0.0.OR0khk&method=index");
+                    wb.Navigate("http://chongzhi.taobao.com/index.do?spm=0.0.0.0.OR0khk&method=index");
                 });
                 await Connection.Start();
                 this.tssl_ConnState.Text = "连接状态：" + ConnectionState.Connected.AsZhConnectionState();
@@ -1232,7 +1233,7 @@ namespace WinFormsClient
             {
                 if (!cts.IsCancellationRequested)
                     cts.Cancel();
-
+                SyncSupplierQueue.Dispose();
                 try
                 {
                     if (Connection != null)
@@ -1561,22 +1562,18 @@ namespace WinFormsClient
                 }
                 if (lockType == "锁定所有商品" || (lockType == "锁定监控商品" && product.Monitor))
                 {
-                    if (qty != 0)
+                    if (qty == 0)
+                        qty = 1;
+                    var apix = await client.ItemHub.ItemUpdateList(product.Id, qty);
+                    if (apix.Success)
                     {
-                        var apix = await client.ItemHub.ItemUpdateList(product.Id, qty);
-                        if (apix.Success)
-                        {
-                            //有服务端消息，这个不显示了
-                            //AppendText("[商品{0}]上架完成。", product.ItemName);
-                        }
-                        else
-                        {
-                            AppendText("[商品{0}]上架失败，错误消息：{1}", product.ItemName, apix.Message);
-                        }
+                        //await client.ItemHub.ItemQuantityUpdate(product.Id, qty);
+                        //有服务端消息，这个不显示了
+                        //AppendText("[商品{0}]上架完成。", product.ItemName);
                     }
                     else
                     {
-                        AppendText("无法处理，库存设置异常！");
+                        AppendText("[商品{0}]上架失败，错误消息：{1}", product.ItemName, apix.Message);
                     }
                 }
                 else
@@ -1845,13 +1842,14 @@ namespace WinFormsClient
         {
             上架ToolStripMenuItem.Showing += 上架ToolStripMenuItem_ShownOnContext;
             下架ToolStripMenuItem.Showing += 下架ToolStripMenuItem_ShownOnContext;
-            修改库存ToolStripMenuItem2.ShowingOption = Moonlight.WindowsForms.StateControls.StateItemShowingOption.HideIfNoneTarget;
+            修改库存ToolStripMenuItem2.ControlOptions.WhenNone.Avaiable = false;
             锁定库存ToolStripMenuItem.Showing += 锁定库存ToolStripMenuItem_ShownOnContext;
             取消锁定库存ToolStripMenuItem.Showing += 取消锁定库存ToolStripMenuItem_ShownOnContext;
             开启自动上架ToolStripMenuItem.Showing += 开启自动上架ToolStripMenuItem_ShownOnContext;
             关闭自动上架ToolStripMenuItem.Showing += 关闭自动上架ToolStripMenuItem_ShownOnContext;
-            获取供应商信息ToolStripMenuItem.ShowingOption = Moonlight.WindowsForms.StateControls.StateItemShowingOption.HideIfNoneTarget;
-            反选ToolStripMenuItem1.ShowingOption = Moonlight.WindowsForms.StateControls.StateItemShowingOption.DisableIfNoneTarget;
+            获取供应商信息ToolStripMenuItem.ControlOptions.WhenNone.Enabled = false;
+            反选ToolStripMenuItem1.ControlOptions.WhenNone.Enabled = false;
+            进入商品页ToolStripMenuItem.ControlOptions.WhenSingle.Enabled = true;
         }
 
         private void 关闭自动上架ToolStripMenuItem_ShownOnContext(object sender, Moonlight.WindowsForms.StateControls.StripMenuItemShownOnContextEventArgs e)
@@ -2055,7 +2053,7 @@ namespace WinFormsClient
                     SyncSupplierQueue.CreateTaskItem(item, SyncSupplierInfo, x =>
                     {
                         var product = AppDatabase.db.ProductItems.FindById(x.ProductId);
-                        if (x.Success)
+                        if (x.Success && !product.NeedResotreProfit)
                         {
                             //备份原始利润
                             product.原利润 = product.利润;
@@ -2103,6 +2101,12 @@ namespace WinFormsClient
         private void 刷新ToolStripMenuItem_Click(object sender, EventArgs e)
         {
             BindDGViewProduct();
+        }
+
+        private void 进入商品页ToolStripMenuItem_Click(object sender, EventArgs e)
+        {
+            var id = GetSelectedProductList().First();
+            Process.Start("https://item.taobao.com/item.htm?id=" + id);
         }
     }
 
