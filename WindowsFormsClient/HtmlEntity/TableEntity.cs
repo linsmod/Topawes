@@ -67,7 +67,10 @@ namespace WinFormsClient.HtmlEntity
             item.Id = long.Parse(TrElement.Attribute("data-id").AttributeValue);
             item.SpuId = TrElement.Attribute("data-spuid").AttributeValue;
             item.ItemName = TrElement.FindFirst(".item-name a").InnerText();
-            item.ItemSubName = new string(TrElement.FindFirst(".item-name").InnerText().Skip(item.ItemName.Length + 7).ToArray());
+            var text = TrElement.FindFirst(".item-name").InnerText();
+            var index = TrElement.FindFirst(".item-name").InnerText().IndexOf("类型：");
+            item.ItemName = text.Substring(0, index).Trim();
+            item.ItemSubName = new string(text.Skip(index + 3).ToArray()).Trim();
             item.Type = TrElement.FindFirst(".type").InnerText();
             item.面值 = TrElement.FindFirst(".price").InnerText();
             decimal price = 0;
