@@ -32,7 +32,7 @@ namespace WinFormsClient
         {
             this.wbMode = wbMode;
             InitializeComponent();
-            this.Load += (s, e) => { wbMode.Navigate("https://login.taobao.com/member/login.jhtml?sign=rm402NWkiXFspfo5MW2bPQ%3D%3D&timestamp=2015-09-20+15%3A25%3A51&sub=true&style=mini_top&need_sign=top&full_redirect=true&from=mini_top&from_encoding=utf-8&TPL_redirect_url=http%3A%2F%2Fcontainer.api.taobao.com%2Fcontainer%3Fappkey%3D23140690"); };
+            this.Load += (s, e) => { wbMode.Navigate("https://login.taobao.com/member/login.jhtml?style=mini_top&redirectURL=http%3A%2F%2Fcontainer.api.taobao.com%2Fcontainer%3Fappkey%3D23140690"); };
             wbMode.AskHideUI += () => this.Hide();
             wbMode.WB.ProgressChanged2 += WbMode_ProgressChanged;
             this.VisibleChanged += TaoLoginForm_VisibleChanged;

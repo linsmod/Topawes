@@ -133,7 +133,7 @@ namespace WinFormsClient.WBMode
                         AppSetting.UserSetting.Set("TaoUserName", userName, true);
                         AppSetting.UserSetting.Set("TaoPassword", password, true);
                     };
-                    await TaskEx.Delay(200);
+                    await TaskEx.Delay(100);
                     if (J_Static.clientWidth > 0 && J_Static.clientHeight > 0)
                     {
                         IsPasswordLogin = true;

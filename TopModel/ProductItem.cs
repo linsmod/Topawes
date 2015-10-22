@@ -80,6 +80,16 @@ namespace TopModel
         [Display(Name = "更新时间")]
         public DateTime UpdateAt { get; set; }
 
+        /// <summary>
+        /// 同步供应商操作已提交
+        /// </summary>
+        public bool SyncSuplierSubmited { get; set; }
+
+        /// <summary>
+        /// 改价操作已提交
+        /// </summary>
+        public bool ModifyProfitSubmitted { get; set; }
+
         public void OnDownshelf(LiteCollection<ProductItem> productItems)
         {
             Where = "仓库中";
