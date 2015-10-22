@@ -77,12 +77,15 @@ namespace Moonlight.WindowsForms.Controls
 
         private void dataGridView1_RowPostPaint(object sender, DataGridViewRowPostPaintEventArgs e)
         {
-            Rectangle rectangle = new Rectangle(e.RowBounds.Location.X, e.RowBounds.Location.Y, RowHeadersWidth - 4, e.RowBounds.Height);
-            TextRenderer.DrawText(e.Graphics, (e.RowIndex + 1).ToString(),
-                RowHeadersDefaultCellStyle.Font,
-                rectangle,
-                RowHeadersDefaultCellStyle.ForeColor,
-                TextFormatFlags.VerticalCenter | TextFormatFlags.Right);
+            if (this.Rows[e.RowIndex].Tag == null) {
+                Rectangle rectangle = new Rectangle(e.RowBounds.Location.X, e.RowBounds.Location.Y, RowHeadersWidth - 4, e.RowBounds.Height);
+                TextRenderer.DrawText(e.Graphics, (e.RowIndex + 1).ToString(),
+                    RowHeadersDefaultCellStyle.Font,
+                    rectangle,
+                    RowHeadersDefaultCellStyle.ForeColor,
+                    TextFormatFlags.VerticalCenter | TextFormatFlags.Right);
+                this.Rows[e.RowIndex].Tag = true;
+            }
         }
 
         /// <summary>

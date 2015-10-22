@@ -41,6 +41,10 @@ namespace WinFormsClient
                     x.Type = item.Type;
                     x.UpdateAt = DateTime.Now;
                     x.Where = item.Where;
+                    x.利润 = item.利润;
+                    x.原利润 = item.原利润;
+                    x.一口价 = item.一口价;
+                    x.进价 = item.进价;
                     db.ProductItems.Update(x);
                 }
             }

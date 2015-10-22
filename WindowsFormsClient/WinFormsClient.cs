@@ -34,7 +34,7 @@ namespace WinFormsClient
     public partial class WinFormsClient : BaseForm
     {
         public static JumonyParser HtmlParser = new Nx.EasyHtml.Html.Parser.JumonyParser();
-        public AppQueue<ProductItem, bool> SyncSupplierQueue;
+        public AppQueue<ProductItem, SimpleResult> SyncSupplierQueue;
         const string IndexUrl = "http://chongzhi.taobao.com/index.do?spm=0.0.0.0.OR0khk&method=index";
         public TimeSpan DateDifference = TimeSpan.Zero;
         public static CancellationTokenSource cts = new CancellationTokenSource();
@@ -59,7 +59,7 @@ namespace WinFormsClient
         internal WinFormsClient()
         {
             InitializeComponent();
-            SyncSupplierQueue = new AppQueue<ProductItem, bool>(cts.Token);
+            SyncSupplierQueue = new AppQueue<ProductItem, SimpleResult>(cts.Token);
             TaskScheduler.UnobservedTaskException += TaskScheduler_UnobservedTaskException;
             wb = new ExtendedWinFormsWebBrowser();
             wbLoginMode.Enter(wb);
@@ -77,20 +77,6 @@ namespace WinFormsClient
             {
                 AppendException(item);
             }
-        }
-
-        [DebuggerStepThrough]
-        [DebuggerHidden]
-        protected override void WndProc(ref Message msg)
-        {
-            const int WM_SYSCOMMAND = 0x0112;
-            const int SC_MINIMIZE = 61472;
-            if (msg.Msg == WM_SYSCOMMAND && ((int)msg.WParam == SC_MINIMIZE))
-            {
-                this.ShowInTaskbar = false;
-                this.Hide();
-            }
-            base.WndProc(ref msg);
         }
         private void ResetTaskProgress()
         {
@@ -132,9 +118,6 @@ namespace WinFormsClient
             trade.Intercept = true;
             AppDatabase.db.TopTrades.Update(trade);
             var product = AppDatabase.db.ProductItems.FindById(trade.NumIid);
-            //备份用来恢复价格
-            var 原始卖价 = product.一口价;
-            var 原始利润 = product.利润;
 
             //更新价格
             using (var helper = new WBHelper(false))
@@ -158,14 +141,14 @@ namespace WinFormsClient
                     //恢复价格
                     //更新改价结果
                     product = AppDatabase.db.ProductItems.FindById(trade.NumIid);
-                    if (product.利润 != 0)
+                    if (!product.NeedResotreProfit)
                     {
                         //尝试还原价格时原始价格已经更新的话就不用恢复了
                         return;
                     }
                     using (var wbHelper = new WBHelper(false))
                     {
-                        var taoResult = await this.InvokeTask(BizHelper.supplierSave, helper, supplier.profitData[0].id, spu, 原始利润.ToString("f2"), 原始卖价.ToString("f2"), trade.NumIid, tbcpCrumbs);
+                        var taoResult = await this.InvokeTask(BizHelper.supplierSave, helper, supplier.profitData[0].id, spu, product.原利润.ToString("f2"), (product.进价 + product.原利润).ToString("f2"), trade.NumIid, tbcpCrumbs);
                         if (taoResult == null || taoResult.status != 200)
                         {
                             AppendText("商品{0}恢复价格失败，请注意！" + taoResult != null ? taoResult.msg : "", trade.NumIid);
@@ -377,6 +360,7 @@ namespace WinFormsClient
                         WBHelper.InitWBHelper(tabPageWB, "http://chongzhi.taobao.com/index.do?spm=0.0.0.0.OR0khk&method=index", wbCount);
                     });
                     AppSetting.UserSetting.Set("TaoInfo", taoInfo);
+                    ResetProductStates();
                     BindDGViewProduct();
                     BindDGViewTBOrder();
                     var permit = await client.TmcGroupAddThenTmcUserPermit();
@@ -408,6 +392,15 @@ namespace WinFormsClient
                 AppendException(ex);
             }
         }
+        private void ResetProductStates()
+        {
+            foreach (var item in AppDatabase.db.ProductItems.FindAll())
+            {
+                item.ModifyProfitSubmitted = false;
+                item.SyncProfitSubmited = false;
+                AppDatabase.db.ProductItems.Update(item);
+            }
+        }
 
         private async Task SyncBackground()
         {
@@ -436,10 +429,11 @@ namespace WinFormsClient
             }
         }
 
-        private async Task<bool> SyncSupplierInfo(ProductItem product)
+        private async Task<SimpleResult> SyncSupplierInfo(ProductItem product)
         {
             using (var helper = new WBHelper(true))
             {
+                var success = false;
                 //查找供应商
                 var url = string.Format("http://chongzhi.taobao.com/item.do?spu={0}&action=edit&method=supplierInfo&_=" + DateTime.Now.Ticks, product.SpuId);
                 await this.InvokeTask(helper.PrepareIfNoneDocument, IndexUrl);
@@ -450,10 +444,10 @@ namespace WinFormsClient
                     if (supplier.profitData.Any())
                     {
                         product.OnSupplierInfoUpdate(AppDatabase.db.ProductItems, supplier);
-                        return true;
+                        success = true;
                     }
                 }
-                return false;
+                return new SimpleResult { Success = success, ProductId = product.Id };
             }
         }
 
@@ -737,10 +731,18 @@ namespace WinFormsClient
                 {
                     product.ModifyProfitSubmitted = false;
                     AppDatabase.db.ProductItems.Update(product);
-                    SyncSupplierQueue.CreateTaskItem(product, SyncSupplierInfo, success =>
+                    BindDGViewProduct();
+                    SyncSupplierQueue.CreateTaskItem(product, SyncSupplierInfo, x =>
                     {
-                        //处理完成后先判断根据情况处理
-                        AppDatabase.db.ProductItems.Update(product);
+                        BindDGViewProduct();
+                    });
+                }
+
+                //恢复价格的,已经在关单的时候提交了请求，这里只需要更新供应商利润信息即可
+                if (product.NeedResotreProfit)
+                {
+                    SyncSupplierQueue.CreateTaskItem(product, SyncSupplierInfo, x =>
+                    {
                         BindDGViewProduct();
                     });
                 }
@@ -1037,6 +1039,7 @@ namespace WinFormsClient
                 IsSyncProductListAll = false;
                 return false;
             }
+
         }
 
         private async Task<bool> SyncInStockProductList()
@@ -1058,60 +1061,54 @@ namespace WinFormsClient
 
         private async Task<bool> SyncProductList(string where, string url)
         {
-            bool continueYes = true;
             var productList = new List<ProductItem>();
             int page = 1;
             HtmlDocument doc = null;
             ApiPagedResult<List<ProductItem>> pagedList = new ApiPagedResult<List<ProductItem>>();
-            while (continueYes)
+            while (pagedList.Success && pagedList.HasMore)
             {
-                while (pagedList.Success && pagedList.HasMore)
+
+                var nextUrl = UrlHelper.SetValue(url, "page", page.ToString());
+                using (var helper = new WBHelper(false))
                 {
-
-                    var nextUrl = UrlHelper.SetValue(url, "page", page.ToString());
-                    using (var helper = new WBHelper(false))
+                    try
                     {
-                        try
-                        {
-                            doc = await this.InvokeTask(helper.SynchronousLoadDocument, nextUrl);
-                            var xdoc = HtmlParser.Parse(doc.Body.InnerHtml);
-                            var table = xdoc.GetElementById("main").FindFirst(".stock-table");
-                            pagedList = ProductItemHelper.GetProductItemList(table, page);
-                            tbcpCrumbs = xdoc.FindSingle("#tbcpCrumbs").Attribute("value").AttributeValue;
-                            doc = null;
-                            SetTaskName("同步{0}商品第{1}页（{2}个）", where, page, pagedList.Data.Count);
-                            productList.AddRange(pagedList.Data);
-                            page++;
-                        }
-                        catch (Exception ex)
-                        {
-                            pagedList.Success = false;
-                            helper.Dispose();
-                        }
+                        doc = await this.InvokeTask(helper.SynchronousLoadDocument, nextUrl);
+                        var xdoc = HtmlParser.Parse(doc.Body.InnerHtml);
+                        var table = xdoc.GetElementById("main").FindFirst(".stock-table");
+                        pagedList = ProductItemHelper.GetProductItemList(table, page);
+                        tbcpCrumbs = xdoc.FindSingle("#tbcpCrumbs").Attribute("value").AttributeValue;
+                        doc = null;
+                        SetTaskName("同步{0}商品第{1}页（{2}个）", where, page, pagedList.Data.Count);
+                        productList.AddRange(pagedList.Data);
+                        page++;
                     }
-
+                    catch (Exception ex)
+                    {
+                        pagedList.Success = false;
+                        helper.Dispose();
+                    }
                 }
                 if (!pagedList.Success)
                 {
                     AppendText("同步{0}商品第{1}页出错，{2}", where, page, pagedList.Message);
-                    continueYes = MessageBox.Show(string.Format("同步{0}商品第{1}页出错，是否重试？", where, page), Text, MessageBoxButtons.YesNo) == DialogResult.Yes;
-                    continue;
+                    if (MessageBox.Show(string.Format("同步{0}商品第{1}页出错，是否重试？", where, page), Text, MessageBoxButtons.YesNo) == DialogResult.Yes)
+                        continue;
                 }
-                else
-                {
-                    var dt = DateTime.Now;
-                    foreach (var item in productList)
-                    {
-                        item.UpdateAt = dt;
-                        item.Where = where;
-                    }
-                    AppDatabase.UpsertProductList(productList);
-                    SetTaskName("就绪");
-                    AppendText("同步{0}商品完成！（{1}个）", where, productList.Count);
-                    return true;
-                }
+
             }
-            return false;
+            var dt = DateTime.Now;
+            foreach (var item in productList)
+            {
+                item.UpdateAt = dt;
+                item.Where = where;
+                item.原利润 = item.利润 = item.一口价 - item.进价;
+            }
+            AppDatabase.UpsertProductList(productList);
+            BindDGViewProduct();
+            SetTaskName("就绪");
+            AppendText("同步{0}商品完成！（{1}个）", where, productList.Count);
+            return true;
         }
         private void Connection_StateChanged(StateChange state)
         {
@@ -1393,7 +1390,9 @@ namespace WinFormsClient
             this.InvokeAction(() =>
             {
                 var selected = GetSelectedProductList();
+                dataGridViewItem.DataSource = null;
                 dataGridViewItem.DataSource = dt;
+                dt = null;
                 dataGridViewItem.ClearSelection();
                 SelectRows(selected);
             });
@@ -1425,7 +1424,7 @@ namespace WinFormsClient
             await UpProduct(productList.ToArray());
         }
 
-        public async Task<bool> SetProductProfit(ProductItem product, Func<ProductItem, decimal> Getprofit, bool forceModify = false)
+        public async Task<bool> SetProductProfit(ProductItem product, Func<ProductItem, decimal> Getprofit, bool forceModify = false, bool isUserOperation = false)
         {
             decimal profit = Getprofit(product);
             SuplierInfo supplier = null;
@@ -1477,7 +1476,13 @@ namespace WinFormsClient
                     else
                     {
                         product.ModifyProfitSubmitted = true;
+                        if (isUserOperation)
+                        {
+                            //备份原始利润
+                            product.原利润 = profit;
+                        }
                         AppDatabase.db.ProductItems.Update(product);
+                        BindDGViewProduct();
                         return true;
                     }
                 }
@@ -1500,7 +1505,7 @@ namespace WinFormsClient
             foreach (var id in selectedList)
             {
                 var product = AppDatabase.db.ProductItems.FindById(id);
-                await SetProductProfit(product, (x) => profit);
+                await SetProductProfit(product, (x) => profit, forceModify: false, isUserOperation: true);
             }
         }
 
@@ -1524,7 +1529,7 @@ namespace WinFormsClient
                         profit = AppSetting.UserSetting.Get<decimal>("话费直充利润");
                     }
                     return profit;
-                });
+                }, isUserOperation: true);
             }
         }
 
@@ -1747,14 +1752,12 @@ namespace WinFormsClient
             var rows = dataGridViewItem.Rows.AsList<DataGridViewRow>();
             if (productIds.Any())
             {
-                var slectedRows = new List<DataGridViewRow>();
                 foreach (var item in rows)
                 {
                     var productId = (long)((System.Data.DataRowView)item.DataBoundItem).Row.ItemArray[0];
                     if (productIds.Any(x => x == productId))
                     {
                         item.Selected = true;
-                        slectedRows.Add(item);
                     }
                 }
             }
@@ -2045,21 +2048,34 @@ namespace WinFormsClient
             var products = AppDatabase.db.ProductItems.FindAll().Where(x => ids.Contains(x.Id));
             foreach (var item in products)
             {
-                if (!item.SyncSuplierSubmited)
+                if (!item.SyncProfitSubmited)
                 {
-                    item.SyncSuplierSubmited = true;
+                    item.SyncProfitSubmited = true;
                     AppDatabase.db.ProductItems.Update(item);
-                    SyncSupplierQueue.CreateTaskItem(item, SyncSupplierInfo, success =>
+                    SyncSupplierQueue.CreateTaskItem(item, SyncSupplierInfo, x =>
                     {
-                        if (item.SyncSuplierSubmited)
+                        var product = AppDatabase.db.ProductItems.FindById(x.ProductId);
+                        if (x.Success)
                         {
-                            item.SyncSuplierSubmited = false;
-                            AppDatabase.db.ProductItems.Update(item);
+                            //备份原始利润
+                            product.原利润 = product.利润;
                         }
+                        if (product.SyncProfitSubmited)
+                        {
+                            product.SyncProfitSubmited = false;
+                        }
+                        AppDatabase.db.ProductItems.Update(product);
+                        BindDGViewProduct();
                     });
                 }
             }
+            BindDGViewProduct();
             AppendText("任务已提交至后台执行");
+        }
+        public class SimpleResult
+        {
+            public bool Success { get; set; }
+            public long ProductId { get; set; }
         }
 
         private void button自动上架_Click(object sender, EventArgs e)

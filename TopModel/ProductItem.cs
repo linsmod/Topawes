@@ -61,11 +61,14 @@ namespace TopModel
         /// <summary>
         /// 淘宝一口价 如 4.80元
         /// </summary>
-        [Display(Name = "一口价")]
         public decimal 一口价 { get; set; }
 
-        [Display(Name = "利润")]
         public decimal 利润 { get; set; }
+
+        /// <summary>
+        /// 通过界面右键菜单或按钮设置的利润值
+        /// </summary>
+        public decimal 原利润 { get; set; }
 
         [Display(Name = "供应商")]
         public string SupplierId { get; set; }
@@ -83,11 +86,13 @@ namespace TopModel
         /// <summary>
         /// 同步供应商操作已提交
         /// </summary>
-        public bool SyncSuplierSubmited { get; set; }
+        [Display(Name = "同步利润")]
+        public bool SyncProfitSubmited { get; set; }
 
         /// <summary>
         /// 改价操作已提交
         /// </summary>
+        [Display(Name = "修改利润")]
         public bool ModifyProfitSubmitted { get; set; }
 
         public void OnDownshelf(LiteCollection<ProductItem> productItems)
@@ -134,6 +139,17 @@ namespace TopModel
             this.SupplierId = supplier.profitData[0].id;
             this.UpdateAt = DateTime.Now;
             productItems.Update(this);
+        }
+        /// <summary>
+        /// 是否需要恢复价格
+        /// </summary>
+        [Display(Name = "恢复价格")]
+        public bool NeedResotreProfit
+        {
+            get
+            {
+                return this.利润 != this.原利润;
+            }
         }
     }
 }
