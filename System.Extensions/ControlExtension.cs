@@ -235,5 +235,15 @@ namespace System.Windows.Forms
             else
                 method();
         }
+
+        public static void InvokeAction<T>(this Control control, Action<T> method, T args)
+        {
+            if (control.InvokeRequired)
+            {
+                control.Invoke(method, args);
+            }
+            else
+                method.Invoke(args);
+        }
     }
 }

@@ -21,6 +21,7 @@
     <DefineConstants>DEBUG;TRACE</DefineConstants>
     <ErrorReport>prompt</ErrorReport>
     <WarningLevel>4</WarningLevel>
+    <UseVSHostingProcess>true</UseVSHostingProcess>
   </PropertyGroup>
   <PropertyGroup Condition=" '$(Configuration)|$(Platform)' == 'Release|AnyCPU' ">
     <DebugType>pdbonly</DebugType>
@@ -84,6 +85,9 @@
   </ItemGroup>
   <ItemGroup>
     <Compile Include="AppSetting.cs" />
+    <Compile Include="Common\EventArgs.cs" />
+    <Compile Include="Helpers\CertificateHelper.cs" />
+    <Compile Include="Helpers\CookieHelper.cs" />
     <Compile Include="Helpers\HttpHelper.cs" />
     <Compile Include="Helpers\IEFeatureControl.cs" />
     <Compile Include="Microsoft\ShDocVw\DWebBrowserEvents2.cs" />
@@ -97,6 +101,35 @@
     <Compile Include="EntityStorage\Extensions\DbContextExtension.cs" />
     <Compile Include="EntityStorage\Extensions\LiteDbExtension.cs" />
     <Compile Include="Properties\AssemblyInfo.cs" />
+    <Compile Include="Common\Tracing\DiagnosticLogTextWriter.cs" />
+    <Compile Include="Common\Tracing\IThreadSafeTracer.cs" />
+    <Compile Include="Common\Tracing\ITraceWriter.cs" />
+    <Compile Include="Common\Tracing\ThreadSafeTracer.cs" />
+    <Compile Include="Common\Tracing\TraceListenerAdapter.cs" />
+    <Compile Include="Common\Tracing\TraceManager.cs" />
+    <Compile Include="Common\Tracing\Tracer.cs" />
+    <Compile Include="StateMachine\BaseTypes\BaseErrorState.cs" />
+    <Compile Include="StateMachine\BaseTypes\BaseState.cs" />
+    <Compile Include="StateMachine\BaseTypes\BaseStateMachine.cs" />
+    <Compile Include="StateMachine\BaseTypes\BaseStateMachineErrorEventArgs.cs" />
+    <Compile Include="StateMachine\BaseTypes\BaseTransition.cs" />
+    <Compile Include="StateMachine\BaseTypes\Error.cs" />
+    <Compile Include="StateMachine\BaseTypes\ErrorTransition.cs" />
+    <Compile Include="StateMachine\BaseTypes\TransitionEventArgs.cs" />
+    <Compile Include="StateMachine\DefaultTypes\DefaultTransition.cs" />
+    <Compile Include="StateMachine\DefaultTypes\DelayedState.cs" />
+    <Compile Include="StateMachine\DefaultTypes\EndState.cs" />
+    <Compile Include="StateMachine\DefaultTypes\ErrorEndState.cs" />
+    <Compile Include="StateMachine\DefaultTypes\LambdaTransition.cs" />
+    <Compile Include="StateMachine\DefaultTypes\StartState.cs" />
+    <Compile Include="StateMachine\DefaultTypes\StateMachineState.cs" />
+    <Compile Include="StateMachine\DefaultTypes\TransitionFromErrorState.cs" />
+    <Compile Include="StateMachine\DefaultTypes\TransitionToErrorState.cs" />
+    <Compile Include="StateMachine\Exceptions\InternalException.cs" />
+    <Compile Include="StateMachine\Exceptions\UnexpectedErrorException.cs" />
+    <Compile Include="StateMachine\Transitions\PropagateErrorTransition.cs" />
+    <Compile Include="StateMachine\Transitions\PropagateStateStatusTransition.cs" />
+    <Compile Include="StateMachine\Transitions\StateStatusTransition.cs" />
     <Compile Include="Treading\BlockingQueue.cs" />
     <Compile Include="Treading\SendOrPostCallbackItem.cs" />
     <Compile Include="Treading\StaSynchronizationContext.cs" />

@@ -15,7 +15,7 @@ namespace WinFormsClient
         public BaseForm()
         {
             InitializeComponent();
-            this.StartPosition = FormStartPosition.CenterParent;
+            this.StartPosition = FormStartPosition.CenterScreen;
         }
     }
 }

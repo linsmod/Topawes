@@ -16,34 +16,20 @@ using Moonlight.WindowsForms.Controls;
 
 namespace WinFormsClient.WBMode
 {
-    public class TaoAccount
-    {
-        public TaoAccount(string userName, string password)
-        {
-            Username = userName;
-            Password = password;
-        }
-
-        public string Username { get; set; }
-        public string Password { get; set; }
-    }
-    public class WBTaoLoginMode : WebBrowserMode<WBTaoLoginMode>
+    public class WBTaoLoginState : WebBrowserMode<WBTaoLoginState>
     {
         public event Action UserCancelLogin;
         public event Action AskHideUI;
-        public event Action AskShowUI;
-        public event Action RequireLogin;
-        public event Action LoginSuccess;
-        public List<string> CookieHeaders = new List<string>();
         public string AuthorizedUrl { get; set; }
         public bool IsPasswordLogin { get; set; }
-        public WBTaoLoginMode(string authorizedUrl)
+        public WBTaoLoginState()
         {
-            AuthorizedUrl = authorizedUrl;
+            AuthorizedUrl = "http://123.56.122.122:8080/";
         }
 
         protected override void EnterModeInternal(ExtendedWinFormsWebBrowser webBrowser)
         {
+            webBrowser.Dock = DockStyle.Fill;
             webBrowser.ScrollBarsEnabled = false;
             webBrowser.ScriptErrorsSuppressed = true;
             //WB.IsWebBrowserContextMenuEnabled = false;
@@ -55,7 +41,6 @@ namespace WinFormsClient.WBMode
             {
                 e.Cancel = true;
                 Process.Start(e.Url.ToString());
-                InvokeEventHandler(this.AskHideUI);
             }
         }
         //获取所有的frame
@@ -94,7 +79,6 @@ namespace WinFormsClient.WBMode
             {
                 return;
             }
-            CookieHeaders = IECookieHelper.GetCookieHeaderList(WB, CookieHeaders);
             if (html.IndexOf("secondVerifyRender();") != -1)
             {
                 return;
@@ -111,8 +95,6 @@ namespace WinFormsClient.WBMode
             }
             if (url.IndexOf("https://login.taobao.com/member/login.jhtml") != -1)
             {
-
-                this.InvokeEventHandlerAsync(this.RequireLogin);
                 try
                 {
                     IHTMLControlElement J_QuickLogin = (IHTMLControlElement)doc.getElementById("J_QuickLogin");
@@ -157,20 +139,29 @@ namespace WinFormsClient.WBMode
                         var current = WB.Document.Body.JQuerySelect("#J_QuickLogin .userlist .current label");
                         if (current.Any())
                         {
-                            var nick = current[0].InnerText;
-                            InitAppUserSetting(nick);
-                            if (!string.IsNullOrEmpty(AppSetting.UserSetting.Get<string>("TaoUserName")))
+                            if (AppSetting.UserSetting != null)
                             {
-                                if (nick == AppSetting.UserSetting.Get<string>("TaoUserName"))
+                                //使用其他账户登录
+                                WB.Document.All["J_Quick2Static"].InvokeMember("click");
+                                StaticLogin(doc); 
+                            }
+                            else
+                            {
+                                var nick = current[0].InnerText;
+                                InitAppUserSetting(nick);
+                                if (!string.IsNullOrEmpty(AppSetting.UserSetting.Get<string>("TaoUserName")))
                                 {
-                                    if (AppSetting.UserSetting.Get<bool>("AutoSelectLoginedAccount"))
-                                        WB.Document.All["J_SubmitQuick"].InvokeMember("click");
-                                }
-                                else
-                                {
-                                    //使用其他账户登录
-                                    WB.Document.All["J_Quick2Static"].InvokeMember("click");
-                                    StaticLogin(doc);
+                                    if (nick == AppSetting.UserSetting.Get<string>("TaoUserName"))
+                                    {
+                                        if (AppSetting.UserSetting.Get<bool>("AutoSelectLoginedAccount"))
+                                            WB.Document.All["J_SubmitQuick"].InvokeMember("click");
+                                    }
+                                    else
+                                    {
+                                        //使用其他账户登录
+                                        WB.Document.All["J_Quick2Static"].InvokeMember("click");
+                                        StaticLogin(doc);
+                                    }
                                 }
                             }
                         }
@@ -193,6 +184,10 @@ namespace WinFormsClient.WBMode
                     WB.Navigate(AuthorizedUrl);
                 }
             }
+            if (url.StartsWith("http://container.api.taobao.com/container") && WB.DocumentTitle == "错误页面")
+            {
+                AppSetting.UserSetting.SetNull("AutoSelectLoginedAccount");
+            }
         }
         private void InitAppUserSetting(string userName)
         {
@@ -203,6 +198,10 @@ namespace WinFormsClient.WBMode
         private void StaticLogin(HTMLDocument doc)
         {
             IHTMLInputTextElement TPL_username_1 = (IHTMLInputTextElement)doc.getElementById("TPL_username_1");
+            if (AppSetting.UserSetting != null)
+            {
+                TPL_username_1.value = AppSetting.UserSetting.UserName;
+            }
             var userName = TPL_username_1.value;
             InitAppUserSetting(userName);
             //J_Static表单登录
@@ -226,6 +225,7 @@ namespace WinFormsClient.WBMode
                         if (!string.IsNullOrEmpty(password))
                         {
                             passwordEl.SetAttribute("value", password);
+                            Application.DoEvents();
                             //如果验证码窗口没有显示就点击提交按钮，否则用户自己去点
                             if (WB.Document.Body.JQuerySelect(".field-checkcode.hidden").Any())
                             {
@@ -243,25 +243,12 @@ namespace WinFormsClient.WBMode
             if (url == AuthorizedUrl)
             {
                 WB.Stop();
-                this.CookieHeaders = IECookieHelper.GetCookieHeaderList(this.WB, this.CookieHeaders);
-                InvokeEventHandler(this.AskHideUI);
                 if (IsPasswordLogin)
                 {
                     AppSetting.UserSetting.Set("TaoPasswordOK", true);
                 }
-                this.OnLoginSuccess();
+                InvokeEventHandler(this.AskHideUI);
             }
-        }
-
-        private void OnLoginSuccess()
-        {
-            var h = this.LoginSuccess;
-            if (h != null)
-            {
-                h.BeginInvoke(null, null);
-            }
-            else
-                throw new Exception("没有为事件LoginSuccess注册处理程序");
         }
 
         private void InvokeEventHandlerAsync(Action eventHandler)
@@ -292,7 +279,8 @@ namespace WinFormsClient.WBMode
 
         protected override void LeaveModeInternal(ExtendedWinFormsWebBrowser webBrowser)
         {
-            //do noting
+            webBrowser.ScrollBarsEnabled = true;
+            webBrowser.ScriptErrorsSuppressed = true;
         }
     }
 }

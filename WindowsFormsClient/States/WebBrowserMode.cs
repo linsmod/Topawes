@@ -14,16 +14,17 @@ namespace WinFormsClient.WBMode
     public class SynchronousLoadResult
     {
         private SynchronousLoadResult() { }
-        public static SynchronousLoadResult GetWebBrowserResult(bool success)
+        public static SynchronousLoadResult GetWebBrowserResult(bool success, bool loginRequried = false)
         {
             return new SynchronousLoadResult
             {
                 Success = success,
                 IsWebBrowserResult = true,
-                IsFileDownloadResult = false
+                IsFileDownloadResult = false,
+                LoginRequired = false
             };
         }
-        public static SynchronousLoadResult GetFileDownloadResult(bool success, string filePath)
+        public static SynchronousLoadResult GetFileDownloadResult(bool success, string filePath, bool loginRequried = false)
         {
             return new SynchronousLoadResult
             {
@@ -37,6 +38,7 @@ namespace WinFormsClient.WBMode
         public bool IsWebBrowserResult { get; private set; }
         public bool IsFileDownloadResult { get; private set; }
         public string FilePath { get; set; }
+        public bool LoginRequired { get; private set; }
     }
     public abstract class WebBrowserMode<T> : IWebBrowserMode where T : IWebBrowserMode
     {
@@ -65,15 +67,22 @@ namespace WinFormsClient.WBMode
         /// </summary>
         public void Enter(ExtendedWinFormsWebBrowser webBrowser)
         {
+            webBrowser.Tag = this;
             webBrowser.ProgressChanged += WB_ProgressChanged;
             webBrowser.Navigating += WebBrowser_Navigating;
             webBrowser.NewWindow += WebBrowser_NewWindow;
             webBrowser.DocumentCompleted += WebBrowser_DocumentCompleted;
             webBrowser.Navigated += WebBrowser_Navigated;
-            webBrowser.Dock = DockStyle.Fill;
             this.EnterModeInternal(webBrowser);
             WB = webBrowser;
             this.IsActive = true;
+        }
+
+        public WebBrowserMode<TState> TransitionToNext<TState>(WebBrowserMode<TState> state, ExtendedWinFormsWebBrowser wb) where TState : IWebBrowserMode
+        {
+            this.Leave();
+            state.Enter(wb);
+            return state;
         }
 
         private void WebBrowser_Navigated(object sender, WebBrowserNavigatedEventArgs e)
@@ -115,14 +124,15 @@ namespace WinFormsClient.WBMode
         /// <summary>
         /// 离开该模式
         /// </summary>
-        public void Leave(ExtendedWinFormsWebBrowser webBrowser)
+        public void Leave()
         {
-            webBrowser.ProgressChanged -= WB_ProgressChanged;
-            webBrowser.Navigating -= WebBrowser_Navigating;
-            webBrowser.NewWindow -= WebBrowser_NewWindow;
-            webBrowser.DocumentCompleted -= WebBrowser_DocumentCompleted;
-            webBrowser.Navigated -= WebBrowser_Navigated;
-            LeaveModeInternal(webBrowser);
+            WB.ProgressChanged -= WB_ProgressChanged;
+            WB.Navigating -= WebBrowser_Navigating;
+            WB.NewWindow -= WebBrowser_NewWindow;
+            WB.DocumentCompleted -= WebBrowser_DocumentCompleted;
+            WB.Navigated -= WebBrowser_Navigated;
+            LeaveModeInternal(WB);
+            WB.Tag = null;
             this.IsActive = false;
         }
 
@@ -148,6 +158,7 @@ namespace WinFormsClient.WBMode
     public interface IWebBrowserMode
     {
         void Enter(ExtendedWinFormsWebBrowser extendedWinFormsWebBrowser);
-        void Leave(ExtendedWinFormsWebBrowser extendedWinFormsWebBrowser);
+        void Leave();
+        WebBrowserMode<TState> TransitionToNext<TState>(WebBrowserMode<TState> state, ExtendedWinFormsWebBrowser wb) where TState : IWebBrowserMode;
     }
 }

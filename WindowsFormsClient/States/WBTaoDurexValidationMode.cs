@@ -8,7 +8,7 @@ using Moonlight.WindowsForms.Controls;
 
 namespace WinFormsClient.WBMode
 {
-    public class WBTaoDurexValidationMode : WebBrowserMode<WBTaoDurexValidationMode>
+    public class WBTaoDurexValidationState : WebBrowserMode<WBTaoDurexValidationState>
     {
         public async Task Start(string durexParam)
         {

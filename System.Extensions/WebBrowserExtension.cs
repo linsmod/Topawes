@@ -66,6 +66,7 @@ namespace System.Windows.Forms
                 if (wb.IsBusy)
                     continue;
             }
+            
             return content.ToString();
         }
 

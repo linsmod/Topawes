@@ -26,31 +26,29 @@ namespace WinFormsClient.Helpers
 
         internal SynchronousNavigationContext SyncNavContext { get; private set; }
 
-        public static void InitWBHelper(Control parent, string initUrl, int count)
+        public static void InitWBHelper(Control parent, string initUrl)
         {
-            if (wbQueue.Count <= 1)
+            int i = 0;
+            foreach (var item in parent.Controls)
             {
-                int i = 0;
-                foreach (var item in parent.Controls)
+                var wb = item as ExtendedWinFormsWebBrowser;
+                if (wb != null)
                 {
-                    var wb = item as ExtendedWinFormsWebBrowser;
-                    if (wb != null)
+                    wb.ScriptErrorsSuppressed = true;
+                    if (i % 2 == 0)
                     {
-                        wb.ScriptErrorsSuppressed = true;
-                        if (i + 1 < count)
-                        {
-                            wbQueue.Enqueue(wb);
-                        }
-                        else
-                        {
-                            ajaxWbQueue.Enqueue(wb);
-                        }
-                        wb.Navigate(initUrl);
-                        TaskEx.Delay(200).Wait();
+                        wbQueue.Enqueue(wb);
                     }
+                    else
+                    {
+                        ajaxWbQueue.Enqueue(wb);
+                    }
+                    wb.Navigate(initUrl);
+                    i++;
                 }
             }
         }
+
         public WBHelper(bool ajax)
         {
             ExtendedWinFormsWebBrowser exWb = wbQueue.Dequeue();
@@ -59,13 +57,13 @@ namespace WinFormsClient.Helpers
                 throw new Exception("在使用前必须将浏览器放入某个控件");
             }
             this.WB = exWb;
-            WB.DownloadCompleted += WB_DownloadCompleted;
-            WB.DocumentCompleted += WB_DocumentCompleted;
-            //WB.Navigated += WB_Navigated;
+            SubscribEvents();
         }
 
         private void WB_Navigated(object sender, WebBrowserNavigatedEventArgs e)
         {
+            if (SyncNavContext == null)
+                return;
             if (!SyncNavContext.Tcs.Task.IsCompleted && SyncNavContext.EndUrl == WB.Document.Url.AbsoluteUri)
             {
                 if ((int)SyncNavContext.Tcs.Task.Status <= 3)
@@ -99,9 +97,16 @@ namespace WinFormsClient.Helpers
                 SyncNavContext.Tcs.TrySetResult(SynchronousLoadResult.GetFileDownloadResult(false, client.DownloadPath));
             }
         }
-
+        private static event Action LoginRequired;
         private void WB_DocumentCompleted(object sender, WebBrowserDocumentCompletedEventArgs e)
         {
+            if (SyncNavContext == null)
+                return;
+            if (e.Url.AbsoluteUri.StartsWith("https://login.taobao.com/member/login.jhtml"))
+            {
+                SyncNavContext.Tcs.TrySetResult(SynchronousLoadResult.GetWebBrowserResult(false, true));
+                return;
+            }
             if (!SyncNavContext.Tcs.Task.IsCompleted && SyncNavContext.EndUrl == WB.Document.Url.AbsoluteUri)
             {
                 if ((int)SyncNavContext.Tcs.Task.Status <= 3)
@@ -115,12 +120,13 @@ namespace WinFormsClient.Helpers
             }
         }
 
-        public async Task<HtmlDocument> SynchronousLoadDocument(string url)
+        public async Task<DataLoadResult<HtmlDocument>> SynchronousLoadDocument(string url)
         {
             return await SynchronousLoadDocument(url, url, 15, CancellationToken.None);
         }
-        public async Task<HtmlDocument> SynchronousLoadDocument(string url, string endUrl, int timeoutSeconds, CancellationToken token)
+        public async Task<DataLoadResult<HtmlDocument>> SynchronousLoadDocument(string url, string endUrl, int timeoutSeconds, CancellationToken token)
         {
+            cancelDelayTokenSource = new CancellationTokenSource();
             this.SyncNavContext = new SynchronousNavigationContext
             {
                 StartUrl = url,
@@ -136,16 +142,20 @@ namespace WinFormsClient.Helpers
                 this.WB.Navigate(url);
                 var result = await SyncNavContext.Tcs.Task;
                 cancelDelayTokenSource.Cancel();
-
+                if (result.LoginRequired)
+                {
+                    UnsubscribEvents();
+                    return new DataLoadResult<HtmlDocument> { LoginRequired = true };
+                }
                 if (result.Success) // wait for DocumentCompleted
                 {
                     if (result.IsWebBrowserResult)
-                        return WB.Document;
+                        return new DataLoadResult<HtmlDocument> { Data = WB.Document };
                     else
                         throw new NotSupportedException("无法将文件转换为HtmlElement");
                 }
             }
-            return null;
+            return new DataLoadResult<HtmlDocument> { Data = null };
         }
         public void SetTimeoutThread(SynchronousNavigationContext snc)
         {
@@ -167,13 +177,14 @@ namespace WinFormsClient.Helpers
             });
         }
 
-        public async Task<string> SynchronousLoadString(string url)
+        public async Task<DataLoadResult<string>> SynchronousLoadString(string url)
         {
             return await SynchronousLoadString(url, CancellationToken.None);
         }
 
-        public async Task<string> SynchronousLoadString(string url, CancellationToken token)
+        public async Task<DataLoadResult<string>> SynchronousLoadString(string url, CancellationToken token)
         {
+            cancelDelayTokenSource = new CancellationTokenSource();
             this.SyncNavContext = new SynchronousNavigationContext
             {
                 StartUrl = url,
@@ -189,92 +200,69 @@ namespace WinFormsClient.Helpers
                 this.WB.Navigate(url);
                 var result = await SyncNavContext.Tcs.Task;
                 cancelDelayTokenSource.Cancel();
+                if (result.LoginRequired)
+                {
+                    UnsubscribEvents();
+                    return new DataLoadResult<string>
+                    {
+                        LoginRequired = true
+                    };
+                }
                 if (result.Success) // wait for DocumentCompleted
                 {
                     if (result.IsWebBrowserResult)
-                        return WB.DocumentText;
+                        return new DataLoadResult<string> { Data = WB.DocumentText };
                     else if (System.IO.File.Exists(result.FilePath))
                     {
                         var content = System.IO.File.ReadAllText(result.FilePath);
                         System.IO.File.Delete(result.FilePath);
-                        return content;
+                        return new DataLoadResult<string> { Data = content };
                     }
                 }
             }
-            return string.Empty;
-        }
-
-        /// <summary>
-        /// 查询供应商信息
-        /// </summary>
-        /// <param name="wb"></param>
-        /// <param name="spu"></param>
-        /// <returns></returns>
-        public async Task<SuplierInfo> supplierInfo(string spu)
-        {
-            var url = "http://chongzhi.taobao.com/item.do?spu={0}&action=edit&method=supplierInfo";
-            url = string.Format(url, spu);
-            var content = await SynchronousLoadString(url, CancellationToken.None);
-            var suplierInfo = JsonConvert.DeserializeObject<SuplierInfo>(content);
-            if (suplierInfo.profitData != null && suplierInfo.profitData.Any())
+            return new DataLoadResult<string>
             {
-                //查到供应商
-                return suplierInfo;
-            }
-            else
-            {
-                //无供应商,平台默认会自动关单
-                return null;
-            }
+                Data = string.Empty
+            };
         }
 
-        /// <summary>
-        /// 设置供应商
-        /// </summary>
-        /// <param name="wb"></param>
-        /// <param name="sup"></param>
-        /// <param name="spu"></param>
-        /// <param name="profitMin"></param>
-        /// <param name="profitMax"></param>
-        /// <param name="price"></param>
-        /// <param name="itemId"></param>
-        /// <returns></returns>
-        public async Task<TaoJsonpResult> supplierSave(string sup, string spu, string profitMin, string profitMax, string price, string itemId, string tbcpCrumbs)
-        {
-            //profitMode=0 保证我赚钱
-            //profitMode=2 自定义
-            var url = "http://chongzhi.taobao.com/item.do?method=supplierSave&sup={0}&mode=2&spu={1}&itemId={2}&profitMode=2&profitMin={3}&profitMax={4}&price={5}&tbcpCrumbs={6}";
-            url = string.Format(url, sup, spu, itemId, profitMin, profitMax, price, tbcpCrumbs);
-            var content = await SynchronousLoadString(url, CancellationToken.None);
-            return JsonConvert.DeserializeObject<TaoJsonpResult>(content);
-        }
-
-        /// <summary>
-        /// 获取tbcpCrumbs参数
-        /// </summary>
-        /// <returns></returns>
-        public async Task<string> GettbcpCrumbs()
-        {
-            //var doc = await SynchronousLoadDocument("http://chongzhi.taobao.com/item.do?method=list&type=1&keyword=&category=0&supplier=0&promoted=0&order=0&desc=0&page=1&size=20").ConfigureAwait(false);
-            //var tbcpCrumbs = doc.Body.JquerySelectInputHidden("tbcpCrumbs");
-            //return tbcpCrumbs;
-            return null;
-        }
-
-        public void Dispose()
+        private void UnsubscribEvents()
         {
             WB.DownloadCompleted -= WB_DownloadCompleted;
             WB.DocumentCompleted -= WB_DocumentCompleted;
             WB.Navigated -= WB_Navigated;
+        }
+
+        public void SubscribEvents()
+        {
+            WB.DownloadCompleted += WB_DownloadCompleted;
+            WB.DocumentCompleted += WB_DocumentCompleted;
+        }
+
+        public void Dispose()
+        {
+            UnsubscribEvents();
             wbQueue.Enqueue(WB);
         }
 
-        public async Task PrepareIfNoneDocument(string v)
+        public async Task<DataLoadResult<HtmlDocument>> PrepareIfNoneDocument(string v)
         {
-            if (WB.Document == null)
+            if (WB.Document == null || WB.Document.Url.AbsoluteUri.StartsWith("https://login.taobao.com/member/login.jhtml"))
             {
-                await this.SynchronousLoadString(v);
+                var doc = await this.SynchronousLoadDocument(v);
+                if (WB.Document.Url.AbsoluteUri.StartsWith("https://login.taobao.com/member/login.jhtml"))
+                {
+                    UnsubscribEvents();
+                }
+                return doc;
             }
+            return new DataLoadResult<HtmlDocument> { LoginRequired = false,Data= WB.Document };
         }
+    }
+    public class DataLoadResult<T>
+    {
+
+        public T Data { get; set; }
+        public bool LoginRequired { get; internal set; }
     }
 }

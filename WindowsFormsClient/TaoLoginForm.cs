@@ -27,13 +27,17 @@ namespace WinFormsClient
         /// </summary>
         public event Action AskSelectAccount;
 
-        public WBTaoLoginMode wbMode;
-        public TaoLoginForm(WBTaoLoginMode wbMode)
+        public WBTaoLoginState wbMode;
+        public TaoLoginForm(WBTaoLoginState wbMode)
         {
             this.wbMode = wbMode;
             InitializeComponent();
             this.Load += (s, e) => { wbMode.Navigate("https://login.taobao.com/member/login.jhtml?style=mini_top&redirectURL=http%3A%2F%2Fcontainer.api.taobao.com%2Fcontainer%3Fappkey%3D23140690"); };
-            wbMode.AskHideUI += () => this.Hide();
+            wbMode.AskHideUI += () =>
+            {
+                this.DialogResult = DialogResult.OK;
+                this.Close(); 
+            };
             wbMode.WB.ProgressChanged2 += WbMode_ProgressChanged;
             this.VisibleChanged += TaoLoginForm_VisibleChanged;
             this.Controls.Add(wbMode.WB);

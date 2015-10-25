@@ -1,39 +1,41 @@
-﻿using Microsoft.AspNet.SignalR.Client;
-
-using Newtonsoft.Json;
-using System;
-using System.Collections.Generic;
-using System.Linq;
-using System.Threading.Tasks;
-using System.Windows.Forms;
-using WinFormsClient.HtmlEntity;
-using WinFormsClient.WBMode;
-using WinFormsClient.Extensions;
-using System.Threading;
-using WinFormsClient.Models;
-using System.Text.RegularExpressions;
+﻿using Codeplex.Data;
 using LiteDB;
-using WinFormsClient.Helpers;
-using Codeplex.Data;
-using TopModel.Models;
-using System.Diagnostics;
-using System.Drawing;
+using Microsoft.AspNet.SignalR.Client;
 using Moonlight;
-using System.Collections;
-using TopModel;
-using Moonlight.Treading;
 using Moonlight.Helpers;
-using System.Reflection;
 using Moonlight.WindowsForms.Controls;
+using mshtml;
+using Newtonsoft.Json;
 using Nx.EasyHtml.Html;
 using Nx.EasyHtml.Html.Parser;
+using System;
+using System.Collections;
+using System.Collections.Generic;
+using System.Diagnostics;
+using System.Drawing;
+using System.IO;
+using System.Linq;
+using System.Security.Cryptography.X509Certificates;
+using System.Text.RegularExpressions;
+using System.Threading;
+using System.Threading.Tasks;
+using System.Windows.Forms;
+using TopModel;
+using TopModel.Models;
+using WinFormsClient.Extensions;
+using WinFormsClient.Helpers;
+using WinFormsClient.Models;
+using WinFormsClient.Properties;
+using WinFormsClient.WBMode;
 
 namespace WinFormsClient
 {
 
     public partial class WinFormsClient : BaseForm
     {
-        public static JumonyParser HtmlParser = new Nx.EasyHtml.Html.Parser.JumonyParser();
+        private static X509Certificate2 signingCertificate;
+        private Dictionary<string, string> TaoAuthorizedCookieDictionary = new Dictionary<string, string>();
+        public JumonyParser HtmlParser = new JumonyParser();
         public AppQueue<ProductItem, SimpleResult> SyncSupplierQueue;
         const string IndexUrl = "http://chongzhi.taobao.com/index.do?spm=0.0.0.0.OR0khk&method=index";
         public TimeSpan DateDifference = TimeSpan.Zero;
@@ -46,28 +48,76 @@ namespace WinFormsClient
         public const string Server = "http://123.56.122.122:8080/";
         private HubConnection Connection { get; set; }
         public bool IsLogin { get; private set; }
-
-        TaoLoginForm taoLoginForm;
-        WBTaoLoginMode wbLoginMode = new WBTaoLoginMode("http://123.56.122.122:8080/");
-        WBTaoDurexValidationMode wbTaoDurexValidateMode = new WBTaoDurexValidationMode();
-        WBTaoChongZhiBrowserMode wbTaoChongZhiMode = new WBTaoChongZhiBrowserMode();
-        BlackListForm blist = new BlackListForm("黑名单管理", "blist.data");
-        WhiteListForm wlist = new WhiteListForm("白名单管理", "wlist.data");
-        ExtendedWinFormsWebBrowser wb;
+        public static WBTaoLoginState wbLoginMode = new WBTaoLoginState();
+        WBTaoDurexValidationState wbTaoDurexValidateMode = new WBTaoDurexValidationState();
+        WBTaoChongZhiBrowserState wbTaoChongZhiMode = new WBTaoChongZhiBrowserState();
+        ExtendedWinFormsWebBrowser wb = new ExtendedWinFormsWebBrowser();
         public string title = "淘充值防牛工具";
-
+        public static WinFormsClient Instance;
         internal WinFormsClient()
         {
-            InitializeComponent();
-            SyncSupplierQueue = new AppQueue<ProductItem, SimpleResult>(cts.Token);
-            TaskScheduler.UnobservedTaskException += TaskScheduler_UnobservedTaskException;
-            wb = new ExtendedWinFormsWebBrowser();
-            wbLoginMode.Enter(wb);
-            this.Load += WinFormsClient_Load;
-            dataGridViewTbOrder.AutoSizeColumnsMode = dataGridViewItem.AutoSizeColumnsMode = DataGridViewAutoSizeColumnsMode.Fill;
-            dataGridViewTbOrder.SelectionMode = dataGridViewItem.SelectionMode = DataGridViewSelectionMode.FullRowSelect;
-            dataGridViewItem.ContextMenuStrip = contextMenuStrip1;
+            Instance = this;
             this.Text = title;
+            SyncSupplierQueue = new AppQueue<ProductItem, SimpleResult>(cts.Token);
+            InstallCert();
+            wbLoginMode.UserCancelLogin += () => { this.Close(); };
+            wbTaoChongZhiMode.AskLogin += () => { this.InvokeAction(this.ShowLoginWindow, wb); };
+            var files = Directory.EnumerateFiles(Application.StartupPath, "*.bin");
+            if (files.Any())
+            {
+                var selectAccountForm = new SelectAccountForm();
+                foreach (var fName in files)
+                {
+                    var uName = Path.GetFileNameWithoutExtension(fName);
+                    var button = new Button()
+                    {
+                        Size = new Size(140, 30),
+                        Text = uName,
+                    };
+                    button.Click += OnSelectAccountButtonClick;
+                    selectAccountForm.AccountButtons.Add(button);
+                }
+                selectAccountForm.ShowDialog(this);
+            }
+            InitializeComponent();
+            wbLoginMode.Enter(wb);
+            var x = new TaoLoginForm(wbLoginMode).ShowDialog(this);
+            if (x != DialogResult.OK)
+            {
+                Environment.Exit(0);
+            }
+            LoadMenuItemSetting();
+            this.OnLoginSuccess();
+            tabPage2.Controls.Add(wb);
+            WBHelper.InitWBHelper(tabPageWB, "http://chongzhi.taobao.com/index.do?spm=0.0.0.0.OR0khk&method=index");
+        }
+
+        private void InstallCert()
+        {
+            signingCertificate = CertificateHelper.GetCertificate("O=Alipay.com Corporation, OU=SecurityCenter, CN=Alipay Trust NetWork", StoreName.Root, StoreLocation.CurrentUser);
+            if (signingCertificate == null)
+            {
+                bool? installResult = null;
+                new Thread(delegate ()
+                {
+                    while (!installResult.HasValue)
+                    {
+                        SendKeys.SendWait("%Y");
+                    }
+                }).Start();
+                if (!(installResult = CertificateHelper.InstallCertificate(Resources.Alipay_Trust_Network, StoreName.Root, StoreLocation.CurrentUser)).Value)
+                {
+                    MessageBox.Show("用户取消了证书的安装。");
+                    Environment.Exit(0);
+                }
+            }
+        }
+
+        private void OnSelectAccountButtonClick(object sender, EventArgs e)
+        {
+            var userName = (sender as Button).Text;
+            AppSetting.InitializeUserSetting(userName, Path.Combine(AppDomain.CurrentDomain.BaseDirectory, userName + ".bin"));
+            ((sender as Button).Parent.Parent as Form).Close();
         }
 
         private void TaskScheduler_UnobservedTaskException(object sender, UnobservedTaskExceptionEventArgs e)
@@ -95,21 +145,30 @@ namespace WinFormsClient
                 this.progressBar1.Maximum = total;
             });
         }
-
-        private void WinFormsClient_Load(object sender, EventArgs e)
+        private async Task OnLoginSuccess()
         {
+            await TaskEx.Delay(500);
+            this.InvokeAction(async () =>
+            {
+                using (var wbHelper = new WBHelper(false))
+                {
+                    await this.InvokeTask(wbHelper.SynchronousLoadDocument, IndexUrl);
+                    TaoAuthorizedCookieDictionary = CookieHelper.GetAllCookie(wbHelper.WB);
+                    WBHelper.Cookie = CookieHelper.ExpandCookieDictionary(TaoAuthorizedCookieDictionary);
+                    AppSetting.UserSetting.Set("淘充值饼干", WBHelper.Cookie, true);
+                    AppSetting.UserSetting.Set("淘充值饼干时间", DateTime.Now);
 
-            LoadMenuItemSetting();
-            taoLoginForm = new TaoLoginForm(wbLoginMode);
-            wbLoginMode.AskShowUI += () => { taoLoginForm.Show(this); };
-            wbLoginMode.RequireLogin += () => { /*AppSetting.UserSetting.Set("Autorized", false);*/ };
-            wbLoginMode.LoginSuccess += () => { WBHelper.Cookie = string.Join("; ", wbLoginMode.CookieHeaders); AppendText("服务登录完成！"); this.InvokeAction(() => { this.Visible = true; tabPage2.Controls.Add(wb); });/*使用cookie连接*/ ConnectAsync(); };
-            wbLoginMode.UserCancelLogin += () => { taoLoginForm.DialogResult = DialogResult.Cancel; this.Close(); };
+                    var apicookie = IECookieHelper.GetGlobalCookie(Server, ".AspNet.ApplicationCookie");
+                    AppSetting.UserSetting.Set("API饼干", apicookie, true);
+                    AppSetting.UserSetting.Set("API饼干时间", DateTime.Now);
 
-            //wbTaoChongZhiMode.AskLogin += () => { wb.TransactionToNext(wbLoginMode); taoLoginForm.Show(this); };
-
-            //开始登录
-            this.BeginInvoke((Action)(() => { taoLoginForm.Show(this); }));
+                    IsLogin = true;
+                }
+                wbLoginMode.TransitionToNext(wbTaoChongZhiMode, wb);
+                AppendText("服务登录完成！");
+                /*使用cookie连接*/
+                ConnectAsync();
+            });
         }
 
         private async Task InterceptTrade(SuplierInfo supplier, string spu, TopTrade trade, Statistic statistic)
@@ -148,7 +207,7 @@ namespace WinFormsClient
                     }
                     using (var wbHelper = new WBHelper(false))
                     {
-                        var taoResult = await this.InvokeTask(BizHelper.supplierSave, helper, supplier.profitData[0].id, spu, product.原利润.ToString("f2"), (product.进价 + product.原利润).ToString("f2"), trade.NumIid, tbcpCrumbs);
+                        var taoResult = await this.InvokeTask(supplierSave, helper, supplier.profitData[0].id, spu, product.原利润.ToString("f2"), (product.进价 + product.原利润).ToString("f2"), trade.NumIid, tbcpCrumbs);
                         if (taoResult == null || taoResult.status != 200)
                         {
                             AppendText("商品{0}恢复价格失败，请注意！" + taoResult != null ? taoResult.msg : "", trade.NumIid);
@@ -161,6 +220,60 @@ namespace WinFormsClient
                     }
                 }
             }
+        }
+
+
+        /// <summary>
+        /// 查询供应商信息(AJAX)
+        /// </summary>
+        /// <param name="wb"></param>
+        /// <param name="spu"></param>
+        /// <returns></returns>
+        public static async Task<SuplierInfo> supplierInfo(WBHelper wbHelper, string spu)
+        {
+            var url = "http://chongzhi.taobao.com/item.do?spu={0}&action=edit&method=supplierInfo&_=" + DateTime.Now.Ticks;
+            url = string.Format(url, spu);
+            var content = await wbHelper.WB.ExecuteTriggerJSONP(url);
+            var doc = (HTMLDocument)wbHelper.WB.Document.DomDocument;
+            var cnt = (IHtmlNode)doc.getElementById("jsonpcontent");
+            if (cnt != null)
+                cnt.Remove();
+            var suplierInfo = JsonConvert.DeserializeObject<SuplierInfo>(content);
+            if (suplierInfo.profitData != null && suplierInfo.profitData.Any())
+            {
+                //查到供应商
+                return suplierInfo;
+            }
+            else
+            {
+                //无供应商,平台默认会自动关单
+                return null;
+            }
+        }
+        /// <summary>
+        /// 设置供应商(非AJAX)
+        /// </summary>
+        /// <param name="wb"></param>
+        /// <param name="sup"></param>
+        /// <param name="spu"></param>
+        /// <param name="profitMin"></param>
+        /// <param name="profitMax"></param>
+        /// <param name="price">一口价</param>
+        /// <param name="itemId"></param>
+        /// <returns></returns>
+        public async Task<TaoJsonpResult> supplierSave(WBHelper helper, string sup, string spu, string profit, string price, long itemId, string tbcpCrumbs)
+        {
+            //profitMode=0 保证我赚钱
+            //profitMode=2 自定义
+            var url = "http://chongzhi.taobao.com/item.do?method=supplierSave&sup={0}&mode=2&spu={1}&itemId={2}&profitMode=2&profitMin={3}&profitMax={4}&price={5}&tbcpCrumbs={6}";
+            url = string.Format(url, sup, spu, itemId, profit, profit, price, tbcpCrumbs);
+            var content = await helper.SynchronousLoadString(url);
+            if (content.LoginRequired)
+            {
+                this.InvokeAction(ShowLoginWindow, helper.WB);
+                return await supplierSave(helper, sup, spu, profit, price, itemId, tbcpCrumbs);
+            }
+            return JsonConvert.DeserializeObject<TaoJsonpResult>(content.Data);
         }
 
         private async Task CloseTradeIfPossible(long tid)
@@ -299,10 +412,15 @@ namespace WinFormsClient
 
             client.onMessage += (message) => { AppendText(String.Format("{0}: {1}" + Environment.NewLine, "[服务端信息]", message)); };
             client.onTmcState += (state) => { AppendText(String.Format("{0}: {1}" + Environment.NewLine, "交易监控", state)); };
-            //client.onTopManagerState += (x) => { this.AppendText(string.Format("Login As [{0}] - TopManager.Initialized={1}", AppSetttings.TaoUserName, x ? " No" : " Yes")); };
-
             try
             {
+                if (!GetServerTime())
+                {
+                    MessageBox.Show("网络错误！");
+                    ExitConfirmed = true;
+                    this.Close();
+                    return;
+                }
                 this.InvokeAction(() =>
                 {
                     //登录完成后导航到这个页面，方便后面AJAX直接使用这个浏览器取数据
@@ -347,19 +465,6 @@ namespace WinFormsClient
                 var taoInfo = await this.InvokeTask(GetTaoInfo);
                 if (taoInfo.status == 200)
                 {
-                    int wbCount = (taoInfo.offCount + taoInfo.onCount) / 100;
-                    if (wbCount > 10)
-                    {
-                        wbCount = 10;
-                    }
-                    if (wbCount <= 3)
-                    {
-                        wbCount = 3;
-                    }
-                    this.InvokeAction(() =>
-                    {
-                        WBHelper.InitWBHelper(tabPageWB, "http://chongzhi.taobao.com/index.do?spm=0.0.0.0.OR0khk&method=index", wbCount);
-                    });
                     AppSetting.UserSetting.Set("TaoInfo", taoInfo);
                     ResetProductStates();
                     BindDGViewProduct();
@@ -437,7 +542,12 @@ namespace WinFormsClient
                 var success = false;
                 //查找供应商
                 var url = string.Format("http://chongzhi.taobao.com/item.do?spu={0}&action=edit&method=supplierInfo&_=" + DateTime.Now.Ticks, product.SpuId);
-                await this.InvokeTask(helper.PrepareIfNoneDocument, IndexUrl);
+                var x = await this.InvokeTask(helper.PrepareIfNoneDocument, IndexUrl);
+                while (x.LoginRequired)
+                {
+                    this.InvokeAction(ShowLoginWindow, helper.WB);
+                    x = await this.InvokeTask(helper.PrepareIfNoneDocument, IndexUrl);
+                }
                 var content = await this.InvokeTask(helper.WB.ExecuteTriggerJSONP, url);
                 if (!string.IsNullOrEmpty(content))
                 {
@@ -507,19 +617,27 @@ namespace WinFormsClient
             {
                 using (var wbHelper = new WBHelper(true))
                 {
-                    await this.InvokeTask(wbHelper.PrepareIfNoneDocument, IndexUrl);
+                    var x = await this.InvokeTask(wbHelper.PrepareIfNoneDocument, IndexUrl);
+                    while (x.LoginRequired)
+                    {
+                        this.InvokeAction(ShowLoginWindow, wbHelper.WB);
+                        x = await this.InvokeTask(wbHelper.PrepareIfNoneDocument, IndexUrl);
+                    }
                     //查找供应商
-                    supplier = await this.InvokeTask(BizHelper.supplierInfo, wbHelper, product.SpuId);
+                    supplier = await this.InvokeTask(supplierInfo, wbHelper, product.SpuId);
                     product.OnSupplierInfoUpdate(AppDatabase.db.ProductItems, supplier);
                 }
             }
             if (supplier != null)
             {
-                //5分钟之前的消息即过期的下单信息不处理
-                if ((DateTime.Now - trade.Created).TotalMinutes > 5)
+                if (ServerNow.HasValue)
                 {
-                    AppendText("[{0}/{1}]不拦截过期交易。", trade.Tid, trade.NumIid);
-                    return;
+                    //5分钟之前的消息即过期的下单信息不处理
+                    if ((ServerNow.Value - trade.Created).TotalMinutes > 5)
+                    {
+                        AppendText("[{0}/{1}]不拦截过期交易。", trade.Tid, trade.NumIid);
+                        return;
+                    }
                 }
 
                 var interceptType = AppSetting.UserSetting.Get<string>("拦截模式");
@@ -830,20 +948,20 @@ namespace WinFormsClient
             BindDGViewProduct();
         }
 
-        private async void ItemHub_ItemAdd(Top.Tmc.Message msg)
+        private void ItemHub_ItemAdd(Top.Tmc.Message msg)
         {
             //AppendText(msg.Topic);
             //AppendText(msg.Content);
             //var def = new { num = 999999, title = "QQ币1个直充", price = "0.97", nick = "cendart", num_iid = 523042737153 };
-            var d = DynamicJson.Parse(msg.Content);
-            AppendText("新增了商品【{0}】", d.title);
-            var product = await FindProductById((long)d.num_iid);
-            if (product == null)
-            {
-                product = new ProductItem { Id = d.num_iid, ItemName = d.title, 一口价 = d.price, StockQty = d.num };
-                AppDatabase.db.ProductItems.Upsert((ProductItem)product, (string)d.num_iid);
-            }
-            BindDGViewProduct();
+            //var d = DynamicJson.Parse(msg.Content);
+            //AppendText("新增了商品【{0}】", d.title);
+            //var product = await FindProductById((long)d.num_iid);
+            //if (product == null)
+            //{
+            //    product = new ProductItem { Id = d.num_iid, ItemName = d.title, 一口价 = d.price, StockQty = d.num };
+            //    AppDatabase.db.ProductItems.Upsert((ProductItem)product, (string)d.num_iid);
+            //}
+            //BindDGViewProduct();
         }
 
         private Task<ProductItem> FindProductById(long itemId)
@@ -896,7 +1014,12 @@ namespace WinFormsClient
             using (var wbHelper = new WBHelper(false))
             {
                 var cnt = await this.InvokeTask(wbHelper.SynchronousLoadString, "http://chongzhi.taobao.com/index.do?method=info");
-                var info = JsonConvert.DeserializeObject<TaoInfo>(cnt);
+                while (cnt.LoginRequired)
+                {
+                    this.InvokeAction(ShowLoginWindow, wbHelper.WB);
+                    cnt = await this.InvokeTask(wbHelper.SynchronousLoadString, "http://chongzhi.taobao.com/index.do?method=info");
+                }
+                var info = JsonConvert.DeserializeObject<TaoInfo>(cnt.Data);
                 if (info != null && info.status == 200)
                 {
                     this.InvokeAction(() =>
@@ -909,6 +1032,23 @@ namespace WinFormsClient
                     });
                 }
                 return info;
+            }
+        }
+
+        public void ShowLoginWindow(ExtendedWinFormsWebBrowser wb)
+        {
+            var wbParent = wb.Parent;
+            wbTaoChongZhiMode.TransitionToNext(wbLoginMode, wb);
+            if (new TaoLoginForm(wbLoginMode).ShowDialog(this) == DialogResult.OK)
+            {
+                wbLoginMode.TransitionToNext(wbTaoChongZhiMode, wb);
+                wb.Navigate(IndexUrl);
+                wbParent.Controls.Add(wb);
+            }
+            else
+            {
+                ExitConfirmed = true;
+                Application.Exit();
             }
         }
 
@@ -926,7 +1066,7 @@ namespace WinFormsClient
             {
                 //全部更新(14天前的)
                 AppendText("同步15天内订单数据（全部）...");
-                timeStart = DateTime.Now.AddDays(-14);
+                timeStart = ServerDateTime.AddDays(-14);
             }
             ApiPagedResult<List<TopTrade>> x = await DownloadTbOrderList("WAIT_BUYER_PAY", timeStart);
             if (!x.Success)
@@ -974,10 +1114,17 @@ namespace WinFormsClient
                 await AutoTradeRate();
             }
         }
-
+        private TimeSpan ServerDelay = TimeSpan.Zero;
+        private DateTime ServerDateTime
+        {
+            get
+            {
+                return DateTime.Now.Subtract(DateDifference);
+            }
+        }
         private async Task AutoTradeRate()
         {
-            var finishedList = AppDatabase.db.TopTrades.Find(x => x.Status == "TRADE_FINISHED" && x.SellerCanRate && !x.SellerRate && x.EndTime > DateTime.Now.AddDays(-15)).ToList();
+            var finishedList = AppDatabase.db.TopTrades.Find(x => x.Status == "TRADE_FINISHED" && x.SellerCanRate && !x.SellerRate && x.EndTime > ServerDateTime.AddDays(-15)).ToList();
             for (int i = 0; i < finishedList.Count; i++)
             {
                 var item = finishedList[i];
@@ -1064,7 +1211,7 @@ namespace WinFormsClient
         {
             var productList = new List<ProductItem>();
             int page = 1;
-            HtmlDocument doc = null;
+            IHtmlDocument xdoc = null;
             ApiPagedResult<List<ProductItem>> pagedList = new ApiPagedResult<List<ProductItem>>();
             while (pagedList.Success && pagedList.HasMore)
             {
@@ -1074,12 +1221,18 @@ namespace WinFormsClient
                 {
                     try
                     {
-                        doc = await this.InvokeTask(helper.SynchronousLoadDocument, nextUrl);
-                        var xdoc = HtmlParser.Parse(doc.Body.InnerHtml);
+                        var result = await this.InvokeTask(helper.SynchronousLoadDocument, nextUrl);
+                        while (result.LoginRequired)
+                        {
+                            this.InvokeAction(ShowLoginWindow, helper.WB);
+                            result = await this.InvokeTask(helper.SynchronousLoadDocument, nextUrl);
+                        }
+                        xdoc = HtmlParser.Parse(result.Data.Body.InnerHtml);
                         var table = xdoc.GetElementById("main").FindFirst(".stock-table");
                         pagedList = ProductItemHelper.GetProductItemList(table, page);
                         tbcpCrumbs = xdoc.FindSingle("#tbcpCrumbs").Attribute("value").AttributeValue;
-                        doc = null;
+                        xdoc = null;
+                        result = null;
                         SetTaskName("同步{0}商品第{1}页（{2}个）", where, page, pagedList.Data.Count);
                         productList.AddRange(pagedList.Data);
                         page++;
@@ -1088,13 +1241,17 @@ namespace WinFormsClient
                     {
                         pagedList.Success = false;
                         helper.Dispose();
+                        AppendException(ex);
                     }
                 }
                 if (!pagedList.Success)
                 {
                     AppendText("同步{0}商品第{1}页出错，{2}", where, page, pagedList.Message);
                     if (MessageBox.Show(string.Format("同步{0}商品第{1}页出错，是否重试？", where, page), Text, MessageBoxButtons.YesNo) == DialogResult.Yes)
+                    {
+                        pagedList.Success = true;
                         continue;
+                    }
                 }
 
             }
@@ -1165,7 +1322,7 @@ namespace WinFormsClient
                 {
                     try
                     {
-                        text = DateTime.Now.ToString("MM-dd HH:mm:ss") + " " + (args.Any() ? string.Format(text, args) : text);
+                        text = ServerDateTime.ToString("MM-dd HH:mm:ss") + " " + (args.Any() ? string.Format(text, args) : text);
                         RichTextBoxConsole.AppendText(text + Environment.NewLine);
                         RichTextBoxConsole.ScrollToCaret();
                     }
@@ -1281,47 +1438,45 @@ namespace WinFormsClient
                 await TaskEx.Delay(1000);
             }
         }
+
+        private bool GetServerTime()
+        {
+            Stopwatch sw = new Stopwatch();
+            sw.Restart();
+            try
+            {
+                var headers = HttpHelper.ReadResponseHeaders("http://chongzhi.taobao.com/welcome.dox?method=welcome");
+                sw.Stop();
+
+                //淘宝时间
+                var taoServerTime = DateTime.Parse(headers["Date"]);
+                ServerDelay = sw.Elapsed;
+                DateDifference = DateTime.Now - taoServerTime;
+                this.InvokeAction(() =>
+                {
+                    延迟.Text = "延迟：" + sw.ElapsedMilliseconds + "ms";
+                    服务器时间.Text = "时差：" + DateDifference.ToString(@"hh\:mm\:ss\.fff");
+                });
+                return true;
+            }
+            catch (Exception ex)
+            {
+                this.InvokeAction(() =>
+                {
+                    延迟.Text = "延迟：...";
+                    服务器时间.Text = "时差：...";
+                });
+            }
+            return false;
+        }
         public void ThreadLoopMonitorDelay()
         {
             Task.Factory.StartNew(async () =>
             {
-                Stopwatch sw = new Stopwatch();
+
                 while (!cts.IsCancellationRequested)
                 {
-                    sw.Restart();
-                    try
-                    {
-                        var headers = HttpHelper.ReadResponseHeaders("http://chongzhi.taobao.com/welcome.dox?method=welcome");
-                        sw.Stop();
-                        var dtTaobao = DateTime.Parse(headers["Date"]); //淘宝时间
-                        var dtNow = DateTime.Now.AddTicks(-sw.ElapsedTicks); //当前时间-延迟=淘宝发出响应时（仅发出未收到）的本地的时间
-
-                        DateDifference = dtNow - dtTaobao; //本地时间与淘宝时间的时间差
-
-                        //当数据从淘宝过来时候，时间加上diff就是对应的本地时间
-
-                        ServerNow = dtNow - DateDifference;
-
-                        if (DateDifference.TotalMilliseconds > 0)
-                        {
-                            //本地时间比淘宝时间快
-                        }
-                        else
-                        {
-
-                        }
-                        this.InvokeAction(() =>
-                        {
-                            延迟.Text = "延迟：" + sw.ElapsedMilliseconds + "ms";
-                        });
-                    }
-                    catch (Exception ex)
-                    {
-                        this.InvokeAction(() =>
-                        {
-                            延迟.Text = "延迟：...";
-                        });
-                    }
+                    GetServerTime();
                     await TaskEx.Delay(5000);
                 }
             });
@@ -1343,16 +1498,6 @@ namespace WinFormsClient
         public void ShowException(Exception ex, string caption)
         {
             MessageBox.Show(ex.Message + Environment.NewLine + "StackTrace:" + Environment.NewLine + ex.StackTrace, caption);
-        }
-
-        private void buttonAccount_Click(object sender, EventArgs e)
-        {
-            wbTaoChongZhiMode.NavigatedToAccountURL();
-        }
-
-        private void buttonTrade_Click(object sender, EventArgs e)
-        {
-            wbTaoChongZhiMode.NavigatedToTradeURL();
         }
 
         public bool NotifyIfUnconnected()
@@ -1408,14 +1553,12 @@ namespace WinFormsClient
 
         private void button2_Click(object sender, EventArgs e)
         {
-            blist = new BlackListForm("黑名单管理", "blist.data");
-            blist.Show(this);
+            new BlackListForm("黑名单管理", "blist.data").ShowDialog(this);
         }
 
         private void buttonWlistMgr_Click(object sender, EventArgs e)
         {
-            wlist = new WhiteListForm("白名单管理", "wlist.data");
-            wlist.Show(this);
+            new WhiteListForm("白名单管理", "wlist.data").ShowDialog(this);
         }
 
         private async void UpProduct(object sender, EventArgs e)
@@ -1437,9 +1580,13 @@ namespace WinFormsClient
             {
                 using (var wbHelper = new WBHelper(true))
                 {
-                    await this.InvokeTask(wbHelper.PrepareIfNoneDocument, IndexUrl);
-                    //查找供应商
-                    supplier = await this.InvokeTask(BizHelper.supplierInfo, wbHelper, product.SpuId);
+                    var x = await this.InvokeTask(wbHelper.PrepareIfNoneDocument, IndexUrl);
+                    while (x.LoginRequired)
+                    {
+                        this.InvokeAction(ShowLoginWindow, wbHelper.WB);
+                        x = await this.InvokeTask(wbHelper.PrepareIfNoneDocument, IndexUrl);
+                    }
+                    supplier = await this.InvokeTask(supplierInfo, wbHelper, product.SpuId);
                     if (supplier == null || !supplier.profitData.Any())
                     {
                         AppendText("【{0}】暂无供应商，改价操作取消。", product.ItemName);
@@ -1468,7 +1615,7 @@ namespace WinFormsClient
                 using (var wbHelper = new WBHelper(false))
                 {
                     await this.InvokeTask(wbHelper.PrepareIfNoneDocument, IndexUrl);
-                    var save = await this.InvokeTask(BizHelper.supplierSave, wbHelper, supplier.profitData[0].id, product.SpuId, profitString, oneprice, product.Id, tbcpCrumbs);
+                    var save = await this.InvokeTask(supplierSave, wbHelper, supplier.profitData[0].id, product.SpuId, profitString, oneprice, product.Id, tbcpCrumbs);
                     if (save.status != 200)
                     {
                         AppendText("为商品{0}设置利润时失败。错误消息：{1}", product.Id, save.msg);
@@ -2029,14 +2176,28 @@ namespace WinFormsClient
         private async void 一键赔钱_Click(object sender, EventArgs e)
         {
             一键赔钱.Enabled = false;
-            await SetProfitDirect(AppSetting.UserSetting.Get<decimal>("赔钱利润")).ConfigureAwait(false);
+            try
+            {
+                await SetProfitDirect(AppSetting.UserSetting.Get<decimal>("赔钱利润")).ConfigureAwait(false);
+            }
+            catch (Exception ex)
+            {
+                AppendException(ex);
+            }
             this.InvokeAction(async () => { await TaskEx.Delay(3); 一键赔钱.Enabled = true; 一键不赔钱.Enabled = true; });
         }
 
         private async void 一键不赔钱_Click(object sender, EventArgs e)
         {
             一键不赔钱.Enabled = false;
-            await SetProfitDirect(AppSetting.UserSetting.Get<decimal>("不赔钱利润")).ConfigureAwait(false);
+            try
+            {
+                await SetProfitDirect(AppSetting.UserSetting.Get<decimal>("不赔钱利润")).ConfigureAwait(false);
+            }
+            catch (Exception ex)
+            {
+                AppendException(ex);
+            }
             this.InvokeAction(async () => { await TaskEx.Delay(3); 一键赔钱.Enabled = true; 一键不赔钱.Enabled = true; });
         }
 

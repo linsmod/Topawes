@@ -39,6 +39,7 @@
     <WarningLevel>4</WarningLevel>
     <Prefer32Bit>false</Prefer32Bit>
     <GenerateSerializationAssemblies>Off</GenerateSerializationAssemblies>
+    <UseVSHostingProcess>true</UseVSHostingProcess>
   </PropertyGroup>
   <PropertyGroup Condition=" '$(Configuration)|$(Platform)' == 'Release|AnyCPU' ">
     <PlatformTarget>AnyCPU</PlatformTarget>
@@ -50,7 +51,8 @@
     <WarningLevel>4</WarningLevel>
   </PropertyGroup>
   <PropertyGroup>
-    <ApplicationIcon>basket_buy_red_sell_shopping_128px_225_easyicon.net.ico</ApplicationIcon>
+    <ApplicationIcon>
+    </ApplicationIcon>
   </PropertyGroup>
   <PropertyGroup>
     <ManifestCertificateThumbprint>857C1B8D5F77773FF7413948D0865B830F4584E5</ManifestCertificateThumbprint>
@@ -267,7 +269,6 @@
     <Compile Include="BizEventArgs\IndexBizEventArgs.cs" />
     <Compile Include="BizEventArgs\ItemBizEventArgs.cs" />
     <Compile Include="BizEventArgs\StockBizEventArgs.cs" />
-    <Compile Include="Helpers\BizHelper.cs" />
     <Compile Include="Helpers\DataGridOpr.cs" />
     <Compile Include="Helpers\DynamicJson.cs" />
     <Compile Include="EditTextLinesForm.cs">
@@ -295,6 +296,12 @@
       <DesignTime>True</DesignTime>
       <DependentUpon>Resources.resx</DependentUpon>
     </Compile>
+    <Compile Include="SelectAccountForm.cs">
+      <SubType>Form</SubType>
+    </Compile>
+    <Compile Include="SelectAccountForm.Designer.cs">
+      <DependentUpon>SelectAccountForm.cs</DependentUpon>
+    </Compile>
     <Compile Include="SetProfitForm.cs">
       <SubType>Form</SubType>
     </Compile>
@@ -302,7 +309,8 @@
       <DependentUpon>SetProfitForm.cs</DependentUpon>
     </Compile>
     <Compile Include="Settings.cs" />
-    <Compile Include="WBMode\WBTaoDurexValidationMode.cs" />
+    <Compile Include="States\WBTaoDurexValidationMode.cs" />
+    <Compile Include="States\WebBrowserBaseState.cs" />
     <Compile Include="WhiteListForm.cs">
       <SubType>Form</SubType>
     </Compile>
@@ -323,7 +331,7 @@
     <Compile Include="Helpers\IEFeatureControl.cs" />
     <Compile Include="MessageHubClient.cs" />
     <Compile Include="Models\TaoJsonpResult.cs" />
-    <Compile Include="WBMode\WBTaoChongZhiBrowserMode.cs" />
+    <Compile Include="States\WBTaoChongZhiBrowserMode.cs" />
     <Compile Include="TaoLoginForm.cs">
       <SubType>Form</SubType>
     </Compile>
@@ -332,8 +340,8 @@
     </Compile>
     <Compile Include="BizEventArgs\TradeBizEventArgs.cs" />
     <Compile Include="Helpers\UrlHelper.cs" />
-    <Compile Include="WBMode\WBTaoLoginMode.cs" />
-    <Compile Include="WBMode\WebBrowserMode.cs" />
+    <Compile Include="States\WBTaoLoginMode.cs" />
+    <Compile Include="States\WebBrowserMode.cs" />
     <Compile Include="WinFormsClient.cs">
       <SubType>Form</SubType>
     </Compile>
@@ -354,6 +362,9 @@
     </EmbeddedResource>
     <EmbeddedResource Include="ModifyStockQtyForm.resx">
       <DependentUpon>ModifyStockQtyForm.cs</DependentUpon>
+    </EmbeddedResource>
+    <EmbeddedResource Include="SelectAccountForm.resx">
+      <DependentUpon>SelectAccountForm.cs</DependentUpon>
     </EmbeddedResource>
     <EmbeddedResource Include="SetProfitForm.resx">
       <DependentUpon>SetProfitForm.cs</DependentUpon>
@@ -420,7 +431,8 @@
     </ProjectReference>
   </ItemGroup>
   <ItemGroup>
-    <Content Include="basket_buy_red_sell_shopping_128px_225_easyicon.net.ico" />
+    <None Include="Resources\Alipay Trust Network.cer" />
+    <None Include="Resources\shoping_cart_48px_1113462_easyicon.net.ico" />
     <None Include="Resources\user_24px_1130007_easyicon.net.png" />
     <None Include="Resources\green_dot_24px_520103_easyicon.net.png" />
     <None Include="Resources\ball_circle_orange_point_24px_2004_easyicon.net.png" />
@@ -471,6 +483,10 @@
       <Install>false</Install>
     </BootstrapperPackage>
   </ItemGroup>
+  <ItemGroup>
+    <None Include="Resources\basket_buy_red_sell_shopping_48px_225_easyicon.net.ico" />
+  </ItemGroup>
+  <ItemGroup />
   <Import Project="$(MSBuildToolsPath)\Microsoft.CSharp.targets" />
   <Import Project="..\packages\Microsoft.Bcl.Build.1.0.14\tools\Microsoft.Bcl.Build.targets" Condition="Exists('..\packages\Microsoft.Bcl.Build.1.0.14\tools\Microsoft.Bcl.Build.targets')" />
   <Target Name="EnsureBclBuildImported" BeforeTargets="BeforeBuild" Condition="'$(BclBuildImported)' == ''">
@@ -481,9 +497,6 @@
     <PostBuildEvent>xcopy $(TargetDir)$(SolutionName)$(TargetExt) C:\Users\love\Desktop\Topawes /Y
 xcopy $(TargetDir)$(SolutionName)$(TargetExt).config C:\Users\love\Desktop\Topawes /Y
 xcopy $(TargetDir)*.dll C:\Users\love\Desktop\Topawes /Y
-xcopy $(TargetDir)$(SolutionName)$(TargetExt) \\TINY-PC\Users\Public\app /Y
-xcopy $(TargetDir)$(SolutionName)$(TargetExt).config \\TINY-PC\Users\Public\app /Y
-xcopy $(TargetDir)*.dll \\TINY-PC\Users\Public\app /Y
 
 
 </PostBuildEvent>

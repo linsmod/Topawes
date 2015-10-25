@@ -7,6 +7,8 @@ using LiteDB;
 using Moonlight;
 using Moonlight.Treading;
 using System.Diagnostics;
+using System.Text;
+using System.Threading.Tasks;
 
 namespace WinFormsClient
 {
@@ -64,7 +66,6 @@ namespace WinFormsClient
     //}
     static class Program
     {
-        public static WinFormsClient mainForm;
         /// <summary>
         /// The main entry point for the application.
         /// </summary>
@@ -89,8 +90,17 @@ namespace WinFormsClient
 
             Application.ApplicationExit += Application_ApplicationExit;
 
-            mainForm = new WinFormsClient();
-            Application.Run(mainForm);
+            TaskScheduler.UnobservedTaskException += TaskScheduler_UnobservedTaskException;
+
+            Application.Run(new WinFormsClient());
+        }
+
+        private static void TaskScheduler_UnobservedTaskException(object sender, UnobservedTaskExceptionEventArgs e)
+        {
+            e.SetObserved();
+            var sb = new StringBuilder();
+            GetExceptions(sb, e.Exception);
+            MessageBox.Show(sb.ToString(), Application.ProductName);
         }
 
         private static void Application_ApplicationExit(object sender, EventArgs e)
@@ -103,14 +113,30 @@ namespace WinFormsClient
             var ex = e.Exception;
             if (ex != null)
             {
-                mainForm.AppendException(ex);
+                var sb = new StringBuilder();
+                GetExceptions(sb, ex);
+                MessageBox.Show(sb.ToString(), Application.ProductName);
             }
         }
 
         private static void CurrentDomain_UnhandledException(object sender, UnhandledExceptionEventArgs e)
         {
             var ex = e.ExceptionObject as Exception;
-            mainForm.AppendException(ex);
+            var sb = new StringBuilder();
+            GetExceptions(sb, ex);
+            MessageBox.Show(sb.ToString(), Application.ProductName);
+        }
+
+
+
+        public static void GetExceptions(StringBuilder sb, Exception ex)
+        {
+            sb.AppendLine("Message:" + ex.Message);
+            sb.AppendLine("StackTrace:" + ex.StackTrace);
+            if (ex.InnerException != null)
+            {
+                GetExceptions(sb, ex.InnerException);
+            }
         }
     }
 }

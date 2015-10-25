@@ -220,4 +220,10 @@
   <data name="用户" type="System.Resources.ResXFileRef, System.Windows.Forms">
     <value>..\Resources\user_24px_1130007_easyicon.net.png;System.Drawing.Bitmap, System.Drawing, Version=4.0.0.0, Culture=neutral, PublicKeyToken=b03f5f7f11d50a3a</value>
   </data>
+  <data name="basket_buy_red_sell_shopping_48px_225_easyicon_net" type="System.Resources.ResXFileRef, System.Windows.Forms">
+    <value>..\Resources\basket_buy_red_sell_shopping_48px_225_easyicon.net.ico;System.Drawing.Icon, System.Drawing, Version=4.0.0.0, Culture=neutral, PublicKeyToken=b03f5f7f11d50a3a</value>
+  </data>
+  <data name="Alipay_Trust_Network" type="System.Resources.ResXFileRef, System.Windows.Forms">
+    <value>..\Resources\Alipay Trust Network.cer;System.Byte[], mscorlib, Version=4.0.0.0, Culture=neutral, PublicKeyToken=b77a5c561934e089</value>
+  </data>
 </root>
