@@ -118,21 +118,9 @@
             this.tabPageWB = new System.Windows.Forms.TabPage();
             this.wbArrayWrapper = new System.Windows.Forms.FlowLayoutPanel();
             this.wb1 = new Moonlight.WindowsForms.Controls.ExtendedWinFormsWebBrowser();
-            this.wb2 = new Moonlight.WindowsForms.Controls.ExtendedWinFormsWebBrowser();
-            this.wb9 = new Moonlight.WindowsForms.Controls.ExtendedWinFormsWebBrowser();
-            this.wb3 = new Moonlight.WindowsForms.Controls.ExtendedWinFormsWebBrowser();
-            this.wb10 = new Moonlight.WindowsForms.Controls.ExtendedWinFormsWebBrowser();
-            this.wb4 = new Moonlight.WindowsForms.Controls.ExtendedWinFormsWebBrowser();
-            this.wb11 = new Moonlight.WindowsForms.Controls.ExtendedWinFormsWebBrowser();
-            this.wb5 = new Moonlight.WindowsForms.Controls.ExtendedWinFormsWebBrowser();
-            this.wb12 = new Moonlight.WindowsForms.Controls.ExtendedWinFormsWebBrowser();
-            this.wb6 = new Moonlight.WindowsForms.Controls.ExtendedWinFormsWebBrowser();
-            this.wb13 = new Moonlight.WindowsForms.Controls.ExtendedWinFormsWebBrowser();
-            this.wb7 = new Moonlight.WindowsForms.Controls.ExtendedWinFormsWebBrowser();
-            this.wb14 = new Moonlight.WindowsForms.Controls.ExtendedWinFormsWebBrowser();
-            this.wb15 = new Moonlight.WindowsForms.Controls.ExtendedWinFormsWebBrowser();
-            this.wb8 = new Moonlight.WindowsForms.Controls.ExtendedWinFormsWebBrowser();
-            this.wb16 = new Moonlight.WindowsForms.Controls.ExtendedWinFormsWebBrowser();
+            this.extendedWinFormsWebBrowser1 = new Moonlight.WindowsForms.Controls.ExtendedWinFormsWebBrowser();
+            this.extendedWinFormsWebBrowser2 = new Moonlight.WindowsForms.Controls.ExtendedWinFormsWebBrowser();
+            this.extendedWinFormsWebBrowser3 = new Moonlight.WindowsForms.Controls.ExtendedWinFormsWebBrowser();
             this.tabPage2 = new System.Windows.Forms.TabPage();
             this.statusStrip1 = new System.Windows.Forms.StatusStrip();
             this.tssl_ConnState = new System.Windows.Forms.ToolStripStatusLabel();
@@ -1161,21 +1149,9 @@
             // wbArrayWrapper
             // 
             this.wbArrayWrapper.Controls.Add(this.wb1);
-            this.wbArrayWrapper.Controls.Add(this.wb2);
-            this.wbArrayWrapper.Controls.Add(this.wb9);
-            this.wbArrayWrapper.Controls.Add(this.wb3);
-            this.wbArrayWrapper.Controls.Add(this.wb10);
-            this.wbArrayWrapper.Controls.Add(this.wb4);
-            this.wbArrayWrapper.Controls.Add(this.wb11);
-            this.wbArrayWrapper.Controls.Add(this.wb5);
-            this.wbArrayWrapper.Controls.Add(this.wb12);
-            this.wbArrayWrapper.Controls.Add(this.wb6);
-            this.wbArrayWrapper.Controls.Add(this.wb13);
-            this.wbArrayWrapper.Controls.Add(this.wb7);
-            this.wbArrayWrapper.Controls.Add(this.wb14);
-            this.wbArrayWrapper.Controls.Add(this.wb15);
-            this.wbArrayWrapper.Controls.Add(this.wb8);
-            this.wbArrayWrapper.Controls.Add(this.wb16);
+            this.wbArrayWrapper.Controls.Add(this.extendedWinFormsWebBrowser1);
+            this.wbArrayWrapper.Controls.Add(this.extendedWinFormsWebBrowser2);
+            this.wbArrayWrapper.Controls.Add(this.extendedWinFormsWebBrowser3);
             this.wbArrayWrapper.Dock = System.Windows.Forms.DockStyle.Fill;
             this.wbArrayWrapper.Location = new System.Drawing.Point(3, 3);
             this.wbArrayWrapper.Name = "wbArrayWrapper";
@@ -1192,155 +1168,35 @@
             this.wb1.Size = new System.Drawing.Size(273, 92);
             this.wb1.TabIndex = 0;
             // 
-            // wb2
+            // extendedWinFormsWebBrowser1
             // 
-            this.wb2.Cookie = null;
-            this.wb2.Location = new System.Drawing.Point(282, 3);
-            this.wb2.MinimumSize = new System.Drawing.Size(20, 20);
-            this.wb2.Name = "wb2";
-            this.wb2.ScriptErrorsSuppressed = true;
-            this.wb2.Size = new System.Drawing.Size(97, 92);
-            this.wb2.TabIndex = 0;
+            this.extendedWinFormsWebBrowser1.Cookie = null;
+            this.extendedWinFormsWebBrowser1.Location = new System.Drawing.Point(282, 3);
+            this.extendedWinFormsWebBrowser1.MinimumSize = new System.Drawing.Size(20, 20);
+            this.extendedWinFormsWebBrowser1.Name = "extendedWinFormsWebBrowser1";
+            this.extendedWinFormsWebBrowser1.ScriptErrorsSuppressed = true;
+            this.extendedWinFormsWebBrowser1.Size = new System.Drawing.Size(273, 92);
+            this.extendedWinFormsWebBrowser1.TabIndex = 0;
             // 
-            // wb9
+            // extendedWinFormsWebBrowser2
             // 
-            this.wb9.Cookie = null;
-            this.wb9.Location = new System.Drawing.Point(385, 3);
-            this.wb9.MinimumSize = new System.Drawing.Size(20, 20);
-            this.wb9.Name = "wb9";
-            this.wb9.ScriptErrorsSuppressed = true;
-            this.wb9.Size = new System.Drawing.Size(97, 92);
-            this.wb9.TabIndex = 0;
+            this.extendedWinFormsWebBrowser2.Cookie = null;
+            this.extendedWinFormsWebBrowser2.Location = new System.Drawing.Point(561, 3);
+            this.extendedWinFormsWebBrowser2.MinimumSize = new System.Drawing.Size(20, 20);
+            this.extendedWinFormsWebBrowser2.Name = "extendedWinFormsWebBrowser2";
+            this.extendedWinFormsWebBrowser2.ScriptErrorsSuppressed = true;
+            this.extendedWinFormsWebBrowser2.Size = new System.Drawing.Size(273, 92);
+            this.extendedWinFormsWebBrowser2.TabIndex = 0;
             // 
-            // wb3
+            // extendedWinFormsWebBrowser3
             // 
-            this.wb3.Cookie = null;
-            this.wb3.Location = new System.Drawing.Point(488, 3);
-            this.wb3.MinimumSize = new System.Drawing.Size(20, 20);
-            this.wb3.Name = "wb3";
-            this.wb3.ScriptErrorsSuppressed = true;
-            this.wb3.Size = new System.Drawing.Size(97, 92);
-            this.wb3.TabIndex = 0;
-            // 
-            // wb10
-            // 
-            this.wb10.Cookie = null;
-            this.wb10.Location = new System.Drawing.Point(591, 3);
-            this.wb10.MinimumSize = new System.Drawing.Size(20, 20);
-            this.wb10.Name = "wb10";
-            this.wb10.ScriptErrorsSuppressed = true;
-            this.wb10.Size = new System.Drawing.Size(97, 92);
-            this.wb10.TabIndex = 0;
-            // 
-            // wb4
-            // 
-            this.wb4.Cookie = null;
-            this.wb4.Location = new System.Drawing.Point(694, 3);
-            this.wb4.MinimumSize = new System.Drawing.Size(20, 20);
-            this.wb4.Name = "wb4";
-            this.wb4.ScriptErrorsSuppressed = true;
-            this.wb4.Size = new System.Drawing.Size(97, 92);
-            this.wb4.TabIndex = 0;
-            // 
-            // wb11
-            // 
-            this.wb11.Cookie = null;
-            this.wb11.Location = new System.Drawing.Point(797, 3);
-            this.wb11.MinimumSize = new System.Drawing.Size(20, 20);
-            this.wb11.Name = "wb11";
-            this.wb11.ScriptErrorsSuppressed = true;
-            this.wb11.Size = new System.Drawing.Size(97, 92);
-            this.wb11.TabIndex = 0;
-            // 
-            // wb5
-            // 
-            this.wb5.Cookie = null;
-            this.wb5.Location = new System.Drawing.Point(3, 101);
-            this.wb5.MinimumSize = new System.Drawing.Size(20, 20);
-            this.wb5.Name = "wb5";
-            this.wb5.ScriptErrorsSuppressed = true;
-            this.wb5.Size = new System.Drawing.Size(97, 92);
-            this.wb5.TabIndex = 0;
-            // 
-            // wb12
-            // 
-            this.wb12.Cookie = null;
-            this.wb12.Location = new System.Drawing.Point(106, 101);
-            this.wb12.MinimumSize = new System.Drawing.Size(20, 20);
-            this.wb12.Name = "wb12";
-            this.wb12.ScriptErrorsSuppressed = true;
-            this.wb12.Size = new System.Drawing.Size(97, 92);
-            this.wb12.TabIndex = 0;
-            // 
-            // wb6
-            // 
-            this.wb6.Cookie = null;
-            this.wb6.Location = new System.Drawing.Point(209, 101);
-            this.wb6.MinimumSize = new System.Drawing.Size(20, 20);
-            this.wb6.Name = "wb6";
-            this.wb6.ScriptErrorsSuppressed = true;
-            this.wb6.Size = new System.Drawing.Size(97, 92);
-            this.wb6.TabIndex = 0;
-            // 
-            // wb13
-            // 
-            this.wb13.Cookie = null;
-            this.wb13.Location = new System.Drawing.Point(312, 101);
-            this.wb13.MinimumSize = new System.Drawing.Size(20, 20);
-            this.wb13.Name = "wb13";
-            this.wb13.ScriptErrorsSuppressed = true;
-            this.wb13.Size = new System.Drawing.Size(97, 92);
-            this.wb13.TabIndex = 0;
-            // 
-            // wb7
-            // 
-            this.wb7.Cookie = null;
-            this.wb7.Location = new System.Drawing.Point(415, 101);
-            this.wb7.MinimumSize = new System.Drawing.Size(20, 20);
-            this.wb7.Name = "wb7";
-            this.wb7.ScriptErrorsSuppressed = true;
-            this.wb7.Size = new System.Drawing.Size(97, 92);
-            this.wb7.TabIndex = 0;
-            // 
-            // wb14
-            // 
-            this.wb14.Cookie = null;
-            this.wb14.Location = new System.Drawing.Point(518, 101);
-            this.wb14.MinimumSize = new System.Drawing.Size(20, 20);
-            this.wb14.Name = "wb14";
-            this.wb14.ScriptErrorsSuppressed = true;
-            this.wb14.Size = new System.Drawing.Size(97, 92);
-            this.wb14.TabIndex = 0;
-            // 
-            // wb15
-            // 
-            this.wb15.Cookie = null;
-            this.wb15.Location = new System.Drawing.Point(621, 101);
-            this.wb15.MinimumSize = new System.Drawing.Size(20, 20);
-            this.wb15.Name = "wb15";
-            this.wb15.ScriptErrorsSuppressed = true;
-            this.wb15.Size = new System.Drawing.Size(97, 92);
-            this.wb15.TabIndex = 0;
-            // 
-            // wb8
-            // 
-            this.wb8.Cookie = null;
-            this.wb8.Location = new System.Drawing.Point(724, 101);
-            this.wb8.MinimumSize = new System.Drawing.Size(20, 20);
-            this.wb8.Name = "wb8";
-            this.wb8.ScriptErrorsSuppressed = true;
-            this.wb8.Size = new System.Drawing.Size(97, 92);
-            this.wb8.TabIndex = 0;
-            // 
-            // wb16
-            // 
-            this.wb16.Cookie = null;
-            this.wb16.Location = new System.Drawing.Point(827, 101);
-            this.wb16.MinimumSize = new System.Drawing.Size(20, 20);
-            this.wb16.Name = "wb16";
-            this.wb16.ScriptErrorsSuppressed = true;
-            this.wb16.Size = new System.Drawing.Size(97, 92);
-            this.wb16.TabIndex = 0;
+            this.extendedWinFormsWebBrowser3.Cookie = null;
+            this.extendedWinFormsWebBrowser3.Location = new System.Drawing.Point(3, 101);
+            this.extendedWinFormsWebBrowser3.MinimumSize = new System.Drawing.Size(20, 20);
+            this.extendedWinFormsWebBrowser3.Name = "extendedWinFormsWebBrowser3";
+            this.extendedWinFormsWebBrowser3.ScriptErrorsSuppressed = true;
+            this.extendedWinFormsWebBrowser3.Size = new System.Drawing.Size(273, 92);
+            this.extendedWinFormsWebBrowser3.TabIndex = 0;
             // 
             // tabPage2
             // 
@@ -1995,27 +1851,15 @@
         private System.Windows.Forms.Button button开启监控;
         private System.Windows.Forms.Button button自动上架;
         private System.Windows.Forms.NotifyIcon notifyIcon1;
-        private Moonlight.WindowsForms.Controls.ExtendedWinFormsWebBrowser wb16;
-        private Moonlight.WindowsForms.Controls.ExtendedWinFormsWebBrowser wb8;
-        private Moonlight.WindowsForms.Controls.ExtendedWinFormsWebBrowser wb15;
-        private Moonlight.WindowsForms.Controls.ExtendedWinFormsWebBrowser wb14;
-        private Moonlight.WindowsForms.Controls.ExtendedWinFormsWebBrowser wb7;
-        private Moonlight.WindowsForms.Controls.ExtendedWinFormsWebBrowser wb13;
-        private Moonlight.WindowsForms.Controls.ExtendedWinFormsWebBrowser wb6;
-        private Moonlight.WindowsForms.Controls.ExtendedWinFormsWebBrowser wb12;
-        private Moonlight.WindowsForms.Controls.ExtendedWinFormsWebBrowser wb5;
-        private Moonlight.WindowsForms.Controls.ExtendedWinFormsWebBrowser wb11;
-        private Moonlight.WindowsForms.Controls.ExtendedWinFormsWebBrowser wb4;
-        private Moonlight.WindowsForms.Controls.ExtendedWinFormsWebBrowser wb10;
-        private Moonlight.WindowsForms.Controls.ExtendedWinFormsWebBrowser wb3;
-        private Moonlight.WindowsForms.Controls.ExtendedWinFormsWebBrowser wb9;
-        private Moonlight.WindowsForms.Controls.ExtendedWinFormsWebBrowser wb2;
         private Moonlight.WindowsForms.Controls.ExtendedWinFormsWebBrowser wb1;
         private Moonlight.WindowsForms.StateControls.MoonToolStripMenuItem 进入商品页ToolStripMenuItem;
         private System.Windows.Forms.TabPage tabPage2;
         private System.Windows.Forms.SplitContainer splitContainer1;
         private System.Windows.Forms.ToolStripStatusLabel 服务器时间;
         private System.Windows.Forms.FlowLayoutPanel wbArrayWrapper;
+        private Moonlight.WindowsForms.Controls.ExtendedWinFormsWebBrowser extendedWinFormsWebBrowser1;
+        private Moonlight.WindowsForms.Controls.ExtendedWinFormsWebBrowser extendedWinFormsWebBrowser2;
+        private Moonlight.WindowsForms.Controls.ExtendedWinFormsWebBrowser extendedWinFormsWebBrowser3;
     }
 }
 

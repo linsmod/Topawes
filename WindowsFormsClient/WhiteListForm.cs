@@ -1,4 +1,5 @@
-﻿using System;
+﻿using Moonlight;
+using System;
 using System.Collections.Generic;
 using System.ComponentModel;
 using System.Data;
@@ -12,26 +13,19 @@ namespace WinFormsClient
 {
     public partial class WhiteListForm : BaseForm
     {
-        DataStorage appDataStorage;
-        public WhiteListForm(string title, string fileName)
+        public WhiteListForm(string title)
         {
             InitializeComponent();
             this.Text = title;
-            appDataStorage = new AppTextDataStorage(fileName);
-            appDataStorage.LoadForType(this.GetType());
-            this.textBoxBlackList.Lines = WhiteList.Split(new char[] { ',' }, StringSplitOptions.RemoveEmptyEntries);
+            this.textBoxBlackList.Lines = AppSetting.UserSetting.Get<string[]>("买家白名单", new string[0]);
             if (Owner != null) Owner.Enabled = false;
         }
 
         private void buttonSave_Click(object sender, EventArgs e)
         {
-            WhiteList = string.Join(",", textBoxBlackList.Lines);
-            appDataStorage.SaveForType(this.GetType());
+            AppSetting.UserSetting.Set<string[]>("买家白名单", textBoxBlackList.Lines);
             if (Owner != null) Owner.Enabled = true;
             this.Hide();
         }
-
-        [DefaultValue("")]
-        public static string WhiteList;
     }
 }

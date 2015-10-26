@@ -30,6 +30,8 @@ namespace Moonlight.WindowsForms.Controls
             this.RowPostPaint += dataGridView1_RowPostPaint;
             this.ContextMenuStripChanged += MoonDataGridView_ContextMenuStripChanged;
             this.RowContextMenuStripNeeded += MoonDataGridView_RowContextMenuStripNeeded;
+            this.AutoSizeColumnsMode = DataGridViewAutoSizeColumnsMode.DisplayedCells;
+            this.AutoSizeRowsMode = DataGridViewAutoSizeRowsMode.DisplayedCells;
         }
 
         private void MoonDataGridView_RowContextMenuStripNeeded(object sender, DataGridViewRowContextMenuStripNeededEventArgs e)
@@ -91,7 +93,7 @@ namespace Moonlight.WindowsForms.Controls
 
         private void dataGridView1_RowPostPaint(object sender, DataGridViewRowPostPaintEventArgs e)
         {
-            if (this.Rows[e.RowIndex].Tag == null)
+            if (e.RowIndex % 10 == 0)
             {
                 Rectangle rectangle = new Rectangle(e.RowBounds.Location.X, e.RowBounds.Location.Y, RowHeadersWidth - 4, e.RowBounds.Height);
                 TextRenderer.DrawText(e.Graphics, (e.RowIndex + 1).ToString(),
@@ -99,7 +101,6 @@ namespace Moonlight.WindowsForms.Controls
                     rectangle,
                     RowHeadersDefaultCellStyle.ForeColor,
                     TextFormatFlags.VerticalCenter | TextFormatFlags.Right);
-                this.Rows[e.RowIndex].Tag = true;
             }
         }
 
@@ -121,7 +122,7 @@ namespace Moonlight.WindowsForms.Controls
             IsMouseOnCell = false;
             if (e.RowIndex > -1)
             {
-                if (!dgv.Rows[e.RowIndex].Selected)
+                if (!dgv.Rows[e.RowIndex].Selected && dgv.Rows[e.RowIndex].DefaultCellStyle.BackColor != SystemColors.Window)
                 {
                     dgv.Rows[e.RowIndex].DefaultCellStyle.BackColor = SystemColors.Window;
                 }
@@ -134,7 +135,7 @@ namespace Moonlight.WindowsForms.Controls
             IsMouseOnCell = true;
             if (e.RowIndex > -1)
             {
-                if (!dgv.Rows[e.RowIndex].Selected)
+                if (!dgv.Rows[e.RowIndex].Selected && dgv.Rows[e.RowIndex].DefaultCellStyle.BackColor != SystemColors.Control)
                 {
                     dgv.Rows[e.RowIndex].DefaultCellStyle.BackColor = SystemColors.Control;
                 }

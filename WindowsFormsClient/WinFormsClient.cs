@@ -686,13 +686,13 @@ namespace WinFormsClient
                     }
 
                     //买家是白名单内买家,不拦截
-                    if (WhiteListForm.WhiteList.IndexOf(trade.BuyerNick) != -1)
+                    if (AppSetting.UserSetting.Get("买家白名单", new string[0]).Any(x => x == trade.BuyerNick))
                     {
                         AppendText("[{0}/{1}]不拦截-{2}。", trade.Tid, trade.NumIid, interceptType);
                         return;
                     }
                     //黑名单买家一律拦截
-                    if (BlackListForm.BlackList.IndexOf(trade.BuyerNick) != -1)
+                    if (AppSetting.UserSetting.Get<string[]>("买家黑名单", new string[0]).Any(x => x == trade.BuyerNick))
                     {
                         //AppendText("黑名单买家拦截，订单ID={0}", trade.Tid);
                         await InterceptTrade(supplier, product.SpuId, trade, statistic);
@@ -727,10 +727,12 @@ namespace WinFormsClient
             if (result.Success)
             {
                 var trade = AppDatabase.db.TopTrades.FindById(d.tid);
-                trade.Status = result.Data;
-                AppDatabase.db.TopTrades.Update(trade);
+                if (trade != null)
+                {
+                    trade.Status = result.Data;
+                    AppDatabase.db.TopTrades.Update(trade);
+                }
             }
-            await CloseTradeIfPossible(d.tid);
         }
 
         private async void TradeHub_TradeBuyerPay(Top.Tmc.Message msg)
@@ -841,8 +843,7 @@ namespace WinFormsClient
 
         private async void ItemHub_ItemUpdate(Top.Tmc.Message msg)
         {
-            AppendText(msg.Topic);
-            //AppendText(msg.Content);
+            //AppendText(msg.Topic + " " + msg.Content);
             //taobao_item_ItemUpdate
             //{ "nick":"cendart","changed_fields":"","num_iid":522571681053} 
             //被删除时会先触发taobao_item_ItemUpdate消息，如果商品在出售中，还会触发下架消息
@@ -1561,12 +1562,12 @@ namespace WinFormsClient
 
         private void button2_Click(object sender, EventArgs e)
         {
-            new BlackListForm("黑名单管理", "blist.data").ShowDialog(this);
+            new BlackListForm("黑名单管理").ShowDialog(this);
         }
 
         private void buttonWlistMgr_Click(object sender, EventArgs e)
         {
-            new WhiteListForm("白名单管理", "wlist.data").ShowDialog(this);
+            new WhiteListForm("白名单管理").ShowDialog(this);
         }
 
         private async void UpProduct(object sender, EventArgs e)
