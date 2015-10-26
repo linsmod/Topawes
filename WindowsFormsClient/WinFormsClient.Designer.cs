@@ -30,6 +30,7 @@
         {
             this.components = new System.ComponentModel.Container();
             System.Windows.Forms.DataGridViewCellStyle dataGridViewCellStyle1 = new System.Windows.Forms.DataGridViewCellStyle();
+            System.ComponentModel.ComponentResourceManager resources = new System.ComponentModel.ComponentResourceManager(typeof(WinFormsClient));
             this.上架所选ToolStripMenuItem = new System.Windows.Forms.ToolStripMenuItem();
             this.下架所选ToolStripMenuItem = new System.Windows.Forms.ToolStripMenuItem();
             this.toolStripSeparator10 = new System.Windows.Forms.ToolStripSeparator();
@@ -53,6 +54,33 @@
             this.buttonUpAll = new System.Windows.Forms.Button();
             this.buttonDownAll = new System.Windows.Forms.Button();
             this.dataGridViewItem = new Moonlight.WindowsForms.Controls.MoonDataGridView();
+            this.contextMenuStrip1 = new System.Windows.Forms.ContextMenuStrip(this.components);
+            this.上架ToolStripMenuItem = new Moonlight.WindowsForms.StateControls.MoonToolStripMenuItem();
+            this.下架ToolStripMenuItem = new Moonlight.WindowsForms.StateControls.MoonToolStripMenuItem();
+            this.刷新ToolStripMenuItem = new System.Windows.Forms.ToolStripMenuItem();
+            this.toolStripSeparator2 = new System.Windows.Forms.ToolStripSeparator();
+            this.开启自动上架ToolStripMenuItem = new Moonlight.WindowsForms.StateControls.MoonToolStripMenuItem();
+            this.关闭自动上架ToolStripMenuItem = new Moonlight.WindowsForms.StateControls.MoonToolStripMenuItem();
+            this.锁定库存ToolStripMenuItem = new Moonlight.WindowsForms.StateControls.MoonToolStripMenuItem();
+            this.取消锁定库存ToolStripMenuItem = new Moonlight.WindowsForms.StateControls.MoonToolStripMenuItem();
+            this.修改库存ToolStripMenuItem2 = new Moonlight.WindowsForms.StateControls.MoonToolStripMenuItem();
+            this.修改利润ToolStripMenuItem = new System.Windows.Forms.ToolStripMenuItem();
+            this.获取供应商信息ToolStripMenuItem = new Moonlight.WindowsForms.StateControls.MoonToolStripMenuItem();
+            this.toolStripSeparator3 = new System.Windows.Forms.ToolStripSeparator();
+            this.全选ToolStripMenuItem2 = new Moonlight.WindowsForms.StateControls.MoonToolStripMenuItem();
+            this.反选ToolStripMenuItem1 = new Moonlight.WindowsForms.StateControls.MoonToolStripMenuItem();
+            this.按类别ToolStripMenuItem = new Moonlight.WindowsForms.StateControls.MoonToolStripMenuItem();
+            this.选择QQ直充ToolStripMenuItem = new System.Windows.Forms.ToolStripMenuItem();
+            this.选择点卡直充ToolStripMenuItem = new System.Windows.Forms.ToolStripMenuItem();
+            this.选择话费直充ToolStripMenuItem = new System.Windows.Forms.ToolStripMenuItem();
+            this.按利润ToolStripMenuItem = new Moonlight.WindowsForms.StateControls.MoonToolStripMenuItem();
+            this.选择正利润ToolStripMenuItem = new System.Windows.Forms.ToolStripMenuItem();
+            this.选择负利润ToolStripMenuItem = new System.Windows.Forms.ToolStripMenuItem();
+            this.选择零利润ToolStripMenuItem = new System.Windows.Forms.ToolStripMenuItem();
+            this.按位置ToolStripMenuItem = new Moonlight.WindowsForms.StateControls.MoonToolStripMenuItem();
+            this.选择仓库中ToolStripMenuItem = new System.Windows.Forms.ToolStripMenuItem();
+            this.选择出售中ToolStripMenuItem = new System.Windows.Forms.ToolStripMenuItem();
+            this.进入商品页ToolStripMenuItem = new Moonlight.WindowsForms.StateControls.MoonToolStripMenuItem();
             this.tabPageOrders = new System.Windows.Forms.TabPage();
             this.dataGridViewTbOrder = new System.Windows.Forms.DataGridView();
             this.tabPage1 = new System.Windows.Forms.TabPage();
@@ -88,24 +116,23 @@
             this.label9 = new System.Windows.Forms.Label();
             this.label7 = new System.Windows.Forms.Label();
             this.tabPageWB = new System.Windows.Forms.TabPage();
-            this.panel2 = new System.Windows.Forms.Panel();
-            this.wbMain = new Moonlight.WindowsForms.Controls.ExtendedWinFormsWebBrowser();
-            this.wb16 = new Moonlight.WindowsForms.Controls.ExtendedWinFormsWebBrowser();
-            this.wb8 = new Moonlight.WindowsForms.Controls.ExtendedWinFormsWebBrowser();
-            this.wb15 = new Moonlight.WindowsForms.Controls.ExtendedWinFormsWebBrowser();
-            this.wb14 = new Moonlight.WindowsForms.Controls.ExtendedWinFormsWebBrowser();
-            this.wb7 = new Moonlight.WindowsForms.Controls.ExtendedWinFormsWebBrowser();
-            this.wb13 = new Moonlight.WindowsForms.Controls.ExtendedWinFormsWebBrowser();
-            this.wb6 = new Moonlight.WindowsForms.Controls.ExtendedWinFormsWebBrowser();
-            this.wb12 = new Moonlight.WindowsForms.Controls.ExtendedWinFormsWebBrowser();
-            this.wb5 = new Moonlight.WindowsForms.Controls.ExtendedWinFormsWebBrowser();
-            this.wb11 = new Moonlight.WindowsForms.Controls.ExtendedWinFormsWebBrowser();
-            this.wb4 = new Moonlight.WindowsForms.Controls.ExtendedWinFormsWebBrowser();
-            this.wb10 = new Moonlight.WindowsForms.Controls.ExtendedWinFormsWebBrowser();
-            this.wb3 = new Moonlight.WindowsForms.Controls.ExtendedWinFormsWebBrowser();
-            this.wb9 = new Moonlight.WindowsForms.Controls.ExtendedWinFormsWebBrowser();
-            this.wb2 = new Moonlight.WindowsForms.Controls.ExtendedWinFormsWebBrowser();
+            this.wbArrayWrapper = new System.Windows.Forms.FlowLayoutPanel();
             this.wb1 = new Moonlight.WindowsForms.Controls.ExtendedWinFormsWebBrowser();
+            this.wb2 = new Moonlight.WindowsForms.Controls.ExtendedWinFormsWebBrowser();
+            this.wb9 = new Moonlight.WindowsForms.Controls.ExtendedWinFormsWebBrowser();
+            this.wb3 = new Moonlight.WindowsForms.Controls.ExtendedWinFormsWebBrowser();
+            this.wb10 = new Moonlight.WindowsForms.Controls.ExtendedWinFormsWebBrowser();
+            this.wb4 = new Moonlight.WindowsForms.Controls.ExtendedWinFormsWebBrowser();
+            this.wb11 = new Moonlight.WindowsForms.Controls.ExtendedWinFormsWebBrowser();
+            this.wb5 = new Moonlight.WindowsForms.Controls.ExtendedWinFormsWebBrowser();
+            this.wb12 = new Moonlight.WindowsForms.Controls.ExtendedWinFormsWebBrowser();
+            this.wb6 = new Moonlight.WindowsForms.Controls.ExtendedWinFormsWebBrowser();
+            this.wb13 = new Moonlight.WindowsForms.Controls.ExtendedWinFormsWebBrowser();
+            this.wb7 = new Moonlight.WindowsForms.Controls.ExtendedWinFormsWebBrowser();
+            this.wb14 = new Moonlight.WindowsForms.Controls.ExtendedWinFormsWebBrowser();
+            this.wb15 = new Moonlight.WindowsForms.Controls.ExtendedWinFormsWebBrowser();
+            this.wb8 = new Moonlight.WindowsForms.Controls.ExtendedWinFormsWebBrowser();
+            this.wb16 = new Moonlight.WindowsForms.Controls.ExtendedWinFormsWebBrowser();
             this.tabPage2 = new System.Windows.Forms.TabPage();
             this.statusStrip1 = new System.Windows.Forms.StatusStrip();
             this.tssl_ConnState = new System.Windows.Forms.ToolStripStatusLabel();
@@ -152,33 +179,6 @@
             this.labelTaskName = new System.Windows.Forms.Label();
             this.progressBar1 = new System.Windows.Forms.ProgressBar();
             this.TextBoxMessage = new System.Windows.Forms.TextBox();
-            this.contextMenuStrip1 = new System.Windows.Forms.ContextMenuStrip(this.components);
-            this.上架ToolStripMenuItem = new Moonlight.WindowsForms.StateControls.MoonToolStripMenuItem();
-            this.下架ToolStripMenuItem = new Moonlight.WindowsForms.StateControls.MoonToolStripMenuItem();
-            this.刷新ToolStripMenuItem = new System.Windows.Forms.ToolStripMenuItem();
-            this.toolStripSeparator2 = new System.Windows.Forms.ToolStripSeparator();
-            this.开启自动上架ToolStripMenuItem = new Moonlight.WindowsForms.StateControls.MoonToolStripMenuItem();
-            this.关闭自动上架ToolStripMenuItem = new Moonlight.WindowsForms.StateControls.MoonToolStripMenuItem();
-            this.锁定库存ToolStripMenuItem = new Moonlight.WindowsForms.StateControls.MoonToolStripMenuItem();
-            this.取消锁定库存ToolStripMenuItem = new Moonlight.WindowsForms.StateControls.MoonToolStripMenuItem();
-            this.修改库存ToolStripMenuItem2 = new Moonlight.WindowsForms.StateControls.MoonToolStripMenuItem();
-            this.修改利润ToolStripMenuItem = new System.Windows.Forms.ToolStripMenuItem();
-            this.获取供应商信息ToolStripMenuItem = new Moonlight.WindowsForms.StateControls.MoonToolStripMenuItem();
-            this.toolStripSeparator3 = new System.Windows.Forms.ToolStripSeparator();
-            this.全选ToolStripMenuItem2 = new Moonlight.WindowsForms.StateControls.MoonToolStripMenuItem();
-            this.反选ToolStripMenuItem1 = new Moonlight.WindowsForms.StateControls.MoonToolStripMenuItem();
-            this.按类别ToolStripMenuItem = new Moonlight.WindowsForms.StateControls.MoonToolStripMenuItem();
-            this.选择QQ直充ToolStripMenuItem = new System.Windows.Forms.ToolStripMenuItem();
-            this.选择点卡直充ToolStripMenuItem = new System.Windows.Forms.ToolStripMenuItem();
-            this.选择话费直充ToolStripMenuItem = new System.Windows.Forms.ToolStripMenuItem();
-            this.按利润ToolStripMenuItem = new Moonlight.WindowsForms.StateControls.MoonToolStripMenuItem();
-            this.选择正利润ToolStripMenuItem = new System.Windows.Forms.ToolStripMenuItem();
-            this.选择负利润ToolStripMenuItem = new System.Windows.Forms.ToolStripMenuItem();
-            this.选择零利润ToolStripMenuItem = new System.Windows.Forms.ToolStripMenuItem();
-            this.按位置ToolStripMenuItem = new Moonlight.WindowsForms.StateControls.MoonToolStripMenuItem();
-            this.选择仓库中ToolStripMenuItem = new System.Windows.Forms.ToolStripMenuItem();
-            this.选择出售中ToolStripMenuItem = new System.Windows.Forms.ToolStripMenuItem();
-            this.进入商品页ToolStripMenuItem = new Moonlight.WindowsForms.StateControls.MoonToolStripMenuItem();
             this.menuStrip1 = new System.Windows.Forms.MenuStrip();
             this.菜单ToolStripMenuItem = new System.Windows.Forms.ToolStripMenuItem();
             this.切换账号ToolStripMenuItem = new System.Windows.Forms.ToolStripMenuItem();
@@ -198,6 +198,7 @@
             ((System.ComponentModel.ISupportInitialize)(this.不陪钱利润)).BeginInit();
             ((System.ComponentModel.ISupportInitialize)(this.赔钱利润)).BeginInit();
             ((System.ComponentModel.ISupportInitialize)(this.dataGridViewItem)).BeginInit();
+            this.contextMenuStrip1.SuspendLayout();
             this.tabPageOrders.SuspendLayout();
             ((System.ComponentModel.ISupportInitialize)(this.dataGridViewTbOrder)).BeginInit();
             this.tabPage1.SuspendLayout();
@@ -210,14 +211,13 @@
             this.groupBox1.SuspendLayout();
             ((System.ComponentModel.ISupportInitialize)(this.QQ直充库存锁定数量)).BeginInit();
             this.tabPageWB.SuspendLayout();
-            this.panel2.SuspendLayout();
+            this.wbArrayWrapper.SuspendLayout();
             this.statusStrip1.SuspendLayout();
             this.ChatPanel.SuspendLayout();
             ((System.ComponentModel.ISupportInitialize)(this.splitContainer1)).BeginInit();
             this.splitContainer1.Panel1.SuspendLayout();
             this.splitContainer1.Panel2.SuspendLayout();
             this.splitContainer1.SuspendLayout();
-            this.contextMenuStrip1.SuspendLayout();
             this.menuStrip1.SuspendLayout();
             this.SuspendLayout();
             // 
@@ -473,6 +473,249 @@
             this.dataGridViewItem.SelectionMode = System.Windows.Forms.DataGridViewSelectionMode.FullRowSelect;
             this.dataGridViewItem.Size = new System.Drawing.Size(964, 255);
             this.dataGridViewItem.TabIndex = 0;
+            // 
+            // contextMenuStrip1
+            // 
+            this.contextMenuStrip1.Items.AddRange(new System.Windows.Forms.ToolStripItem[] {
+            this.上架ToolStripMenuItem,
+            this.下架ToolStripMenuItem,
+            this.刷新ToolStripMenuItem,
+            this.toolStripSeparator2,
+            this.开启自动上架ToolStripMenuItem,
+            this.关闭自动上架ToolStripMenuItem,
+            this.锁定库存ToolStripMenuItem,
+            this.取消锁定库存ToolStripMenuItem,
+            this.修改库存ToolStripMenuItem2,
+            this.修改利润ToolStripMenuItem,
+            this.获取供应商信息ToolStripMenuItem,
+            this.toolStripSeparator3,
+            this.全选ToolStripMenuItem2,
+            this.反选ToolStripMenuItem1,
+            this.按类别ToolStripMenuItem,
+            this.按利润ToolStripMenuItem,
+            this.按位置ToolStripMenuItem,
+            this.进入商品页ToolStripMenuItem});
+            this.contextMenuStrip1.Name = "contextMenuStrip1";
+            this.contextMenuStrip1.Size = new System.Drawing.Size(161, 368);
+            // 
+            // 上架ToolStripMenuItem
+            // 
+            this.上架ToolStripMenuItem.AppUserSettingProtect = false;
+            this.上架ToolStripMenuItem.Image = ((System.Drawing.Image)(resources.GetObject("上架ToolStripMenuItem.Image")));
+            this.上架ToolStripMenuItem.Name = "上架ToolStripMenuItem";
+            this.上架ToolStripMenuItem.Size = new System.Drawing.Size(160, 22);
+            this.上架ToolStripMenuItem.Text = "上架";
+            this.上架ToolStripMenuItem.Click += new System.EventHandler(this.UpProduct);
+            // 
+            // 下架ToolStripMenuItem
+            // 
+            this.下架ToolStripMenuItem.AppUserSettingProtect = false;
+            this.下架ToolStripMenuItem.Image = ((System.Drawing.Image)(resources.GetObject("下架ToolStripMenuItem.Image")));
+            this.下架ToolStripMenuItem.Name = "下架ToolStripMenuItem";
+            this.下架ToolStripMenuItem.Size = new System.Drawing.Size(160, 22);
+            this.下架ToolStripMenuItem.Text = "下架";
+            this.下架ToolStripMenuItem.Click += new System.EventHandler(this.DownProduct);
+            // 
+            // 刷新ToolStripMenuItem
+            // 
+            this.刷新ToolStripMenuItem.Name = "刷新ToolStripMenuItem";
+            this.刷新ToolStripMenuItem.Size = new System.Drawing.Size(160, 22);
+            this.刷新ToolStripMenuItem.Text = "刷新";
+            this.刷新ToolStripMenuItem.Click += new System.EventHandler(this.刷新ToolStripMenuItem_Click);
+            // 
+            // toolStripSeparator2
+            // 
+            this.toolStripSeparator2.Name = "toolStripSeparator2";
+            this.toolStripSeparator2.Size = new System.Drawing.Size(157, 6);
+            // 
+            // 开启自动上架ToolStripMenuItem
+            // 
+            this.开启自动上架ToolStripMenuItem.AppUserSettingProtect = false;
+            this.开启自动上架ToolStripMenuItem.Name = "开启自动上架ToolStripMenuItem";
+            this.开启自动上架ToolStripMenuItem.Size = new System.Drawing.Size(160, 22);
+            this.开启自动上架ToolStripMenuItem.Text = "开启自动上架";
+            this.开启自动上架ToolStripMenuItem.Click += new System.EventHandler(this.开启自动上架ToolStripMenuItem_Click);
+            // 
+            // 关闭自动上架ToolStripMenuItem
+            // 
+            this.关闭自动上架ToolStripMenuItem.AppUserSettingProtect = false;
+            this.关闭自动上架ToolStripMenuItem.Name = "关闭自动上架ToolStripMenuItem";
+            this.关闭自动上架ToolStripMenuItem.Size = new System.Drawing.Size(160, 22);
+            this.关闭自动上架ToolStripMenuItem.Text = "关闭自动上架";
+            this.关闭自动上架ToolStripMenuItem.Click += new System.EventHandler(this.关闭自动上架ToolStripMenuItem_Click);
+            // 
+            // 锁定库存ToolStripMenuItem
+            // 
+            this.锁定库存ToolStripMenuItem.AppUserSettingProtect = false;
+            this.锁定库存ToolStripMenuItem.Image = ((System.Drawing.Image)(resources.GetObject("锁定库存ToolStripMenuItem.Image")));
+            this.锁定库存ToolStripMenuItem.Name = "锁定库存ToolStripMenuItem";
+            this.锁定库存ToolStripMenuItem.Size = new System.Drawing.Size(160, 22);
+            this.锁定库存ToolStripMenuItem.Text = "开启监控";
+            this.锁定库存ToolStripMenuItem.Click += new System.EventHandler(this.锁定库存ToolStripMenuItem_Click);
+            // 
+            // 取消锁定库存ToolStripMenuItem
+            // 
+            this.取消锁定库存ToolStripMenuItem.AppUserSettingProtect = false;
+            this.取消锁定库存ToolStripMenuItem.Image = ((System.Drawing.Image)(resources.GetObject("取消锁定库存ToolStripMenuItem.Image")));
+            this.取消锁定库存ToolStripMenuItem.Name = "取消锁定库存ToolStripMenuItem";
+            this.取消锁定库存ToolStripMenuItem.Size = new System.Drawing.Size(160, 22);
+            this.取消锁定库存ToolStripMenuItem.Text = "关闭监控";
+            this.取消锁定库存ToolStripMenuItem.Click += new System.EventHandler(this.取消锁定库存ToolStripMenuItem_Click);
+            // 
+            // 修改库存ToolStripMenuItem2
+            // 
+            this.修改库存ToolStripMenuItem2.AppUserSettingProtect = false;
+            this.修改库存ToolStripMenuItem2.Image = ((System.Drawing.Image)(resources.GetObject("修改库存ToolStripMenuItem2.Image")));
+            this.修改库存ToolStripMenuItem2.Name = "修改库存ToolStripMenuItem2";
+            this.修改库存ToolStripMenuItem2.Size = new System.Drawing.Size(160, 22);
+            this.修改库存ToolStripMenuItem2.Text = "修改库存...";
+            this.修改库存ToolStripMenuItem2.Click += new System.EventHandler(this.修改库存ToolStripMenuItem1_Click);
+            // 
+            // 修改利润ToolStripMenuItem
+            // 
+            this.修改利润ToolStripMenuItem.Image = ((System.Drawing.Image)(resources.GetObject("修改利润ToolStripMenuItem.Image")));
+            this.修改利润ToolStripMenuItem.Name = "修改利润ToolStripMenuItem";
+            this.修改利润ToolStripMenuItem.Size = new System.Drawing.Size(160, 22);
+            this.修改利润ToolStripMenuItem.Text = "修改利润...";
+            this.修改利润ToolStripMenuItem.Click += new System.EventHandler(this.修改利润ToolStripMenuItem_Click);
+            // 
+            // 获取供应商信息ToolStripMenuItem
+            // 
+            this.获取供应商信息ToolStripMenuItem.AppUserSettingProtect = false;
+            this.获取供应商信息ToolStripMenuItem.Name = "获取供应商信息ToolStripMenuItem";
+            this.获取供应商信息ToolStripMenuItem.Size = new System.Drawing.Size(160, 22);
+            this.获取供应商信息ToolStripMenuItem.Text = "获取供应商信息";
+            this.获取供应商信息ToolStripMenuItem.Click += new System.EventHandler(this.获取供应商信息ToolStripMenuItem_Click);
+            // 
+            // toolStripSeparator3
+            // 
+            this.toolStripSeparator3.Name = "toolStripSeparator3";
+            this.toolStripSeparator3.Size = new System.Drawing.Size(157, 6);
+            // 
+            // 全选ToolStripMenuItem2
+            // 
+            this.全选ToolStripMenuItem2.AppUserSettingProtect = false;
+            this.全选ToolStripMenuItem2.Image = ((System.Drawing.Image)(resources.GetObject("全选ToolStripMenuItem2.Image")));
+            this.全选ToolStripMenuItem2.Name = "全选ToolStripMenuItem2";
+            this.全选ToolStripMenuItem2.Size = new System.Drawing.Size(160, 22);
+            this.全选ToolStripMenuItem2.Text = "全选";
+            this.全选ToolStripMenuItem2.Click += new System.EventHandler(this.全选ToolStripMenuItem_Click);
+            // 
+            // 反选ToolStripMenuItem1
+            // 
+            this.反选ToolStripMenuItem1.AppUserSettingProtect = false;
+            this.反选ToolStripMenuItem1.Name = "反选ToolStripMenuItem1";
+            this.反选ToolStripMenuItem1.Size = new System.Drawing.Size(160, 22);
+            this.反选ToolStripMenuItem1.Text = "反选";
+            this.反选ToolStripMenuItem1.Click += new System.EventHandler(this.反选ToolStripMenuItem_Click);
+            // 
+            // 按类别ToolStripMenuItem
+            // 
+            this.按类别ToolStripMenuItem.AppUserSettingProtect = false;
+            this.按类别ToolStripMenuItem.DropDownItems.AddRange(new System.Windows.Forms.ToolStripItem[] {
+            this.选择QQ直充ToolStripMenuItem,
+            this.选择点卡直充ToolStripMenuItem,
+            this.选择话费直充ToolStripMenuItem});
+            this.按类别ToolStripMenuItem.Image = ((System.Drawing.Image)(resources.GetObject("按类别ToolStripMenuItem.Image")));
+            this.按类别ToolStripMenuItem.Name = "按类别ToolStripMenuItem";
+            this.按类别ToolStripMenuItem.Size = new System.Drawing.Size(160, 22);
+            this.按类别ToolStripMenuItem.Text = "按类别选择";
+            // 
+            // 选择QQ直充ToolStripMenuItem
+            // 
+            this.选择QQ直充ToolStripMenuItem.Image = ((System.Drawing.Image)(resources.GetObject("选择QQ直充ToolStripMenuItem.Image")));
+            this.选择QQ直充ToolStripMenuItem.Name = "选择QQ直充ToolStripMenuItem";
+            this.选择QQ直充ToolStripMenuItem.Size = new System.Drawing.Size(148, 22);
+            this.选择QQ直充ToolStripMenuItem.Text = "选择QQ直充";
+            this.选择QQ直充ToolStripMenuItem.Click += new System.EventHandler(this.qQ直充ToolStripMenuItem2_Click);
+            // 
+            // 选择点卡直充ToolStripMenuItem
+            // 
+            this.选择点卡直充ToolStripMenuItem.Image = ((System.Drawing.Image)(resources.GetObject("选择点卡直充ToolStripMenuItem.Image")));
+            this.选择点卡直充ToolStripMenuItem.Name = "选择点卡直充ToolStripMenuItem";
+            this.选择点卡直充ToolStripMenuItem.Size = new System.Drawing.Size(148, 22);
+            this.选择点卡直充ToolStripMenuItem.Text = "选择点卡直充";
+            this.选择点卡直充ToolStripMenuItem.Click += new System.EventHandler(this.点卡直充ToolStripMenuItem2_Click);
+            // 
+            // 选择话费直充ToolStripMenuItem
+            // 
+            this.选择话费直充ToolStripMenuItem.Image = ((System.Drawing.Image)(resources.GetObject("选择话费直充ToolStripMenuItem.Image")));
+            this.选择话费直充ToolStripMenuItem.Name = "选择话费直充ToolStripMenuItem";
+            this.选择话费直充ToolStripMenuItem.Size = new System.Drawing.Size(148, 22);
+            this.选择话费直充ToolStripMenuItem.Text = "选择话费直充";
+            this.选择话费直充ToolStripMenuItem.Click += new System.EventHandler(this.话费直充ToolStripMenuItem2_Click);
+            // 
+            // 按利润ToolStripMenuItem
+            // 
+            this.按利润ToolStripMenuItem.AppUserSettingProtect = false;
+            this.按利润ToolStripMenuItem.DropDownItems.AddRange(new System.Windows.Forms.ToolStripItem[] {
+            this.选择正利润ToolStripMenuItem,
+            this.选择负利润ToolStripMenuItem,
+            this.选择零利润ToolStripMenuItem});
+            this.按利润ToolStripMenuItem.Image = ((System.Drawing.Image)(resources.GetObject("按利润ToolStripMenuItem.Image")));
+            this.按利润ToolStripMenuItem.Name = "按利润ToolStripMenuItem";
+            this.按利润ToolStripMenuItem.Size = new System.Drawing.Size(160, 22);
+            this.按利润ToolStripMenuItem.Text = "按利润选择";
+            // 
+            // 选择正利润ToolStripMenuItem
+            // 
+            this.选择正利润ToolStripMenuItem.Image = ((System.Drawing.Image)(resources.GetObject("选择正利润ToolStripMenuItem.Image")));
+            this.选择正利润ToolStripMenuItem.Name = "选择正利润ToolStripMenuItem";
+            this.选择正利润ToolStripMenuItem.Size = new System.Drawing.Size(136, 22);
+            this.选择正利润ToolStripMenuItem.Text = "选择正利润";
+            this.选择正利润ToolStripMenuItem.Click += new System.EventHandler(this.正利润ToolStripMenuItem_Click);
+            // 
+            // 选择负利润ToolStripMenuItem
+            // 
+            this.选择负利润ToolStripMenuItem.Image = ((System.Drawing.Image)(resources.GetObject("选择负利润ToolStripMenuItem.Image")));
+            this.选择负利润ToolStripMenuItem.Name = "选择负利润ToolStripMenuItem";
+            this.选择负利润ToolStripMenuItem.Size = new System.Drawing.Size(136, 22);
+            this.选择负利润ToolStripMenuItem.Text = "选择负利润";
+            this.选择负利润ToolStripMenuItem.Click += new System.EventHandler(this.负利润ToolStripMenuItem_Click);
+            // 
+            // 选择零利润ToolStripMenuItem
+            // 
+            this.选择零利润ToolStripMenuItem.Name = "选择零利润ToolStripMenuItem";
+            this.选择零利润ToolStripMenuItem.Size = new System.Drawing.Size(136, 22);
+            this.选择零利润ToolStripMenuItem.Text = "选择零利润";
+            this.选择零利润ToolStripMenuItem.Click += new System.EventHandler(this.零利润ToolStripMenuItem_Click);
+            // 
+            // 按位置ToolStripMenuItem
+            // 
+            this.按位置ToolStripMenuItem.AppUserSettingProtect = false;
+            this.按位置ToolStripMenuItem.DropDownItems.AddRange(new System.Windows.Forms.ToolStripItem[] {
+            this.选择仓库中ToolStripMenuItem,
+            this.选择出售中ToolStripMenuItem});
+            this.按位置ToolStripMenuItem.Image = ((System.Drawing.Image)(resources.GetObject("按位置ToolStripMenuItem.Image")));
+            this.按位置ToolStripMenuItem.Name = "按位置ToolStripMenuItem";
+            this.按位置ToolStripMenuItem.Size = new System.Drawing.Size(160, 22);
+            this.按位置ToolStripMenuItem.Text = "按位置选择";
+            // 
+            // 选择仓库中ToolStripMenuItem
+            // 
+            this.选择仓库中ToolStripMenuItem.Image = ((System.Drawing.Image)(resources.GetObject("选择仓库中ToolStripMenuItem.Image")));
+            this.选择仓库中ToolStripMenuItem.Name = "选择仓库中ToolStripMenuItem";
+            this.选择仓库中ToolStripMenuItem.Size = new System.Drawing.Size(136, 22);
+            this.选择仓库中ToolStripMenuItem.Text = "选择仓库中";
+            this.选择仓库中ToolStripMenuItem.Click += new System.EventHandler(this.仓库中ToolStripMenuItem_Click);
+            // 
+            // 选择出售中ToolStripMenuItem
+            // 
+            this.选择出售中ToolStripMenuItem.Image = ((System.Drawing.Image)(resources.GetObject("选择出售中ToolStripMenuItem.Image")));
+            this.选择出售中ToolStripMenuItem.Name = "选择出售中ToolStripMenuItem";
+            this.选择出售中ToolStripMenuItem.Size = new System.Drawing.Size(136, 22);
+            this.选择出售中ToolStripMenuItem.Text = "选择出售中";
+            this.选择出售中ToolStripMenuItem.Click += new System.EventHandler(this.销售中ToolStripMenuItem_Click);
+            // 
+            // 进入商品页ToolStripMenuItem
+            // 
+            this.进入商品页ToolStripMenuItem.AppUserSettingProtect = false;
+            this.进入商品页ToolStripMenuItem.Enabled = false;
+            this.进入商品页ToolStripMenuItem.Image = ((System.Drawing.Image)(resources.GetObject("进入商品页ToolStripMenuItem.Image")));
+            this.进入商品页ToolStripMenuItem.Name = "进入商品页ToolStripMenuItem";
+            this.进入商品页ToolStripMenuItem.Size = new System.Drawing.Size(160, 22);
+            this.进入商品页ToolStripMenuItem.Text = "进入商品页";
+            this.进入商品页ToolStripMenuItem.Click += new System.EventHandler(this.进入商品页ToolStripMenuItem_Click);
             // 
             // tabPageOrders
             // 
@@ -906,23 +1149,7 @@
             // 
             // tabPageWB
             // 
-            this.tabPageWB.Controls.Add(this.panel2);
-            this.tabPageWB.Controls.Add(this.wb16);
-            this.tabPageWB.Controls.Add(this.wb8);
-            this.tabPageWB.Controls.Add(this.wb15);
-            this.tabPageWB.Controls.Add(this.wb14);
-            this.tabPageWB.Controls.Add(this.wb7);
-            this.tabPageWB.Controls.Add(this.wb13);
-            this.tabPageWB.Controls.Add(this.wb6);
-            this.tabPageWB.Controls.Add(this.wb12);
-            this.tabPageWB.Controls.Add(this.wb5);
-            this.tabPageWB.Controls.Add(this.wb11);
-            this.tabPageWB.Controls.Add(this.wb4);
-            this.tabPageWB.Controls.Add(this.wb10);
-            this.tabPageWB.Controls.Add(this.wb3);
-            this.tabPageWB.Controls.Add(this.wb9);
-            this.tabPageWB.Controls.Add(this.wb2);
-            this.tabPageWB.Controls.Add(this.wb1);
+            this.tabPageWB.Controls.Add(this.wbArrayWrapper);
             this.tabPageWB.Location = new System.Drawing.Point(4, 22);
             this.tabPageWB.Name = "tabPageWB";
             this.tabPageWB.Padding = new System.Windows.Forms.Padding(3);
@@ -931,184 +1158,189 @@
             this.tabPageWB.Text = "调试页面，拒绝手贱";
             this.tabPageWB.UseVisualStyleBackColor = true;
             // 
-            // panel2
+            // wbArrayWrapper
             // 
-            this.panel2.Controls.Add(this.wbMain);
-            this.panel2.Location = new System.Drawing.Point(832, 6);
-            this.panel2.Name = "panel2";
-            this.panel2.Size = new System.Drawing.Size(84, 187);
-            this.panel2.TabIndex = 2;
+            this.wbArrayWrapper.Controls.Add(this.wb1);
+            this.wbArrayWrapper.Controls.Add(this.wb2);
+            this.wbArrayWrapper.Controls.Add(this.wb9);
+            this.wbArrayWrapper.Controls.Add(this.wb3);
+            this.wbArrayWrapper.Controls.Add(this.wb10);
+            this.wbArrayWrapper.Controls.Add(this.wb4);
+            this.wbArrayWrapper.Controls.Add(this.wb11);
+            this.wbArrayWrapper.Controls.Add(this.wb5);
+            this.wbArrayWrapper.Controls.Add(this.wb12);
+            this.wbArrayWrapper.Controls.Add(this.wb6);
+            this.wbArrayWrapper.Controls.Add(this.wb13);
+            this.wbArrayWrapper.Controls.Add(this.wb7);
+            this.wbArrayWrapper.Controls.Add(this.wb14);
+            this.wbArrayWrapper.Controls.Add(this.wb15);
+            this.wbArrayWrapper.Controls.Add(this.wb8);
+            this.wbArrayWrapper.Controls.Add(this.wb16);
+            this.wbArrayWrapper.Dock = System.Windows.Forms.DockStyle.Fill;
+            this.wbArrayWrapper.Location = new System.Drawing.Point(3, 3);
+            this.wbArrayWrapper.Name = "wbArrayWrapper";
+            this.wbArrayWrapper.Size = new System.Drawing.Size(964, 296);
+            this.wbArrayWrapper.TabIndex = 3;
             // 
-            // wbMain
+            // wb1
             // 
-            this.wbMain.Cookie = null;
-            this.wbMain.Dock = System.Windows.Forms.DockStyle.Fill;
-            this.wbMain.Location = new System.Drawing.Point(0, 0);
-            this.wbMain.MinimumSize = new System.Drawing.Size(20, 20);
-            this.wbMain.Name = "wbMain";
-            this.wbMain.ScriptErrorsSuppressed = true;
-            this.wbMain.Size = new System.Drawing.Size(84, 187);
-            this.wbMain.TabIndex = 0;
-            // 
-            // wb16
-            // 
-            this.wb16.Cookie = null;
-            this.wb16.Location = new System.Drawing.Point(729, 101);
-            this.wb16.MinimumSize = new System.Drawing.Size(20, 20);
-            this.wb16.Name = "wb16";
-            this.wb16.ScriptErrorsSuppressed = true;
-            this.wb16.Size = new System.Drawing.Size(97, 92);
-            this.wb16.TabIndex = 0;
-            // 
-            // wb8
-            // 
-            this.wb8.Cookie = null;
-            this.wb8.Location = new System.Drawing.Point(729, 3);
-            this.wb8.MinimumSize = new System.Drawing.Size(20, 20);
-            this.wb8.Name = "wb8";
-            this.wb8.ScriptErrorsSuppressed = true;
-            this.wb8.Size = new System.Drawing.Size(97, 92);
-            this.wb8.TabIndex = 0;
-            // 
-            // wb15
-            // 
-            this.wb15.Cookie = null;
-            this.wb15.Location = new System.Drawing.Point(626, 101);
-            this.wb15.MinimumSize = new System.Drawing.Size(20, 20);
-            this.wb15.Name = "wb15";
-            this.wb15.ScriptErrorsSuppressed = true;
-            this.wb15.Size = new System.Drawing.Size(97, 92);
-            this.wb15.TabIndex = 0;
-            // 
-            // wb14
-            // 
-            this.wb14.Cookie = null;
-            this.wb14.Location = new System.Drawing.Point(523, 101);
-            this.wb14.MinimumSize = new System.Drawing.Size(20, 20);
-            this.wb14.Name = "wb14";
-            this.wb14.ScriptErrorsSuppressed = true;
-            this.wb14.Size = new System.Drawing.Size(97, 92);
-            this.wb14.TabIndex = 0;
-            // 
-            // wb7
-            // 
-            this.wb7.Cookie = null;
-            this.wb7.Location = new System.Drawing.Point(626, 3);
-            this.wb7.MinimumSize = new System.Drawing.Size(20, 20);
-            this.wb7.Name = "wb7";
-            this.wb7.ScriptErrorsSuppressed = true;
-            this.wb7.Size = new System.Drawing.Size(97, 92);
-            this.wb7.TabIndex = 0;
-            // 
-            // wb13
-            // 
-            this.wb13.Cookie = null;
-            this.wb13.Location = new System.Drawing.Point(420, 104);
-            this.wb13.MinimumSize = new System.Drawing.Size(20, 20);
-            this.wb13.Name = "wb13";
-            this.wb13.ScriptErrorsSuppressed = true;
-            this.wb13.Size = new System.Drawing.Size(97, 92);
-            this.wb13.TabIndex = 0;
-            // 
-            // wb6
-            // 
-            this.wb6.Cookie = null;
-            this.wb6.Location = new System.Drawing.Point(523, 3);
-            this.wb6.MinimumSize = new System.Drawing.Size(20, 20);
-            this.wb6.Name = "wb6";
-            this.wb6.ScriptErrorsSuppressed = true;
-            this.wb6.Size = new System.Drawing.Size(97, 92);
-            this.wb6.TabIndex = 0;
-            // 
-            // wb12
-            // 
-            this.wb12.Cookie = null;
-            this.wb12.Location = new System.Drawing.Point(317, 104);
-            this.wb12.MinimumSize = new System.Drawing.Size(20, 20);
-            this.wb12.Name = "wb12";
-            this.wb12.ScriptErrorsSuppressed = true;
-            this.wb12.Size = new System.Drawing.Size(97, 92);
-            this.wb12.TabIndex = 0;
-            // 
-            // wb5
-            // 
-            this.wb5.Cookie = null;
-            this.wb5.Location = new System.Drawing.Point(420, 6);
-            this.wb5.MinimumSize = new System.Drawing.Size(20, 20);
-            this.wb5.Name = "wb5";
-            this.wb5.ScriptErrorsSuppressed = true;
-            this.wb5.Size = new System.Drawing.Size(97, 92);
-            this.wb5.TabIndex = 0;
-            // 
-            // wb11
-            // 
-            this.wb11.Cookie = null;
-            this.wb11.Location = new System.Drawing.Point(214, 104);
-            this.wb11.MinimumSize = new System.Drawing.Size(20, 20);
-            this.wb11.Name = "wb11";
-            this.wb11.ScriptErrorsSuppressed = true;
-            this.wb11.Size = new System.Drawing.Size(97, 92);
-            this.wb11.TabIndex = 0;
-            // 
-            // wb4
-            // 
-            this.wb4.Cookie = null;
-            this.wb4.Location = new System.Drawing.Point(317, 6);
-            this.wb4.MinimumSize = new System.Drawing.Size(20, 20);
-            this.wb4.Name = "wb4";
-            this.wb4.ScriptErrorsSuppressed = true;
-            this.wb4.Size = new System.Drawing.Size(97, 92);
-            this.wb4.TabIndex = 0;
-            // 
-            // wb10
-            // 
-            this.wb10.Cookie = null;
-            this.wb10.Location = new System.Drawing.Point(111, 104);
-            this.wb10.MinimumSize = new System.Drawing.Size(20, 20);
-            this.wb10.Name = "wb10";
-            this.wb10.ScriptErrorsSuppressed = true;
-            this.wb10.Size = new System.Drawing.Size(97, 92);
-            this.wb10.TabIndex = 0;
-            // 
-            // wb3
-            // 
-            this.wb3.Cookie = null;
-            this.wb3.Location = new System.Drawing.Point(214, 6);
-            this.wb3.MinimumSize = new System.Drawing.Size(20, 20);
-            this.wb3.Name = "wb3";
-            this.wb3.ScriptErrorsSuppressed = true;
-            this.wb3.Size = new System.Drawing.Size(97, 92);
-            this.wb3.TabIndex = 0;
-            // 
-            // wb9
-            // 
-            this.wb9.Cookie = null;
-            this.wb9.Location = new System.Drawing.Point(8, 104);
-            this.wb9.MinimumSize = new System.Drawing.Size(20, 20);
-            this.wb9.Name = "wb9";
-            this.wb9.ScriptErrorsSuppressed = true;
-            this.wb9.Size = new System.Drawing.Size(97, 92);
-            this.wb9.TabIndex = 0;
+            this.wb1.Cookie = null;
+            this.wb1.Location = new System.Drawing.Point(3, 3);
+            this.wb1.MinimumSize = new System.Drawing.Size(20, 20);
+            this.wb1.Name = "wb1";
+            this.wb1.ScriptErrorsSuppressed = true;
+            this.wb1.Size = new System.Drawing.Size(273, 92);
+            this.wb1.TabIndex = 0;
             // 
             // wb2
             // 
             this.wb2.Cookie = null;
-            this.wb2.Location = new System.Drawing.Point(111, 6);
+            this.wb2.Location = new System.Drawing.Point(282, 3);
             this.wb2.MinimumSize = new System.Drawing.Size(20, 20);
             this.wb2.Name = "wb2";
             this.wb2.ScriptErrorsSuppressed = true;
             this.wb2.Size = new System.Drawing.Size(97, 92);
             this.wb2.TabIndex = 0;
             // 
-            // wb1
+            // wb9
             // 
-            this.wb1.Cookie = null;
-            this.wb1.Location = new System.Drawing.Point(8, 6);
-            this.wb1.MinimumSize = new System.Drawing.Size(20, 20);
-            this.wb1.Name = "wb1";
-            this.wb1.ScriptErrorsSuppressed = true;
-            this.wb1.Size = new System.Drawing.Size(97, 92);
-            this.wb1.TabIndex = 0;
+            this.wb9.Cookie = null;
+            this.wb9.Location = new System.Drawing.Point(385, 3);
+            this.wb9.MinimumSize = new System.Drawing.Size(20, 20);
+            this.wb9.Name = "wb9";
+            this.wb9.ScriptErrorsSuppressed = true;
+            this.wb9.Size = new System.Drawing.Size(97, 92);
+            this.wb9.TabIndex = 0;
+            // 
+            // wb3
+            // 
+            this.wb3.Cookie = null;
+            this.wb3.Location = new System.Drawing.Point(488, 3);
+            this.wb3.MinimumSize = new System.Drawing.Size(20, 20);
+            this.wb3.Name = "wb3";
+            this.wb3.ScriptErrorsSuppressed = true;
+            this.wb3.Size = new System.Drawing.Size(97, 92);
+            this.wb3.TabIndex = 0;
+            // 
+            // wb10
+            // 
+            this.wb10.Cookie = null;
+            this.wb10.Location = new System.Drawing.Point(591, 3);
+            this.wb10.MinimumSize = new System.Drawing.Size(20, 20);
+            this.wb10.Name = "wb10";
+            this.wb10.ScriptErrorsSuppressed = true;
+            this.wb10.Size = new System.Drawing.Size(97, 92);
+            this.wb10.TabIndex = 0;
+            // 
+            // wb4
+            // 
+            this.wb4.Cookie = null;
+            this.wb4.Location = new System.Drawing.Point(694, 3);
+            this.wb4.MinimumSize = new System.Drawing.Size(20, 20);
+            this.wb4.Name = "wb4";
+            this.wb4.ScriptErrorsSuppressed = true;
+            this.wb4.Size = new System.Drawing.Size(97, 92);
+            this.wb4.TabIndex = 0;
+            // 
+            // wb11
+            // 
+            this.wb11.Cookie = null;
+            this.wb11.Location = new System.Drawing.Point(797, 3);
+            this.wb11.MinimumSize = new System.Drawing.Size(20, 20);
+            this.wb11.Name = "wb11";
+            this.wb11.ScriptErrorsSuppressed = true;
+            this.wb11.Size = new System.Drawing.Size(97, 92);
+            this.wb11.TabIndex = 0;
+            // 
+            // wb5
+            // 
+            this.wb5.Cookie = null;
+            this.wb5.Location = new System.Drawing.Point(3, 101);
+            this.wb5.MinimumSize = new System.Drawing.Size(20, 20);
+            this.wb5.Name = "wb5";
+            this.wb5.ScriptErrorsSuppressed = true;
+            this.wb5.Size = new System.Drawing.Size(97, 92);
+            this.wb5.TabIndex = 0;
+            // 
+            // wb12
+            // 
+            this.wb12.Cookie = null;
+            this.wb12.Location = new System.Drawing.Point(106, 101);
+            this.wb12.MinimumSize = new System.Drawing.Size(20, 20);
+            this.wb12.Name = "wb12";
+            this.wb12.ScriptErrorsSuppressed = true;
+            this.wb12.Size = new System.Drawing.Size(97, 92);
+            this.wb12.TabIndex = 0;
+            // 
+            // wb6
+            // 
+            this.wb6.Cookie = null;
+            this.wb6.Location = new System.Drawing.Point(209, 101);
+            this.wb6.MinimumSize = new System.Drawing.Size(20, 20);
+            this.wb6.Name = "wb6";
+            this.wb6.ScriptErrorsSuppressed = true;
+            this.wb6.Size = new System.Drawing.Size(97, 92);
+            this.wb6.TabIndex = 0;
+            // 
+            // wb13
+            // 
+            this.wb13.Cookie = null;
+            this.wb13.Location = new System.Drawing.Point(312, 101);
+            this.wb13.MinimumSize = new System.Drawing.Size(20, 20);
+            this.wb13.Name = "wb13";
+            this.wb13.ScriptErrorsSuppressed = true;
+            this.wb13.Size = new System.Drawing.Size(97, 92);
+            this.wb13.TabIndex = 0;
+            // 
+            // wb7
+            // 
+            this.wb7.Cookie = null;
+            this.wb7.Location = new System.Drawing.Point(415, 101);
+            this.wb7.MinimumSize = new System.Drawing.Size(20, 20);
+            this.wb7.Name = "wb7";
+            this.wb7.ScriptErrorsSuppressed = true;
+            this.wb7.Size = new System.Drawing.Size(97, 92);
+            this.wb7.TabIndex = 0;
+            // 
+            // wb14
+            // 
+            this.wb14.Cookie = null;
+            this.wb14.Location = new System.Drawing.Point(518, 101);
+            this.wb14.MinimumSize = new System.Drawing.Size(20, 20);
+            this.wb14.Name = "wb14";
+            this.wb14.ScriptErrorsSuppressed = true;
+            this.wb14.Size = new System.Drawing.Size(97, 92);
+            this.wb14.TabIndex = 0;
+            // 
+            // wb15
+            // 
+            this.wb15.Cookie = null;
+            this.wb15.Location = new System.Drawing.Point(621, 101);
+            this.wb15.MinimumSize = new System.Drawing.Size(20, 20);
+            this.wb15.Name = "wb15";
+            this.wb15.ScriptErrorsSuppressed = true;
+            this.wb15.Size = new System.Drawing.Size(97, 92);
+            this.wb15.TabIndex = 0;
+            // 
+            // wb8
+            // 
+            this.wb8.Cookie = null;
+            this.wb8.Location = new System.Drawing.Point(724, 101);
+            this.wb8.MinimumSize = new System.Drawing.Size(20, 20);
+            this.wb8.Name = "wb8";
+            this.wb8.ScriptErrorsSuppressed = true;
+            this.wb8.Size = new System.Drawing.Size(97, 92);
+            this.wb8.TabIndex = 0;
+            // 
+            // wb16
+            // 
+            this.wb16.Cookie = null;
+            this.wb16.Location = new System.Drawing.Point(827, 101);
+            this.wb16.MinimumSize = new System.Drawing.Size(20, 20);
+            this.wb16.Name = "wb16";
+            this.wb16.ScriptErrorsSuppressed = true;
+            this.wb16.Size = new System.Drawing.Size(97, 92);
+            this.wb16.TabIndex = 0;
             // 
             // tabPage2
             // 
@@ -1455,249 +1687,6 @@
             this.TextBoxMessage.Size = new System.Drawing.Size(822, 21);
             this.TextBoxMessage.TabIndex = 2;
             // 
-            // contextMenuStrip1
-            // 
-            this.contextMenuStrip1.Items.AddRange(new System.Windows.Forms.ToolStripItem[] {
-            this.上架ToolStripMenuItem,
-            this.下架ToolStripMenuItem,
-            this.刷新ToolStripMenuItem,
-            this.toolStripSeparator2,
-            this.开启自动上架ToolStripMenuItem,
-            this.关闭自动上架ToolStripMenuItem,
-            this.锁定库存ToolStripMenuItem,
-            this.取消锁定库存ToolStripMenuItem,
-            this.修改库存ToolStripMenuItem2,
-            this.修改利润ToolStripMenuItem,
-            this.获取供应商信息ToolStripMenuItem,
-            this.toolStripSeparator3,
-            this.全选ToolStripMenuItem2,
-            this.反选ToolStripMenuItem1,
-            this.按类别ToolStripMenuItem,
-            this.按利润ToolStripMenuItem,
-            this.按位置ToolStripMenuItem,
-            this.进入商品页ToolStripMenuItem});
-            this.contextMenuStrip1.Name = "contextMenuStrip1";
-            this.contextMenuStrip1.Size = new System.Drawing.Size(161, 368);
-            // 
-            // 上架ToolStripMenuItem
-            // 
-            this.上架ToolStripMenuItem.AppUserSettingProtect = false;
-            this.上架ToolStripMenuItem.Image = global::WinFormsClient.Properties.Resources.向上2;
-            this.上架ToolStripMenuItem.Name = "上架ToolStripMenuItem";
-            this.上架ToolStripMenuItem.Size = new System.Drawing.Size(160, 22);
-            this.上架ToolStripMenuItem.Text = "上架";
-            this.上架ToolStripMenuItem.Click += new System.EventHandler(this.UpProduct);
-            // 
-            // 下架ToolStripMenuItem
-            // 
-            this.下架ToolStripMenuItem.AppUserSettingProtect = false;
-            this.下架ToolStripMenuItem.Image = global::WinFormsClient.Properties.Resources.向下2;
-            this.下架ToolStripMenuItem.Name = "下架ToolStripMenuItem";
-            this.下架ToolStripMenuItem.Size = new System.Drawing.Size(160, 22);
-            this.下架ToolStripMenuItem.Text = "下架";
-            this.下架ToolStripMenuItem.Click += new System.EventHandler(this.DownProduct);
-            // 
-            // 刷新ToolStripMenuItem
-            // 
-            this.刷新ToolStripMenuItem.Name = "刷新ToolStripMenuItem";
-            this.刷新ToolStripMenuItem.Size = new System.Drawing.Size(160, 22);
-            this.刷新ToolStripMenuItem.Text = "刷新";
-            this.刷新ToolStripMenuItem.Click += new System.EventHandler(this.刷新ToolStripMenuItem_Click);
-            // 
-            // toolStripSeparator2
-            // 
-            this.toolStripSeparator2.Name = "toolStripSeparator2";
-            this.toolStripSeparator2.Size = new System.Drawing.Size(157, 6);
-            // 
-            // 开启自动上架ToolStripMenuItem
-            // 
-            this.开启自动上架ToolStripMenuItem.AppUserSettingProtect = false;
-            this.开启自动上架ToolStripMenuItem.Name = "开启自动上架ToolStripMenuItem";
-            this.开启自动上架ToolStripMenuItem.Size = new System.Drawing.Size(160, 22);
-            this.开启自动上架ToolStripMenuItem.Text = "开启自动上架";
-            this.开启自动上架ToolStripMenuItem.Click += new System.EventHandler(this.开启自动上架ToolStripMenuItem_Click);
-            // 
-            // 关闭自动上架ToolStripMenuItem
-            // 
-            this.关闭自动上架ToolStripMenuItem.AppUserSettingProtect = false;
-            this.关闭自动上架ToolStripMenuItem.Name = "关闭自动上架ToolStripMenuItem";
-            this.关闭自动上架ToolStripMenuItem.Size = new System.Drawing.Size(160, 22);
-            this.关闭自动上架ToolStripMenuItem.Text = "关闭自动上架";
-            this.关闭自动上架ToolStripMenuItem.Click += new System.EventHandler(this.关闭自动上架ToolStripMenuItem_Click);
-            // 
-            // 锁定库存ToolStripMenuItem
-            // 
-            this.锁定库存ToolStripMenuItem.AppUserSettingProtect = false;
-            this.锁定库存ToolStripMenuItem.Image = global::WinFormsClient.Properties.Resources.状态开;
-            this.锁定库存ToolStripMenuItem.Name = "锁定库存ToolStripMenuItem";
-            this.锁定库存ToolStripMenuItem.Size = new System.Drawing.Size(160, 22);
-            this.锁定库存ToolStripMenuItem.Text = "开启监控";
-            this.锁定库存ToolStripMenuItem.Click += new System.EventHandler(this.锁定库存ToolStripMenuItem_Click);
-            // 
-            // 取消锁定库存ToolStripMenuItem
-            // 
-            this.取消锁定库存ToolStripMenuItem.AppUserSettingProtect = false;
-            this.取消锁定库存ToolStripMenuItem.Image = global::WinFormsClient.Properties.Resources.状态关;
-            this.取消锁定库存ToolStripMenuItem.Name = "取消锁定库存ToolStripMenuItem";
-            this.取消锁定库存ToolStripMenuItem.Size = new System.Drawing.Size(160, 22);
-            this.取消锁定库存ToolStripMenuItem.Text = "关闭监控";
-            this.取消锁定库存ToolStripMenuItem.Click += new System.EventHandler(this.取消锁定库存ToolStripMenuItem_Click);
-            // 
-            // 修改库存ToolStripMenuItem2
-            // 
-            this.修改库存ToolStripMenuItem2.AppUserSettingProtect = false;
-            this.修改库存ToolStripMenuItem2.Image = global::WinFormsClient.Properties.Resources.修改库存;
-            this.修改库存ToolStripMenuItem2.Name = "修改库存ToolStripMenuItem2";
-            this.修改库存ToolStripMenuItem2.Size = new System.Drawing.Size(160, 22);
-            this.修改库存ToolStripMenuItem2.Text = "修改库存...";
-            this.修改库存ToolStripMenuItem2.Click += new System.EventHandler(this.修改库存ToolStripMenuItem1_Click);
-            // 
-            // 修改利润ToolStripMenuItem
-            // 
-            this.修改利润ToolStripMenuItem.Image = global::WinFormsClient.Properties.Resources.修改库存;
-            this.修改利润ToolStripMenuItem.Name = "修改利润ToolStripMenuItem";
-            this.修改利润ToolStripMenuItem.Size = new System.Drawing.Size(160, 22);
-            this.修改利润ToolStripMenuItem.Text = "修改利润...";
-            this.修改利润ToolStripMenuItem.Click += new System.EventHandler(this.修改利润ToolStripMenuItem_Click);
-            // 
-            // 获取供应商信息ToolStripMenuItem
-            // 
-            this.获取供应商信息ToolStripMenuItem.AppUserSettingProtect = false;
-            this.获取供应商信息ToolStripMenuItem.Name = "获取供应商信息ToolStripMenuItem";
-            this.获取供应商信息ToolStripMenuItem.Size = new System.Drawing.Size(160, 22);
-            this.获取供应商信息ToolStripMenuItem.Text = "获取供应商信息";
-            this.获取供应商信息ToolStripMenuItem.Click += new System.EventHandler(this.获取供应商信息ToolStripMenuItem_Click);
-            // 
-            // toolStripSeparator3
-            // 
-            this.toolStripSeparator3.Name = "toolStripSeparator3";
-            this.toolStripSeparator3.Size = new System.Drawing.Size(157, 6);
-            // 
-            // 全选ToolStripMenuItem2
-            // 
-            this.全选ToolStripMenuItem2.AppUserSettingProtect = false;
-            this.全选ToolStripMenuItem2.Image = global::WinFormsClient.Properties.Resources.全选;
-            this.全选ToolStripMenuItem2.Name = "全选ToolStripMenuItem2";
-            this.全选ToolStripMenuItem2.Size = new System.Drawing.Size(160, 22);
-            this.全选ToolStripMenuItem2.Text = "全选";
-            this.全选ToolStripMenuItem2.Click += new System.EventHandler(this.全选ToolStripMenuItem_Click);
-            // 
-            // 反选ToolStripMenuItem1
-            // 
-            this.反选ToolStripMenuItem1.AppUserSettingProtect = false;
-            this.反选ToolStripMenuItem1.Name = "反选ToolStripMenuItem1";
-            this.反选ToolStripMenuItem1.Size = new System.Drawing.Size(160, 22);
-            this.反选ToolStripMenuItem1.Text = "反选";
-            this.反选ToolStripMenuItem1.Click += new System.EventHandler(this.反选ToolStripMenuItem_Click);
-            // 
-            // 按类别ToolStripMenuItem
-            // 
-            this.按类别ToolStripMenuItem.AppUserSettingProtect = false;
-            this.按类别ToolStripMenuItem.DropDownItems.AddRange(new System.Windows.Forms.ToolStripItem[] {
-            this.选择QQ直充ToolStripMenuItem,
-            this.选择点卡直充ToolStripMenuItem,
-            this.选择话费直充ToolStripMenuItem});
-            this.按类别ToolStripMenuItem.Image = global::WinFormsClient.Properties.Resources.列表;
-            this.按类别ToolStripMenuItem.Name = "按类别ToolStripMenuItem";
-            this.按类别ToolStripMenuItem.Size = new System.Drawing.Size(160, 22);
-            this.按类别ToolStripMenuItem.Text = "按类别选择";
-            // 
-            // 选择QQ直充ToolStripMenuItem
-            // 
-            this.选择QQ直充ToolStripMenuItem.Image = global::WinFormsClient.Properties.Resources.QQ;
-            this.选择QQ直充ToolStripMenuItem.Name = "选择QQ直充ToolStripMenuItem";
-            this.选择QQ直充ToolStripMenuItem.Size = new System.Drawing.Size(148, 22);
-            this.选择QQ直充ToolStripMenuItem.Text = "选择QQ直充";
-            this.选择QQ直充ToolStripMenuItem.Click += new System.EventHandler(this.qQ直充ToolStripMenuItem2_Click);
-            // 
-            // 选择点卡直充ToolStripMenuItem
-            // 
-            this.选择点卡直充ToolStripMenuItem.Image = global::WinFormsClient.Properties.Resources.点卡;
-            this.选择点卡直充ToolStripMenuItem.Name = "选择点卡直充ToolStripMenuItem";
-            this.选择点卡直充ToolStripMenuItem.Size = new System.Drawing.Size(148, 22);
-            this.选择点卡直充ToolStripMenuItem.Text = "选择点卡直充";
-            this.选择点卡直充ToolStripMenuItem.Click += new System.EventHandler(this.点卡直充ToolStripMenuItem2_Click);
-            // 
-            // 选择话费直充ToolStripMenuItem
-            // 
-            this.选择话费直充ToolStripMenuItem.Image = global::WinFormsClient.Properties.Resources.电话;
-            this.选择话费直充ToolStripMenuItem.Name = "选择话费直充ToolStripMenuItem";
-            this.选择话费直充ToolStripMenuItem.Size = new System.Drawing.Size(148, 22);
-            this.选择话费直充ToolStripMenuItem.Text = "选择话费直充";
-            this.选择话费直充ToolStripMenuItem.Click += new System.EventHandler(this.话费直充ToolStripMenuItem2_Click);
-            // 
-            // 按利润ToolStripMenuItem
-            // 
-            this.按利润ToolStripMenuItem.AppUserSettingProtect = false;
-            this.按利润ToolStripMenuItem.DropDownItems.AddRange(new System.Windows.Forms.ToolStripItem[] {
-            this.选择正利润ToolStripMenuItem,
-            this.选择负利润ToolStripMenuItem,
-            this.选择零利润ToolStripMenuItem});
-            this.按利润ToolStripMenuItem.Image = global::WinFormsClient.Properties.Resources.列表;
-            this.按利润ToolStripMenuItem.Name = "按利润ToolStripMenuItem";
-            this.按利润ToolStripMenuItem.Size = new System.Drawing.Size(160, 22);
-            this.按利润ToolStripMenuItem.Text = "按利润选择";
-            // 
-            // 选择正利润ToolStripMenuItem
-            // 
-            this.选择正利润ToolStripMenuItem.Image = global::WinFormsClient.Properties.Resources.加号;
-            this.选择正利润ToolStripMenuItem.Name = "选择正利润ToolStripMenuItem";
-            this.选择正利润ToolStripMenuItem.Size = new System.Drawing.Size(136, 22);
-            this.选择正利润ToolStripMenuItem.Text = "选择正利润";
-            this.选择正利润ToolStripMenuItem.Click += new System.EventHandler(this.正利润ToolStripMenuItem_Click);
-            // 
-            // 选择负利润ToolStripMenuItem
-            // 
-            this.选择负利润ToolStripMenuItem.Image = global::WinFormsClient.Properties.Resources.减号;
-            this.选择负利润ToolStripMenuItem.Name = "选择负利润ToolStripMenuItem";
-            this.选择负利润ToolStripMenuItem.Size = new System.Drawing.Size(136, 22);
-            this.选择负利润ToolStripMenuItem.Text = "选择负利润";
-            this.选择负利润ToolStripMenuItem.Click += new System.EventHandler(this.负利润ToolStripMenuItem_Click);
-            // 
-            // 选择零利润ToolStripMenuItem
-            // 
-            this.选择零利润ToolStripMenuItem.Name = "选择零利润ToolStripMenuItem";
-            this.选择零利润ToolStripMenuItem.Size = new System.Drawing.Size(136, 22);
-            this.选择零利润ToolStripMenuItem.Text = "选择零利润";
-            this.选择零利润ToolStripMenuItem.Click += new System.EventHandler(this.零利润ToolStripMenuItem_Click);
-            // 
-            // 按位置ToolStripMenuItem
-            // 
-            this.按位置ToolStripMenuItem.AppUserSettingProtect = false;
-            this.按位置ToolStripMenuItem.DropDownItems.AddRange(new System.Windows.Forms.ToolStripItem[] {
-            this.选择仓库中ToolStripMenuItem,
-            this.选择出售中ToolStripMenuItem});
-            this.按位置ToolStripMenuItem.Image = global::WinFormsClient.Properties.Resources.列表;
-            this.按位置ToolStripMenuItem.Name = "按位置ToolStripMenuItem";
-            this.按位置ToolStripMenuItem.Size = new System.Drawing.Size(160, 22);
-            this.按位置ToolStripMenuItem.Text = "按位置选择";
-            // 
-            // 选择仓库中ToolStripMenuItem
-            // 
-            this.选择仓库中ToolStripMenuItem.Image = global::WinFormsClient.Properties.Resources.下架;
-            this.选择仓库中ToolStripMenuItem.Name = "选择仓库中ToolStripMenuItem";
-            this.选择仓库中ToolStripMenuItem.Size = new System.Drawing.Size(136, 22);
-            this.选择仓库中ToolStripMenuItem.Text = "选择仓库中";
-            this.选择仓库中ToolStripMenuItem.Click += new System.EventHandler(this.仓库中ToolStripMenuItem_Click);
-            // 
-            // 选择出售中ToolStripMenuItem
-            // 
-            this.选择出售中ToolStripMenuItem.Image = global::WinFormsClient.Properties.Resources.上架;
-            this.选择出售中ToolStripMenuItem.Name = "选择出售中ToolStripMenuItem";
-            this.选择出售中ToolStripMenuItem.Size = new System.Drawing.Size(136, 22);
-            this.选择出售中ToolStripMenuItem.Text = "选择出售中";
-            this.选择出售中ToolStripMenuItem.Click += new System.EventHandler(this.销售中ToolStripMenuItem_Click);
-            // 
-            // 进入商品页ToolStripMenuItem
-            // 
-            this.进入商品页ToolStripMenuItem.AppUserSettingProtect = false;
-            this.进入商品页ToolStripMenuItem.Enabled = false;
-            this.进入商品页ToolStripMenuItem.Image = global::WinFormsClient.Properties.Resources.网络;
-            this.进入商品页ToolStripMenuItem.Name = "进入商品页ToolStripMenuItem";
-            this.进入商品页ToolStripMenuItem.Size = new System.Drawing.Size(160, 22);
-            this.进入商品页ToolStripMenuItem.Text = "进入商品页";
-            this.进入商品页ToolStripMenuItem.Click += new System.EventHandler(this.进入商品页ToolStripMenuItem_Click);
-            // 
             // menuStrip1
             // 
             this.menuStrip1.Items.AddRange(new System.Windows.Forms.ToolStripItem[] {
@@ -1717,14 +1706,14 @@
             this.菜单ToolStripMenuItem.DropDownItems.AddRange(new System.Windows.Forms.ToolStripItem[] {
             this.切换账号ToolStripMenuItem,
             this.退出程序ToolStripMenuItem});
-            this.菜单ToolStripMenuItem.Image = global::WinFormsClient.Properties.Resources.菜单2;
+            this.菜单ToolStripMenuItem.Image = ((System.Drawing.Image)(resources.GetObject("菜单ToolStripMenuItem.Image")));
             this.菜单ToolStripMenuItem.Name = "菜单ToolStripMenuItem";
             this.菜单ToolStripMenuItem.Size = new System.Drawing.Size(60, 21);
             this.菜单ToolStripMenuItem.Text = "菜单";
             // 
             // 切换账号ToolStripMenuItem
             // 
-            this.切换账号ToolStripMenuItem.Image = global::WinFormsClient.Properties.Resources.切换;
+            this.切换账号ToolStripMenuItem.Image = ((System.Drawing.Image)(resources.GetObject("切换账号ToolStripMenuItem.Image")));
             this.切换账号ToolStripMenuItem.Name = "切换账号ToolStripMenuItem";
             this.切换账号ToolStripMenuItem.Size = new System.Drawing.Size(124, 22);
             this.切换账号ToolStripMenuItem.Text = "切换账号";
@@ -1732,7 +1721,7 @@
             // 
             // 退出程序ToolStripMenuItem
             // 
-            this.退出程序ToolStripMenuItem.Image = global::WinFormsClient.Properties.Resources.退出;
+            this.退出程序ToolStripMenuItem.Image = ((System.Drawing.Image)(resources.GetObject("退出程序ToolStripMenuItem.Image")));
             this.退出程序ToolStripMenuItem.Name = "退出程序ToolStripMenuItem";
             this.退出程序ToolStripMenuItem.Size = new System.Drawing.Size(124, 22);
             this.退出程序ToolStripMenuItem.Text = "退出程序";
@@ -1740,7 +1729,7 @@
             // 
             // 同步交易数据ToolStripMenuItem
             // 
-            this.同步交易数据ToolStripMenuItem.Image = global::WinFormsClient.Properties.Resources.刷新3;
+            this.同步交易数据ToolStripMenuItem.Image = ((System.Drawing.Image)(resources.GetObject("同步交易数据ToolStripMenuItem.Image")));
             this.同步交易数据ToolStripMenuItem.Name = "同步交易数据ToolStripMenuItem";
             this.同步交易数据ToolStripMenuItem.Size = new System.Drawing.Size(108, 21);
             this.同步交易数据ToolStripMenuItem.Text = "同步交易数据";
@@ -1748,7 +1737,7 @@
             // 
             // 刷新商品列表ToolStripMenuItem
             // 
-            this.刷新商品列表ToolStripMenuItem.Image = global::WinFormsClient.Properties.Resources.刷新;
+            this.刷新商品列表ToolStripMenuItem.Image = ((System.Drawing.Image)(resources.GetObject("刷新商品列表ToolStripMenuItem.Image")));
             this.刷新商品列表ToolStripMenuItem.Name = "刷新商品列表ToolStripMenuItem";
             this.刷新商品列表ToolStripMenuItem.Size = new System.Drawing.Size(108, 21);
             this.刷新商品列表ToolStripMenuItem.Text = "刷新商品列表";
@@ -1756,7 +1745,7 @@
             // 
             // 账号设置ToolStripMenuItem
             // 
-            this.账号设置ToolStripMenuItem.Image = global::WinFormsClient.Properties.Resources.用户;
+            this.账号设置ToolStripMenuItem.Image = ((System.Drawing.Image)(resources.GetObject("账号设置ToolStripMenuItem.Image")));
             this.账号设置ToolStripMenuItem.Name = "账号设置ToolStripMenuItem";
             this.账号设置ToolStripMenuItem.Size = new System.Drawing.Size(93, 21);
             this.账号设置ToolStripMenuItem.Text = "账号设置...";
@@ -1764,7 +1753,7 @@
             // 
             // 关于ToolStripMenuItem
             // 
-            this.关于ToolStripMenuItem.Image = global::WinFormsClient.Properties.Resources.信息;
+            this.关于ToolStripMenuItem.Image = ((System.Drawing.Image)(resources.GetObject("关于ToolStripMenuItem.Image")));
             this.关于ToolStripMenuItem.Name = "关于ToolStripMenuItem";
             this.关于ToolStripMenuItem.Size = new System.Drawing.Size(69, 21);
             this.关于ToolStripMenuItem.Text = "关于...";
@@ -1772,7 +1761,7 @@
             // 
             // 修改库存ToolStripMenuItem1
             // 
-            this.修改库存ToolStripMenuItem1.Image = global::WinFormsClient.Properties.Resources.修改库存;
+            this.修改库存ToolStripMenuItem1.Image = ((System.Drawing.Image)(resources.GetObject("修改库存ToolStripMenuItem1.Image")));
             this.修改库存ToolStripMenuItem1.Name = "修改库存ToolStripMenuItem1";
             this.修改库存ToolStripMenuItem1.Size = new System.Drawing.Size(93, 21);
             this.修改库存ToolStripMenuItem1.Text = "修改库存...";
@@ -1780,7 +1769,7 @@
             // 
             // 话费直充ToolStripMenuItem1
             // 
-            this.话费直充ToolStripMenuItem1.Image = global::WinFormsClient.Properties.Resources.电话;
+            this.话费直充ToolStripMenuItem1.Image = ((System.Drawing.Image)(resources.GetObject("话费直充ToolStripMenuItem1.Image")));
             this.话费直充ToolStripMenuItem1.Name = "话费直充ToolStripMenuItem1";
             this.话费直充ToolStripMenuItem1.Size = new System.Drawing.Size(84, 21);
             this.话费直充ToolStripMenuItem1.Text = "话费直充";
@@ -1788,7 +1777,7 @@
             // 
             // 修改库存ToolStripMenuItem
             // 
-            this.修改库存ToolStripMenuItem.Image = global::WinFormsClient.Properties.Resources.修改库存;
+            this.修改库存ToolStripMenuItem.Image = ((System.Drawing.Image)(resources.GetObject("修改库存ToolStripMenuItem.Image")));
             this.修改库存ToolStripMenuItem.Name = "修改库存ToolStripMenuItem";
             this.修改库存ToolStripMenuItem.Size = new System.Drawing.Size(93, 21);
             this.修改库存ToolStripMenuItem.Text = "修改库存...";
@@ -1796,7 +1785,7 @@
             // 
             // 全选ToolStripMenuItem
             // 
-            this.全选ToolStripMenuItem.Image = global::WinFormsClient.Properties.Resources.全选;
+            this.全选ToolStripMenuItem.Image = ((System.Drawing.Image)(resources.GetObject("全选ToolStripMenuItem.Image")));
             this.全选ToolStripMenuItem.Name = "全选ToolStripMenuItem";
             this.全选ToolStripMenuItem.Size = new System.Drawing.Size(60, 21);
             this.全选ToolStripMenuItem.Text = "全选";
@@ -1820,6 +1809,7 @@
             this.MainMenuStrip = this.menuStrip1;
             this.MinimumSize = new System.Drawing.Size(600, 500);
             this.Name = "WinFormsClient";
+            this.StartPosition = System.Windows.Forms.FormStartPosition.CenterParent;
             this.Text = "";
             this.FormClosing += new System.Windows.Forms.FormClosingEventHandler(this.WinFormsClient_FormClosing);
             this.tabControl1.ResumeLayout(false);
@@ -1828,6 +1818,7 @@
             ((System.ComponentModel.ISupportInitialize)(this.不陪钱利润)).EndInit();
             ((System.ComponentModel.ISupportInitialize)(this.赔钱利润)).EndInit();
             ((System.ComponentModel.ISupportInitialize)(this.dataGridViewItem)).EndInit();
+            this.contextMenuStrip1.ResumeLayout(false);
             this.tabPageOrders.ResumeLayout(false);
             ((System.ComponentModel.ISupportInitialize)(this.dataGridViewTbOrder)).EndInit();
             this.tabPage1.ResumeLayout(false);
@@ -1846,7 +1837,7 @@
             this.groupBox1.PerformLayout();
             ((System.ComponentModel.ISupportInitialize)(this.QQ直充库存锁定数量)).EndInit();
             this.tabPageWB.ResumeLayout(false);
-            this.panel2.ResumeLayout(false);
+            this.wbArrayWrapper.ResumeLayout(false);
             this.statusStrip1.ResumeLayout(false);
             this.statusStrip1.PerformLayout();
             this.ChatPanel.ResumeLayout(false);
@@ -1855,7 +1846,6 @@
             this.splitContainer1.Panel2.ResumeLayout(false);
             ((System.ComponentModel.ISupportInitialize)(this.splitContainer1)).EndInit();
             this.splitContainer1.ResumeLayout(false);
-            this.contextMenuStrip1.ResumeLayout(false);
             this.menuStrip1.ResumeLayout(false);
             this.menuStrip1.PerformLayout();
             this.ResumeLayout(false);
@@ -2021,12 +2011,11 @@
         private Moonlight.WindowsForms.Controls.ExtendedWinFormsWebBrowser wb9;
         private Moonlight.WindowsForms.Controls.ExtendedWinFormsWebBrowser wb2;
         private Moonlight.WindowsForms.Controls.ExtendedWinFormsWebBrowser wb1;
-        private System.Windows.Forms.Panel panel2;
-        private Moonlight.WindowsForms.Controls.ExtendedWinFormsWebBrowser wbMain;
         private Moonlight.WindowsForms.StateControls.MoonToolStripMenuItem 进入商品页ToolStripMenuItem;
         private System.Windows.Forms.TabPage tabPage2;
         private System.Windows.Forms.SplitContainer splitContainer1;
         private System.Windows.Forms.ToolStripStatusLabel 服务器时间;
+        private System.Windows.Forms.FlowLayoutPanel wbArrayWrapper;
     }
 }
 

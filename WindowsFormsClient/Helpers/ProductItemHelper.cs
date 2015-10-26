@@ -41,6 +41,7 @@ namespace WinFormsClient.Helpers
                 }
                 result.Data = list;
             }
+            tableEntity.Dispose();
             return result;
         }
     }

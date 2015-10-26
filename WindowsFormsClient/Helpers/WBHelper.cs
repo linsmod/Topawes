@@ -21,7 +21,6 @@ namespace WinFormsClient.Helpers
         public static BlockingQueue<Moonlight.WindowsForms.Controls.ExtendedWinFormsWebBrowser> wbQueue = new BlockingQueue<Moonlight.WindowsForms.Controls.ExtendedWinFormsWebBrowser>();
         public static BlockingQueue<Moonlight.WindowsForms.Controls.ExtendedWinFormsWebBrowser> ajaxWbQueue = new BlockingQueue<Moonlight.WindowsForms.Controls.ExtendedWinFormsWebBrowser>();
         public ExtendedWinFormsWebBrowser WB;
-        CancellationTokenSource cancelDelayTokenSource = new CancellationTokenSource();
         internal static string Cookie;
 
         internal SynchronousNavigationContext SyncNavContext { get; private set; }
@@ -122,29 +121,26 @@ namespace WinFormsClient.Helpers
 
         public async Task<DataLoadResult<HtmlDocument>> SynchronousLoadDocument(string url)
         {
-            return await SynchronousLoadDocument(url, url, 15, CancellationToken.None);
+            var cts = new CancellationTokenSource();
+            cts.CancelAfter(TimeSpan.FromSeconds(15));
+            return await SynchronousLoadDocument(url, url, cts.Token);
         }
-        public async Task<DataLoadResult<HtmlDocument>> SynchronousLoadDocument(string url, string endUrl, int timeoutSeconds, CancellationToken token)
+        public async Task<DataLoadResult<HtmlDocument>> SynchronousLoadDocument(string url, string endUrl, CancellationToken token)
         {
-            cancelDelayTokenSource = new CancellationTokenSource();
             this.SyncNavContext = new SynchronousNavigationContext
             {
                 StartUrl = url,
                 EndUrl = endUrl,
                 Tcs = new TaskCompletionSource<SynchronousLoadResult>(),
-                TimeoutSeconds = timeoutSeconds,
             };
 
             using (token.Register(() => SyncNavContext.Tcs.TrySetCanceled(), useSynchronizationContext: false))
             {
-                SetTimeoutThread(SyncNavContext);
                 this.WB.Cookie = Cookie;
                 this.WB.Navigate(url);
                 var result = await SyncNavContext.Tcs.Task;
-                cancelDelayTokenSource.Cancel();
                 if (result.LoginRequired)
                 {
-                    UnsubscribEvents();
                     return new DataLoadResult<HtmlDocument> { LoginRequired = true };
                 }
                 if (result.Success) // wait for DocumentCompleted
@@ -157,52 +153,30 @@ namespace WinFormsClient.Helpers
             }
             return new DataLoadResult<HtmlDocument> { Data = null };
         }
-        public void SetTimeoutThread(SynchronousNavigationContext snc)
-        {
-            Task.Factory.StartNew(async () =>
-            {
-                var when = DateTime.Now.AddSeconds(snc.TimeoutSeconds);
-                while (when > DateTime.Now && (int)snc.Tcs.Task.Status <= 3)
-                {
-                    if (cancelDelayTokenSource.IsCancellationRequested)
-                    {
-                        break;
-                    }
-                    await TaskEx.Delay(50);
-                }
-                if (snc.Tcs.Task.Status != TaskStatus.RanToCompletion)
-                {
-                    snc.Tcs.TrySetCanceled();
-                }
-            });
-        }
 
         public async Task<DataLoadResult<string>> SynchronousLoadString(string url)
         {
-            return await SynchronousLoadString(url, CancellationToken.None);
+            var cts = new CancellationTokenSource();
+            cts.CancelAfter(TimeSpan.FromSeconds(15));
+            return await SynchronousLoadString(url, cts.Token);
         }
 
         public async Task<DataLoadResult<string>> SynchronousLoadString(string url, CancellationToken token)
         {
-            cancelDelayTokenSource = new CancellationTokenSource();
             this.SyncNavContext = new SynchronousNavigationContext
             {
                 StartUrl = url,
                 EndUrl = url,
                 Tcs = new TaskCompletionSource<SynchronousLoadResult>(),
-                TimeoutSeconds = 60
             };
 
             using (token.Register(() => SyncNavContext.Tcs.TrySetCanceled(), useSynchronizationContext: false))
             {
-                SetTimeoutThread(SyncNavContext);
                 this.WB.Cookie = Cookie;
                 this.WB.Navigate(url);
                 var result = await SyncNavContext.Tcs.Task;
-                cancelDelayTokenSource.Cancel();
                 if (result.LoginRequired)
                 {
-                    UnsubscribEvents();
                     return new DataLoadResult<string>
                     {
                         LoginRequired = true
@@ -233,7 +207,7 @@ namespace WinFormsClient.Helpers
             WB.Navigated -= WB_Navigated;
         }
 
-        public void SubscribEvents()
+        private void SubscribEvents()
         {
             WB.DownloadCompleted += WB_DownloadCompleted;
             WB.DocumentCompleted += WB_DocumentCompleted;
@@ -245,18 +219,10 @@ namespace WinFormsClient.Helpers
             wbQueue.Enqueue(WB);
         }
 
-        public async Task<DataLoadResult<HtmlDocument>> PrepareIfNoneDocument(string v)
+        public async Task<bool> IsLoginRequired()
         {
-            if (WB.Document == null || WB.Document.Url.AbsoluteUri.StartsWith("https://login.taobao.com/member/login.jhtml"))
-            {
-                var doc = await this.SynchronousLoadDocument(v);
-                if (WB.Document.Url.AbsoluteUri.StartsWith("https://login.taobao.com/member/login.jhtml"))
-                {
-                    UnsubscribEvents();
-                }
-                return doc;
-            }
-            return new DataLoadResult<HtmlDocument> { LoginRequired = false,Data= WB.Document };
+            var cnt = await SynchronousLoadString("http://chongzhi.taobao.com/index.do?method=info");
+            return cnt.LoginRequired;
         }
     }
     public class DataLoadResult<T>

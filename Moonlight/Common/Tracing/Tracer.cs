@@ -40,11 +40,11 @@ namespace Moonlight.Common.Tracing
 		{
 			Tracer<T>.InternalTracer = TraceManager.Instance.CreateTraceSource(typeof(T).FullName);
 		}
-		public static void LogEntry([CallerMemberName] string callerMemberName = "")
+		public static void LogEntry(string callerMemberName = "")
 		{
 			Tracer<T>.WriteEvent(TraceEventType.Information, null, string.Format("{0}()\tBEGIN", callerMemberName));
 		}
-		public static void LogExit([CallerMemberName] string callerMemberName = "")
+		public static void LogExit(string callerMemberName = "")
 		{
 			Tracer<T>.WriteEvent(TraceEventType.Information, null, string.Format("{0}()\tEND", callerMemberName));
 		}

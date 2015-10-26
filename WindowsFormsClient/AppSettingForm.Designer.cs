@@ -62,7 +62,6 @@
             this.textBoxPassword.Location = new System.Drawing.Point(12, 72);
             this.textBoxPassword.Name = "textBoxPassword";
             this.textBoxPassword.PasswordChar = '*';
-            this.textBoxPassword.ReadOnly = true;
             this.textBoxPassword.Size = new System.Drawing.Size(234, 21);
             this.textBoxPassword.TabIndex = 1;
             // 
@@ -139,7 +138,6 @@
             this.Controls.Add(this.buttonSave);
             this.Controls.Add(this.textBoxUserName);
             this.Name = "AppSettingForm";
-            this.StartPosition = System.Windows.Forms.FormStartPosition.CenterScreen;
             this.Text = "账号设置";
             this.ResumeLayout(false);
             this.PerformLayout();

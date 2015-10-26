@@ -15,7 +15,7 @@ namespace WinFormsClient.HtmlEntity
     /// <summary>
     /// HTML table元素
     /// </summary>
-    public class TableEntity
+    public class TableEntity : IDisposable
     {
         public TableEntity(IHtmlElement tableElement)
         {
@@ -48,6 +48,68 @@ namespace WinFormsClient.HtmlEntity
                 this.TBody.TrList.Add(trEntity);
             }
         }
+
+        public void Dispose()
+        {
+            if (THead != null)
+            {
+                if (THead.THeadElement != null)
+                {
+                    THead.THeadElement.ClearNodes();
+                    THead.THeadElement = null;
+                }
+                if (THead.TrList != null)
+                {
+                    foreach (var tr in THead.TrList)
+                    {
+                        if (tr.TrElement != null)
+                        {
+                            tr.TrElement.ClearNodes();
+                            tr.TrElement = null;
+                        }
+                        if (tr.TdList != null)
+                        {
+                            foreach (var td in tr.TdList)
+                            {
+                                td.TdElement.ClearNodes();
+                                td.TdElement = null;
+                            }
+                        }
+                    }
+                }
+                THead = null;
+            }
+            if (TBody != null)
+            {
+                if (TBody.TBodyElement != null)
+                {
+                    TBody.TBodyElement.ClearNodes();
+                    TBody.TBodyElement = null;
+                }
+                if (TBody.TrList != null)
+                {
+                    foreach (var tr in TBody.TrList)
+                    {
+                        if (tr.TrElement != null)
+                        {
+                            tr.TrElement.ClearNodes();
+                            tr.TrElement = null;
+                        }
+                        if (tr.TdList != null)
+                        {
+                            foreach (var td in tr.TdList)
+                            {
+                                td.TdElement.ClearNodes();
+                                td.TdElement = null;
+                            }
+                        }
+                    }
+                }
+                TBody = null;
+            }
+            GC.SuppressFinalize(this);
+        }
+
         public THeadEntity THead { get; set; }
         public TBodyEntity TBody { get; set; }
     }
@@ -59,7 +121,7 @@ namespace WinFormsClient.HtmlEntity
         {
             this.TrElement = tr;
         }
-        public IHtmlElement TrElement { get; private set; }
+        public IHtmlElement TrElement { get; internal set; }
         public List<TdEntity> TdList = new List<TdEntity>();
         public ProductItem GetProductItem()
         {
@@ -94,7 +156,7 @@ namespace WinFormsClient.HtmlEntity
         {
             this.THeadElement = theadElement;
         }
-        public IHtmlElement THeadElement { get; private set; }
+        public IHtmlElement THeadElement { get; internal set; }
         public List<TrEntity> TrList = new List<TrEntity>();
     }
 
@@ -105,7 +167,7 @@ namespace WinFormsClient.HtmlEntity
         {
             this.TBodyElement = tbodyElement;
         }
-        public IHtmlElement TBodyElement { get; private set; }
+        public IHtmlElement TBodyElement { get; internal set; }
         public List<TrEntity> TrList = new List<TrEntity>();
     }
 
@@ -116,7 +178,7 @@ namespace WinFormsClient.HtmlEntity
         {
             this.TdElement = tdElement;
         }
-        public IHtmlElement TdElement { get; private set; }
+        public IHtmlElement TdElement { get; internal set; }
         public string Text { get; set; }
 
         public override string ToString()

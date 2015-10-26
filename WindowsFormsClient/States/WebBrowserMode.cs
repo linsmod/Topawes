@@ -21,7 +21,7 @@ namespace WinFormsClient.WBMode
                 Success = success,
                 IsWebBrowserResult = true,
                 IsFileDownloadResult = false,
-                LoginRequired = false
+                LoginRequired = loginRequried
             };
         }
         public static SynchronousLoadResult GetFileDownloadResult(bool success, string filePath, bool loginRequried = false)
@@ -31,7 +31,8 @@ namespace WinFormsClient.WBMode
                 Success = success,
                 IsFileDownloadResult = true,
                 IsWebBrowserResult = false,
-                FilePath = filePath
+                FilePath = filePath,
+                LoginRequired = loginRequried
             };
         }
         public bool Success { get; private set; }

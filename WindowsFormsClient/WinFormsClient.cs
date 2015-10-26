@@ -4,7 +4,7 @@ using Microsoft.AspNet.SignalR.Client;
 using Moonlight;
 using Moonlight.Helpers;
 using Moonlight.WindowsForms.Controls;
-using mshtml;
+using MSHTML;
 using Newtonsoft.Json;
 using Nx.EasyHtml.Html;
 using Nx.EasyHtml.Html.Parser;
@@ -89,7 +89,7 @@ namespace WinFormsClient
             LoadMenuItemSetting();
             this.OnLoginSuccess();
             tabPage2.Controls.Add(wb);
-            WBHelper.InitWBHelper(tabPageWB, "http://chongzhi.taobao.com/index.do?spm=0.0.0.0.OR0khk&method=index");
+            WBHelper.InitWBHelper(wbArrayWrapper, "http://chongzhi.taobao.com/index.do?spm=0.0.0.0.OR0khk&method=index");
         }
 
         private void InstallCert()
@@ -235,9 +235,9 @@ namespace WinFormsClient
             url = string.Format(url, spu);
             var content = await wbHelper.WB.ExecuteTriggerJSONP(url);
             var doc = (HTMLDocument)wbHelper.WB.Document.DomDocument;
-            var cnt = (IHtmlNode)doc.getElementById("jsonpcontent");
+            var cnt = (IHTMLDOMNode)doc.getElementById("jsonpcontent");
             if (cnt != null)
-                cnt.Remove();
+                cnt.removeNode();
             var suplierInfo = JsonConvert.DeserializeObject<SuplierInfo>(content);
             if (suplierInfo.profitData != null && suplierInfo.profitData.Any())
             {
@@ -424,7 +424,7 @@ namespace WinFormsClient
                 this.InvokeAction(() =>
                 {
                     //登录完成后导航到这个页面，方便后面AJAX直接使用这个浏览器取数据
-                    wbMain.Navigate("http://chongzhi.taobao.com/index.do?spm=0.0.0.0.OR0khk&method=index");
+                    //wbMain.Navigate("http://chongzhi.taobao.com/index.do?spm=0.0.0.0.OR0khk&method=index");
                     wb.Navigate("http://chongzhi.taobao.com/index.do?spm=0.0.0.0.OR0khk&method=index");
                 });
                 await Connection.Start();
@@ -457,11 +457,11 @@ namespace WinFormsClient
                     this.Close();
                     return;
                 }
-                this.InvokeAction(() =>
-                {
-                    wbMain.ScriptErrorsSuppressed = true;
-                    WBHelper.wbQueue.Enqueue(wbMain);
-                });
+                //this.InvokeAction(() =>
+                //{
+                //    wbMain.ScriptErrorsSuppressed = true;
+                //    WBHelper.wbQueue.Enqueue(wbMain);
+                //});
                 var taoInfo = await this.InvokeTask(GetTaoInfo);
                 if (taoInfo.status == 200)
                 {
@@ -542,13 +542,18 @@ namespace WinFormsClient
                 var success = false;
                 //查找供应商
                 var url = string.Format("http://chongzhi.taobao.com/item.do?spu={0}&action=edit&method=supplierInfo&_=" + DateTime.Now.Ticks, product.SpuId);
-                var x = await this.InvokeTask(helper.PrepareIfNoneDocument, IndexUrl);
-                while (x.LoginRequired)
+                var x = await this.InvokeTask(helper.IsLoginRequired);
+                while (x)
                 {
                     this.InvokeAction(ShowLoginWindow, helper.WB);
-                    x = await this.InvokeTask(helper.PrepareIfNoneDocument, IndexUrl);
+                    x = await this.InvokeTask(helper.IsLoginRequired);
                 }
                 var content = await this.InvokeTask(helper.WB.ExecuteTriggerJSONP, url);
+                while (content == "{\"code\":999}")
+                {
+                    this.InvokeAction(ShowLoginWindow, helper.WB);
+                    content = await this.InvokeTask(helper.WB.ExecuteTriggerJSONP, url);
+                }
                 if (!string.IsNullOrEmpty(content))
                 {
                     var supplier = JsonConvert.DeserializeObject<SuplierInfo>(content);
@@ -617,11 +622,11 @@ namespace WinFormsClient
             {
                 using (var wbHelper = new WBHelper(true))
                 {
-                    var x = await this.InvokeTask(wbHelper.PrepareIfNoneDocument, IndexUrl);
-                    while (x.LoginRequired)
+                    var x = await this.InvokeTask(wbHelper.IsLoginRequired);
+                    while (x)
                     {
                         this.InvokeAction(ShowLoginWindow, wbHelper.WB);
-                        x = await this.InvokeTask(wbHelper.PrepareIfNoneDocument, IndexUrl);
+                        x = await this.InvokeTask(wbHelper.IsLoginRequired);
                     }
                     //查找供应商
                     supplier = await this.InvokeTask(supplierInfo, wbHelper, product.SpuId);
@@ -1035,12 +1040,15 @@ namespace WinFormsClient
             }
         }
 
-        public void ShowLoginWindow(ExtendedWinFormsWebBrowser wb)
+        public void ShowLoginWindow(ExtendedWinFormsWebBrowser wbx)
         {
             var wbParent = wb.Parent;
             wbTaoChongZhiMode.TransitionToNext(wbLoginMode, wb);
             if (new TaoLoginForm(wbLoginMode).ShowDialog(this) == DialogResult.OK)
             {
+                TaoAuthorizedCookieDictionary = CookieHelper.GetAllCookie(wb);
+                WBHelper.Cookie = CookieHelper.ExpandCookieDictionary(TaoAuthorizedCookieDictionary);
+
                 wbLoginMode.TransitionToNext(wbTaoChongZhiMode, wb);
                 wb.Navigate(IndexUrl);
                 wbParent.Controls.Add(wb);
@@ -1241,7 +1249,7 @@ namespace WinFormsClient
                     {
                         pagedList.Success = false;
                         helper.Dispose();
-                        AppendException(ex);
+                        //AppendException(ex);
                     }
                 }
                 if (!pagedList.Success)
@@ -1580,11 +1588,11 @@ namespace WinFormsClient
             {
                 using (var wbHelper = new WBHelper(true))
                 {
-                    var x = await this.InvokeTask(wbHelper.PrepareIfNoneDocument, IndexUrl);
-                    while (x.LoginRequired)
+                    var x = await this.InvokeTask(wbHelper.IsLoginRequired);
+                    while (x)
                     {
                         this.InvokeAction(ShowLoginWindow, wbHelper.WB);
-                        x = await this.InvokeTask(wbHelper.PrepareIfNoneDocument, IndexUrl);
+                        x = await this.InvokeTask(wbHelper.IsLoginRequired);
                     }
                     supplier = await this.InvokeTask(supplierInfo, wbHelper, product.SpuId);
                     if (supplier == null || !supplier.profitData.Any())
@@ -1614,7 +1622,12 @@ namespace WinFormsClient
                 var oneprice = (supplier.profitData[0].price + profit).ToString("f2");
                 using (var wbHelper = new WBHelper(false))
                 {
-                    await this.InvokeTask(wbHelper.PrepareIfNoneDocument, IndexUrl);
+                    var x = await this.InvokeTask(wbHelper.IsLoginRequired);
+                    while (x)
+                    {
+                        this.InvokeAction(ShowLoginWindow, wbHelper.WB);
+                        x = await this.InvokeTask(wbHelper.IsLoginRequired);
+                    }
                     var save = await this.InvokeTask(supplierSave, wbHelper, supplier.profitData[0].id, product.SpuId, profitString, oneprice, product.Id, tbcpCrumbs);
                     if (save.status != 200)
                     {
@@ -2229,7 +2242,6 @@ namespace WinFormsClient
                 }
             }
             BindDGViewProduct();
-            AppendText("任务已提交至后台执行");
         }
         public class SimpleResult
         {

@@ -1,6 +1,6 @@
 ﻿using Microsoft.AspNet.SignalR.Client;
 using Moonlight.WindowsForms.Controls;
-using mshtml;
+using MSHTML;
 using System;
 using System.Collections.Generic;
 using System.ComponentModel;

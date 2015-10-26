@@ -1,5 +1,4 @@
-﻿using mshtml;
-using System;
+﻿using System;
 using System.Collections.Generic;
 using System.Diagnostics;
 using System.Linq;
@@ -9,10 +8,11 @@ using System.Threading.Tasks;
 using System.Web;
 using System.Windows.Forms;
 using WinFormsClient.Extensions;
-
+using Nx.EasyHtml.Html;
 using Moonlight;
 using System.Collections;
 using Moonlight.WindowsForms.Controls;
+using MSHTML;
 
 namespace WinFormsClient.WBMode
 {
@@ -105,16 +105,7 @@ namespace WinFormsClient.WBMode
                         //可能遇到了javascript跳转逻辑
                         return;
                     }
-                    WB.Document.All["J_SubmitStatic"].Click += (s, e) =>
-                    {
-                        IHTMLInputTextElement TPL_username_1 = (IHTMLInputTextElement)doc.getElementById("TPL_username_1");
-                        var userName = TPL_username_1.value;
-                        InitAppUserSetting(userName);
-                        IHTMLInputTextElement TPL_password_1 = (IHTMLInputTextElement)doc.getElementById("TPL_password_1");
-                        var password = TPL_password_1.value;
-                        AppSetting.UserSetting.Set("TaoUserName", userName, true);
-                        AppSetting.UserSetting.Set("TaoPassword", password, true);
-                    };
+                    WB.Document.All["J_SubmitStatic"].Click += WBTaoLoginState_Click;
                     await TaskEx.Delay(100);
                     if (J_Static.clientWidth > 0 && J_Static.clientHeight > 0)
                     {
@@ -137,13 +128,15 @@ namespace WinFormsClient.WBMode
                         //      </ul>
                         //</form>
                         var current = WB.Document.Body.JQuerySelect("#J_QuickLogin .userlist .current label");
+                        var xdoc = new Nx.EasyHtml.Html.Parser.JumonyParser().Parse(WB.Document.Body.InnerHtml, WB.Document.Url);
+                        var label = xdoc.FindFirst(".current label");
                         if (current.Any())
                         {
                             if (AppSetting.UserSetting != null)
                             {
                                 //使用其他账户登录
                                 WB.Document.All["J_Quick2Static"].InvokeMember("click");
-                                StaticLogin(doc); 
+                                StaticLogin(doc);
                             }
                             else
                             {
@@ -189,6 +182,19 @@ namespace WinFormsClient.WBMode
                 AppSetting.UserSetting.SetNull("AutoSelectLoginedAccount");
             }
         }
+
+        private void WBTaoLoginState_Click(object sender, HtmlElementEventArgs e)
+        {
+            var doc = (HTMLDocument)WB.Document.DomDocument;
+            IHTMLInputTextElement TPL_username_1 = (IHTMLInputTextElement)doc.getElementById("TPL_username_1");
+            var userName = TPL_username_1.value;
+            InitAppUserSetting(userName);
+            IHTMLInputTextElement TPL_password_1 = (IHTMLInputTextElement)doc.getElementById("TPL_password_1");
+            var password = TPL_password_1.value;
+            AppSetting.UserSetting.Set("TaoUserName", userName, true);
+            AppSetting.UserSetting.Set("TaoPassword", password, true);
+        }
+
         private void InitAppUserSetting(string userName)
         {
             AppSetting.InitializeUserSetting(userName, System.IO.Path.Combine(AppDomain.CurrentDomain.BaseDirectory, userName + ".bin"));
@@ -227,7 +233,9 @@ namespace WinFormsClient.WBMode
                             passwordEl.SetAttribute("value", password);
                             Application.DoEvents();
                             //如果验证码窗口没有显示就点击提交按钮，否则用户自己去点
-                            if (WB.Document.Body.JQuerySelect(".field-checkcode.hidden").Any())
+                            var xdoc = new Nx.EasyHtml.Html.Parser.JumonyParser().Parse(WB.Document.Body.InnerHtml, WB.Document.Url);
+                            var checkCode = xdoc.Find(".field-checkcode.hidden");
+                            if (checkCode.Any())
                             {
                                 WB.Document.All["J_SubmitStatic"].InvokeMember("click");
                             }
