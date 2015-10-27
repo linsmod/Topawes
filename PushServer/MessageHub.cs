@@ -151,7 +151,12 @@ namespace PushServer
         public void TmcUserCancel()
         {
             var user = UserManager.FindByName(Context.User.Identity.Name);
-            TopManager.TmcUserCancel(user.TaoOAuth.taobao_user_nick);
+
+            //除此之外没有其他活动连接时就关掉消息
+            if (!user.Connections.Any(x => x.Connected && x.ConnectionID != Context.ConnectionId))
+            {
+                TopManager.TmcUserCancel(user.TaoOAuth.taobao_user_nick);
+            }
         }
 
         [Authorize]

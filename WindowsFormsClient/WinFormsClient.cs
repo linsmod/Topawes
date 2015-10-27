@@ -181,43 +181,50 @@ namespace WinFormsClient
             //更新价格
             using (var helper = new WBHelper(false))
             {
-                if (!await this.SetProductProfit(product, (x) => 0, forceModify: true))
+                try
                 {
-                    statistic.InterceptFailed++;
-                    AppDatabase.db.Statistics.Upsert(statistic, statistic.Id);
-                    OnStatisticUpdate(statistic);
-                }
-                else
-                {
-                    AppendText("商品{0}改价已提交", trade.NumIid);
-
-                    //1分钟后关单
-                    await TaskEx.Delay(1000 * 60 - 500);
-
-                    AppendText("{0}关闭交易...", trade.Tid);
-                    await CloseTradeIfPossible(trade.Tid);
-
-                    //恢复价格
-                    //更新改价结果
-                    product = AppDatabase.db.ProductItems.FindById(trade.NumIid);
-                    if (!product.NeedResotreProfit)
+                    if (!await this.SetProductProfit(product, (x) => 0, forceModify: true))
                     {
-                        //尝试还原价格时原始价格已经更新的话就不用恢复了
-                        return;
+                        statistic.InterceptFailed++;
+                        AppDatabase.db.Statistics.Upsert(statistic, statistic.Id);
+                        OnStatisticUpdate(statistic);
                     }
-                    using (var wbHelper = new WBHelper(false))
+                    else
                     {
-                        var taoResult = await this.InvokeTask(supplierSave, helper, supplier.profitData[0].id, spu, product.原利润.ToString("f2"), (product.进价 + product.原利润).ToString("f2"), trade.NumIid, tbcpCrumbs);
-                        if (taoResult == null || taoResult.status != 200)
+                        AppendText("商品{0}改价已提交", trade.NumIid);
+
+                        //1分钟后关单
+                        await TaskEx.Delay(1000 * 60 - 500);
+
+                        AppendText("{0}关闭交易...", trade.Tid);
+                        await CloseTradeIfPossible(trade.Tid);
+
+                        //恢复价格
+                        //更新改价结果
+                        product = AppDatabase.db.ProductItems.FindById(trade.NumIid);
+                        if (!product.NeedResotreProfit)
                         {
-                            AppendText("商品{0}恢复价格失败，请注意！" + taoResult != null ? taoResult.msg : "", trade.NumIid);
+                            //尝试还原价格时原始价格已经更新的话就不用恢复了
                             return;
                         }
-                        else
+                        using (var wbHelper = new WBHelper(false))
                         {
-                            AppendText("商品{0}恢复价格已提交", trade.NumIid);
+                            var taoResult = await this.InvokeTask(supplierSave, helper, supplier.profitData[0].id, spu, product.原利润.ToString("f2"), (product.进价 + product.原利润).ToString("f2"), trade.NumIid, tbcpCrumbs);
+                            if (taoResult == null || taoResult.status != 200)
+                            {
+                                AppendText("商品{0}恢复价格失败，请注意！" + taoResult != null ? taoResult.msg : "", trade.NumIid);
+                                return;
+                            }
+                            else
+                            {
+                                AppendText("商品{0}恢复价格已提交", trade.NumIid);
+                            }
                         }
                     }
+                }
+                catch (Exception ex)
+                {
+                    AppendException(ex);
                 }
             }
         }
@@ -630,7 +637,9 @@ namespace WinFormsClient
                     }
                     //查找供应商
                     supplier = await this.InvokeTask(supplierInfo, wbHelper, product.SpuId);
-                    product.OnSupplierInfoUpdate(AppDatabase.db.ProductItems, supplier);
+                    if (supplier != null) {
+                        product.OnSupplierInfoUpdate(AppDatabase.db.ProductItems, supplier);
+                    }
                 }
             }
             if (supplier != null)

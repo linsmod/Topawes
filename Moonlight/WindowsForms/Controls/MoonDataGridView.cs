@@ -17,13 +17,13 @@ namespace Moonlight.WindowsForms.Controls
         public MoonDataGridView()
         {
             InitializeComponent();
-            AutoSizeColumnsMode = DataGridViewAutoSizeColumnsMode.Fill;
             SelectionMode = DataGridViewSelectionMode.FullRowSelect;
             this.DefaultCellStyle.SelectionBackColor = Color.SteelBlue;
             AllowUserToAddRows = false;
             AllowUserToDeleteRows = false;
             BackgroundColor = System.Drawing.Color.WhiteSmoke;
-            ColumnHeadersHeightSizeMode = System.Windows.Forms.DataGridViewColumnHeadersHeightSizeMode.AutoSize;
+            ColumnHeadersHeightSizeMode = System.Windows.Forms.DataGridViewColumnHeadersHeightSizeMode.DisableResizing;
+            RowHeadersWidthSizeMode = DataGridViewRowHeadersWidthSizeMode.DisableResizing;
             this.CellMouseEnter += MoonDataGridView_CellMouseEnter;
             this.CellMouseLeave += MoonDataGridView_CellMouseLeave;
             this.Click += MoonDataGridView_Click;
@@ -122,7 +122,7 @@ namespace Moonlight.WindowsForms.Controls
             IsMouseOnCell = false;
             if (e.RowIndex > -1)
             {
-                if (!dgv.Rows[e.RowIndex].Selected && dgv.Rows[e.RowIndex].DefaultCellStyle.BackColor != SystemColors.Window)
+                if (!dgv.Rows[e.RowIndex].Selected)
                 {
                     dgv.Rows[e.RowIndex].DefaultCellStyle.BackColor = SystemColors.Window;
                 }
@@ -135,7 +135,7 @@ namespace Moonlight.WindowsForms.Controls
             IsMouseOnCell = true;
             if (e.RowIndex > -1)
             {
-                if (!dgv.Rows[e.RowIndex].Selected && dgv.Rows[e.RowIndex].DefaultCellStyle.BackColor != SystemColors.Control)
+                if (!dgv.Rows[e.RowIndex].Selected)
                 {
                     dgv.Rows[e.RowIndex].DefaultCellStyle.BackColor = SystemColors.Control;
                 }
