@@ -104,7 +104,7 @@ namespace PushServer.MessageHubs
             {
                 File.Delete(tempFile);
             }
-            return rsp.AsApiResult(rsp.Refund);
+            return rsp.AsApiResult(()=>rsp.Refund);
         }
     }
 }

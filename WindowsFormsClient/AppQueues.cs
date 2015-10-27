@@ -19,6 +19,7 @@ namespace WinFormsClient
         {
             Cts = token;
             WorkerThread = new Thread(TheadLoop);
+            WorkerThread.IsBackground = true;
             WorkerThread.Start();
         }
         public QueueItem<T> Current { get; private set; }
@@ -56,7 +57,7 @@ namespace WinFormsClient
                 }
                 else
                 {
-                    Thread.Sleep(1000);
+                    await TaskEx.Delay(1000);
                 }
             }
         }

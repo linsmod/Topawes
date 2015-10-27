@@ -36,6 +36,7 @@ namespace WinFormsClient
         private static X509Certificate2 signingCertificate;
         private Dictionary<string, string> TaoAuthorizedCookieDictionary = new Dictionary<string, string>();
         public JumonyParser HtmlParser = new JumonyParser();
+        public AppQueue<InterceptInfo> InteceptQueue;
         public AppQueue<ProductItem, SimpleResult> SyncSupplierQueue;
         const string IndexUrl = "http://chongzhi.taobao.com/index.do?spm=0.0.0.0.OR0khk&method=index";
         public TimeSpan DateDifference = TimeSpan.Zero;
@@ -59,6 +60,7 @@ namespace WinFormsClient
             Instance = this;
             this.Text = title;
             SyncSupplierQueue = new AppQueue<ProductItem, SimpleResult>(cts.Token);
+            InteceptQueue = new AppQueue<InterceptInfo>(cts.Token);
             InstallCert();
             wbLoginMode.UserCancelLogin += () => { this.Close(); };
             wbTaoChongZhiMode.AskLogin += () => { this.InvokeAction(this.ShowLoginWindow, wb); };
@@ -171,8 +173,12 @@ namespace WinFormsClient
             });
         }
 
-        private async Task InterceptTrade(SuplierInfo supplier, string spu, TopTrade trade, Statistic statistic)
+        private async Task InterceptTrade(InterceptInfo info)
         {
+            SuplierInfo supplier = info.supplier;
+            string spu = info.spuId;
+            TopTrade trade = info.trade;
+            Statistic statistic = info.statistic;
             AppendText("将拦截订单{0}，买家：{1}", trade.Tid, trade.BuyerNick);
             trade.Intercept = true;
             AppDatabase.db.TopTrades.Update(trade);
@@ -198,28 +204,6 @@ namespace WinFormsClient
 
                         AppendText("{0}关闭交易...", trade.Tid);
                         await CloseTradeIfPossible(trade.Tid);
-
-                        //恢复价格
-                        //更新改价结果
-                        product = AppDatabase.db.ProductItems.FindById(trade.NumIid);
-                        if (!product.NeedResotreProfit)
-                        {
-                            //尝试还原价格时原始价格已经更新的话就不用恢复了
-                            return;
-                        }
-                        using (var wbHelper = new WBHelper(false))
-                        {
-                            var taoResult = await this.InvokeTask(supplierSave, helper, supplier.profitData[0].id, spu, product.原利润.ToString("f2"), (product.进价 + product.原利润).ToString("f2"), trade.NumIid, tbcpCrumbs);
-                            if (taoResult == null || taoResult.status != 200)
-                            {
-                                AppendText("商品{0}恢复价格失败，请注意！" + taoResult != null ? taoResult.msg : "", trade.NumIid);
-                                return;
-                            }
-                            else
-                            {
-                                AppendText("商品{0}恢复价格已提交", trade.NumIid);
-                            }
-                        }
                     }
                 }
                 catch (Exception ex)
@@ -323,6 +307,28 @@ namespace WinFormsClient
                     OnStatisticUpdate(statistic);
                     AppendText("{0}关闭交易失败，买家：{1}，订单状态：{2}", topTrade.Tid, topTrade.BuyerNick, topTrade.Status);
                 }
+
+                //恢复价格
+                var product = AppDatabase.db.ProductItems.FindById(topTrade.NumIid);
+                if (!product.NeedResotreProfit)
+                {
+                    //尝试还原价格时原始价格已经更新的话就不用恢复了
+                    return;
+                }
+
+                using (var wbHelper = new WBHelper(false))
+                {
+                    var taoResult = await this.InvokeTask(supplierSave, wbHelper, product.SupplierId, product.SpuId, product.原利润.ToString("f2"), (product.进价 + product.原利润).ToString("f2"), topTrade.NumIid, tbcpCrumbs);
+                    if (taoResult == null || taoResult.status != 200)
+                    {
+                        AppendText("商品{0}恢复价格失败，请注意！" + taoResult != null ? taoResult.msg : "", topTrade.NumIid);
+                        return;
+                    }
+                    else
+                    {
+                        AppendText("商品{0}恢复价格已提交", topTrade.NumIid);
+                    }
+                }
             }
             catch (Exception ex)
             {
@@ -380,7 +386,7 @@ namespace WinFormsClient
             Connection.Headers["x-name"] = asm.Name;
             Connection.Headers["x-version"] = asm.Version.ToString();
             Connection.Headers["x-creation-time"] = new System.IO.FileInfo(Application.ExecutablePath).CreationTime.ToString();
-            Connection.Headers["x-os-version"] = Environment.OSVersion.VersionString;
+            Connection.Headers["x-os-version"] = Environment.OSVersion.VersionString + "(" + Environment.OSVersion.Platform.ToString() + ")";
             Connection.Headers["x-ie-version"] = wb.Version.ToString();
             Connection.Headers["x-runtime-version"] = Environment.Version.ToString();
             Connection.Error += Connection_Error;
@@ -434,7 +440,17 @@ namespace WinFormsClient
                     //wbMain.Navigate("http://chongzhi.taobao.com/index.do?spm=0.0.0.0.OR0khk&method=index");
                     wb.Navigate("http://chongzhi.taobao.com/index.do?spm=0.0.0.0.OR0khk&method=index");
                 });
-                await Connection.Start();
+                try
+                {
+                    await Connection.Start();
+                }
+                catch
+                {
+                    AppendText("尝试连接失败，10s后重试...");
+                    await TaskEx.Delay(1000 * 10);
+                    ConnectAsync();
+                    return;
+                }
                 this.tssl_ConnState.Text = "连接状态：" + ConnectionState.Connected.AsZhConnectionState();
                 IsLogin = true;
                 var userInfo = await client.UserInfo();
@@ -522,7 +538,6 @@ namespace WinFormsClient
             if (success)
             {
                 ThreadLoopMonitorDelay();
-                ThreadLoopCloseTrade();
             }
         }
 
@@ -629,16 +644,24 @@ namespace WinFormsClient
             {
                 using (var wbHelper = new WBHelper(true))
                 {
-                    var x = await this.InvokeTask(wbHelper.IsLoginRequired);
-                    while (x)
+                    try
                     {
-                        this.InvokeAction(ShowLoginWindow, wbHelper.WB);
-                        x = await this.InvokeTask(wbHelper.IsLoginRequired);
+                        var x = await this.InvokeTask(wbHelper.IsLoginRequired);
+                        while (x)
+                        {
+                            this.InvokeAction(ShowLoginWindow, wbHelper.WB);
+                            x = await this.InvokeTask(wbHelper.IsLoginRequired);
+                        }
+                        //查找供应商
+                        supplier = await this.InvokeTask(supplierInfo, wbHelper, product.SpuId);
+                        if (supplier != null)
+                        {
+                            product.OnSupplierInfoUpdate(AppDatabase.db.ProductItems, supplier);
+                        }
                     }
-                    //查找供应商
-                    supplier = await this.InvokeTask(supplierInfo, wbHelper, product.SpuId);
-                    if (supplier != null) {
-                        product.OnSupplierInfoUpdate(AppDatabase.db.ProductItems, supplier);
+                    catch (Exception ex)
+                    {
+                        AppendException(ex);
                     }
                 }
             }
@@ -657,14 +680,14 @@ namespace WinFormsClient
                 var interceptType = AppSetting.UserSetting.Get<string>("拦截模式");
                 if (interceptType == InterceptMode.无条件拦截模式)
                 {
-                    await InterceptTrade(supplier, product.SpuId, trade, statistic);
+                    InteceptQueue.CreateTaskItem(new InterceptInfo(supplier, product.SpuId, trade, statistic), InterceptTrade);
                     return;
                 }
                 else if (interceptType == InterceptMode.仅拦截亏本交易)
                 {
                     if (supplier.profitMin < 0)
                     {
-                        await InterceptTrade(supplier, product.SpuId, trade, statistic);
+                        InteceptQueue.CreateTaskItem(new InterceptInfo(supplier, product.SpuId, trade, statistic), InterceptTrade);
                     }
                     else
                         AppendText("[{0}/{1}]不拦截-{2}。", trade.Tid, trade.NumIid, interceptType);
@@ -680,7 +703,7 @@ namespace WinFormsClient
                         if (countNumUsed > 1)
                         {
                             //AppendText("14天内同充值号码拦截，订单ID={0}", trade.Tid);
-                            await InterceptTrade(supplier, product.SpuId, trade, statistic);
+                            InteceptQueue.CreateTaskItem(new InterceptInfo(supplier, product.SpuId, trade, statistic), InterceptTrade);
                             return;
                         }
                     }
@@ -690,7 +713,7 @@ namespace WinFormsClient
                     if (orderCount > 1)
                     {
                         //AppendText("14天内同宝贝付款订单大于1拦截，订单ID={0}", trade.Tid);
-                        await InterceptTrade(supplier, product.SpuId, trade, statistic);
+                        InteceptQueue.CreateTaskItem(new InterceptInfo(supplier, product.SpuId, trade, statistic), InterceptTrade);
                         return;
                     }
 
@@ -704,7 +727,7 @@ namespace WinFormsClient
                     if (AppSetting.UserSetting.Get<string[]>("买家黑名单", new string[0]).Any(x => x == trade.BuyerNick))
                     {
                         //AppendText("黑名单买家拦截，订单ID={0}", trade.Tid);
-                        await InterceptTrade(supplier, product.SpuId, trade, statistic);
+                        InteceptQueue.CreateTaskItem(new InterceptInfo(supplier, product.SpuId, trade, statistic), InterceptTrade);
                         return;
                     }
 
@@ -712,7 +735,7 @@ namespace WinFormsClient
                     if (trade.Num > 1)
                     {
                         //AppendText("购买数量超过1件拦截，订单ID={0}", trade.Tid);
-                        await InterceptTrade(supplier, product.SpuId, trade, statistic);
+                        InteceptQueue.CreateTaskItem(new InterceptInfo(supplier, product.SpuId, trade, statistic), InterceptTrade);
                         return;
                     }
                     AppendText("[{0}/{1}]不拦截-{2}。", trade.Tid, trade.NumIid, interceptType);
@@ -740,6 +763,7 @@ namespace WinFormsClient
                 {
                     trade.Status = result.Data;
                     AppDatabase.db.TopTrades.Update(trade);
+                    CloseTradeIfPossible(trade.Tid);
                 }
             }
         }
@@ -766,7 +790,7 @@ namespace WinFormsClient
             AppDatabase.db.Statistics.Upsert(statistic, statistic.Id);
             OnStatisticUpdate(statistic);
             AppendText("[{0}]交易付款，买家：{1} 创建于{2}，付款时间{3}", trade.Tid, trade.BuyerNick, trade.Created.ToString("M月d日 H时m分s秒"), trade.PayTime.Value.ToString("M月d日 H时m分s秒"));
-            await CloseTradeIfPossible(trade.Tid);
+            CloseTradeIfPossible(trade.Tid);
         }
 
         private void RefundHub_RefundTimeoutRemind(Top.Tmc.Message msg)
@@ -900,36 +924,6 @@ namespace WinFormsClient
                 //await SetItemQty(product);
             }
             BindDGViewProduct();
-        }
-
-        private async Task SetItemQty(ProductItem product)
-        {
-            var lockType = "";
-            var qty = 0;
-            if (product.ItemSubName == "QQ直充" && AppSetting.UserSetting.Get<bool>("对QQ直充启用库存锁定"))
-            {
-                lockType = AppSetting.UserSetting.Get<string>("QQ直充库存锁定类型");
-                qty = (int)AppSetting.UserSetting.Get<decimal>("QQ直充库存锁定数量");
-            }
-            else if (product.ItemSubName == "话费直充" && AppSetting.UserSetting.Get<bool>("对话费直充启用库存锁定"))
-            {
-                lockType = AppSetting.UserSetting.Get<string>("话费直充库存锁定类型");
-                qty = (int)AppSetting.UserSetting.Get<decimal>("话费直充库存锁定数量");
-            }
-            else if (product.ItemSubName == "点卡直充" && AppSetting.UserSetting.Get<bool>("对点卡直充启用库存锁定"))
-            {
-                lockType = AppSetting.UserSetting.Get<string>("点卡直充库存锁定类型");
-                qty = (int)AppSetting.UserSetting.Get<decimal>("点卡直充库存锁定数量");
-            }
-            else
-            {
-                AppendText("类型为{0}的商品{1}没有设置为锁定库存，忽略。", product.ItemSubName, product.Id);
-            }
-            if (lockType == "锁定所有商品" || (lockType == "锁定监控商品" && product.Monitor))
-            {
-                if (qty != 0 && qty != product.StockQty)
-                    await client.ItemHub.ItemQuantityUpdate(product.Id, qty);
-            }
         }
 
         private async void ItemHub_ItemDownshelf(Top.Tmc.Message msg)
@@ -1435,26 +1429,6 @@ namespace WinFormsClient
                 }
             }
             RestartApplication = false;
-        }
-
-        public async Task ThreadLoopCloseTrade()
-        {
-            while (!cts.IsCancellationRequested)
-            {
-                //如果 （S当前时间-S创建时间>1min) 就关闭单子
-                //亦 (S当前时间-1min>S创建时间)
-                if (ServerNow.HasValue)
-                {
-                    var dts = ServerNow.Value.AddMinutes(-1);
-                    var trade = AppDatabase.db.TopTrades.FindOne(x => (x.Status == "WAIT_BUYER_PAY" || x.Status == "TRADE_NO_CREATE_PAY") && x.Created < dts);
-                    if (trade != null && trade.Intercept)
-                    {
-                        await CloseTradeIfPossible(trade.Tid);
-                        continue;
-                    }
-                }
-                await TaskEx.Delay(1000);
-            }
         }
 
         private bool GetServerTime()
@@ -2310,5 +2284,21 @@ namespace WinFormsClient
         //public static string 卖家拍错了 = "";
         //public static string 同城见面交易 = "";
         //public static string 其他原因 = "";
+    }
+
+    public class InterceptInfo
+    {
+        public string spuId;
+        public Statistic statistic;
+        public SuplierInfo supplier;
+        public TopTrade trade;
+
+        public InterceptInfo(SuplierInfo supplier, string spuId, TopTrade trade, Statistic statistic)
+        {
+            this.supplier = supplier;
+            this.spuId = spuId;
+            this.trade = trade;
+            this.statistic = statistic;
+        }
     }
 }

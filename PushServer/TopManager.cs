@@ -241,7 +241,7 @@ namespace PushServer
                 request.Nick = taoUserOAuth.taobao_user_nick;
                 request.Fields = "user_nick,topics,user_id,is_valid,created,modified";
                 var resp = client.Execute<TmcUserGetResponse>(request, taoUserOAuth.access_token);
-                return resp.AsApiResult(resp.TmcUser);
+                return resp.AsApiResult(()=>resp.TmcUser);
             }
 
             /// <summary>

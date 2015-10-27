@@ -245,5 +245,25 @@ namespace System.Windows.Forms
             else
                 method.Invoke(args);
         }
+
+        public static void InvokeActionAsync(this Control control, Action method)
+        {
+            if (control.InvokeRequired)
+            {
+                control.BeginInvoke(method);
+            }
+            else
+                method.BeginInvoke(null, null);
+        }
+
+        public static void InvokeActionAsync<T>(this Control control, Action<T> method, T args)
+        {
+            if (control.InvokeRequired)
+            {
+                control.BeginInvoke(method, args);
+            }
+            else
+                method.BeginInvoke(args, null, null);
+        }
     }
 }

@@ -17,13 +17,13 @@ namespace TopModel
             }
             return new ApiResult(true, "");
         }
-        public static ApiResult<T> AsApiResult<T>(this TopResponse response, T data)
+        public static ApiResult<T> AsApiResult<T>(this TopResponse response, Func<T> data)
         {
             if (response.IsError)
             {
                 return new ApiResult<T>(false, response.ErrMsg + " " + response.SubErrMsg);
             }
-            return new ApiResult<T>(true, "") { Data = data };
+            return new ApiResult<T>(true, "") { Data = data() };
         }
 
         public static ApiPagedResult<T> AsApiPagedResult<T>(this TopResponse response, T dataList, bool hasMore) where T : new()

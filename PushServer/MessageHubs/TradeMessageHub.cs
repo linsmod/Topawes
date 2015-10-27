@@ -59,7 +59,7 @@ namespace PushServer.MessageHubs
             req.Tid = tid;
             req.CloseReason = closeReason;
             TradeCloseResponse rsp = client.Execute(req, AccessToken);
-            return rsp.AsApiResult(rsp.Trade.Tid);
+            return rsp.AsApiResult(()=>rsp.Trade.Tid);
         }
 
         public ApiPagedResult<List<TopTrade>> GetSoldTrade(string status, int page, DateTime start)
@@ -101,7 +101,7 @@ namespace PushServer.MessageHubs
                 Tid = tid
             };
             TradeGetResponse response = client.Execute<TradeGetResponse>(request, AccessToken);
-            return response.AsApiResult(response.Trade.Status);
+            return response.AsApiResult(()=>response.Trade.Status);
         }
 
         /// <summary>
@@ -118,7 +118,7 @@ namespace PushServer.MessageHubs
                 Fields = "tid,buyer_nick,num,num_iid,created,pay_time,payment,receiver_address,status,end_time,seller_rate,seller_can_rate"
             };
             var rsp = client.Execute(request, AccessToken);
-            return rsp.AsApiResult<TopTrade>(TopTrade.FromTrade(rsp.Trade));
+            return rsp.AsApiResult<TopTrade>(()=>TopTrade.FromTrade(rsp.Trade));
         }
     }
 }
