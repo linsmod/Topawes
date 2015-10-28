@@ -23,6 +23,7 @@ using System.Threading.Tasks;
 using System.Windows.Forms;
 using TopModel;
 using TopModel.Models;
+using TopModel.Extensions;
 using WinFormsClient.Extensions;
 using WinFormsClient.Helpers;
 using WinFormsClient.Models;
@@ -39,7 +40,8 @@ namespace WinFormsClient
         public JumonyParser HtmlParser = new JumonyParser();
         public AppQueue<InterceptInfo> InteceptQueue;
         public AppQueue<long> CloseTradeQueue;
-        public AppQueue<ProductItem, SimpleResult> SyncSupplierQueue;
+        public TaskQueue<ProductItem, SimpleResult> SyncSupplierQueue;
+        public AppQueue<ProductItem[]> WaitUpWaitDownlist;
         const string IndexUrl = "http://chongzhi.taobao.com/index.do?spm=0.0.0.0.OR0khk&method=index";
         public TimeSpan DateDifference = TimeSpan.Zero;
         public static CancellationTokenSource cts = new CancellationTokenSource();
@@ -62,9 +64,16 @@ namespace WinFormsClient
         {
             Instance = this;
             this.Text = title;
-            SyncSupplierQueue = new AppQueue<ProductItem, SimpleResult>(cts.Token);
+            SyncSupplierQueue = new TaskQueue<ProductItem, SimpleResult>(cts.Token);
             InteceptQueue = new AppQueue<InterceptInfo>(cts.Token);
             CloseTradeQueue = new AppQueue<long>(cts.Token);
+            WaitUpWaitDownlist = new AppQueue<ProductItem[]>(cts.Token);
+            InitializeComponent();
+            this.Load += WinFormsClient_Load;
+        }
+
+        private void WinFormsClient_Load(object sender, EventArgs e)
+        {
             InstallCert();
             wbLoginMode.UserCancelLogin += () => { this.Close(); };
             wbTaoChongZhiMode.AskLogin += () => { this.InvokeAction(this.ShowLoginWindow, wb); };
@@ -75,19 +84,23 @@ namespace WinFormsClient
                 foreach (var fName in files)
                 {
                     var uName = Path.GetFileNameWithoutExtension(fName);
-                    var button = new Button()
+                    if (!string.IsNullOrEmpty(uName))
                     {
-                        Size = new Size(140, 30),
-                        Text = uName,
-                    };
-                    button.Click += OnSelectAccountButtonClick;
-                    selectAccountForm.AccountButtons.Add(button);
+                        var button = new Button()
+                        {
+                            Size = new Size(140, 30),
+                            Text = uName,
+                        };
+                        button.Click += OnSelectAccountButtonClick;
+                        selectAccountForm.AccountButtons.Add(button);
+                    }
                 }
-                selectAccountForm.ShowDialog(this);
+                if (selectAccountForm.AccountButtons.Count > 1)
+                    selectAccountForm.ShowDialog();
             }
-            InitializeComponent();
+
             wbLoginMode.Enter(wb);
-            var x = new TaoLoginForm(wbLoginMode).ShowDialog(this);
+            var x = new TaoLoginForm(wbLoginMode).ShowDialog();
             if (x != DialogResult.OK)
             {
                 Environment.Exit(0);
@@ -272,51 +285,73 @@ namespace WinFormsClient
             using (WBHelper helper = new WBHelper(true))
             {
                 //getDurexParam
-                var content = await helper.WB.GetAjaxResult("http://chongzhi.taobao.com/ajax.do?method=getDurexParam&type=0&callback=_");
+                var content = await this.InvokeTask(helper.WB.GetAjaxResult, "http://chongzhi.taobao.com/ajax.do?method=getDurexParam&type=0&callback=_");
                 content = content.Substring(2, content.Length - 3);
                 var param = JsonConvert.DeserializeObject<DurexParamResult>(content);
 
-                if (param.status == 0 && !string.IsNullOrEmpty(param.ret.param))
+                if (param.code == 200)
                 {
-                    durexParam = param.ret.param;
-                    //durex/validate
-                    var url = "http://aq.taobao.com/durex/validate?param=&redirecturl=%2F%2Fchongzhi.taobao.com%2Ferror.do%3Fmethod%3DdurexJump";
-                    url = UrlHelper.SetValue(url, "param", durexParam);
-                    try
+                    if (!string.IsNullOrEmpty(param.ret.param))
                     {
-                        var doc = await helper.SynchronousLoadDocument(url, "http://chongzhi.taobao.com/error.do?method=durexJump&type=success");
+                        durexParam = param.ret.param;
+                        //durex/validate
+                        var url = "http://aq.taobao.com/durex/validate?param=&redirecturl=%2F%2Fchongzhi.taobao.com%2Ferror.do%3Fmethod%3DdurexJump";
+                        url = UrlHelper.SetValue(url, "param", durexParam);
+                        try
+                        {
+                            var doc = await this.InvokeTask(helper.SynchronousLoadDocument, url, "http://chongzhi.taobao.com/error.do?method=durexJump&type=success");
+                            return true;
+                        }
+                        catch { }
+                        await helper.SynchronousLoadDocument("http://chongzhi.taobao.com/item.do?method=list&type=1&keyword=&category=0&supplier=0&promoted=0&order=0&desc=0&page=1&size=20");
+                    }
+                    else
+                    {
                         return true;
                     }
-                    catch { }
                 }
             }
             return false;
         }
 
-        public async Task<TaoJsonpResult> downListItem(string ids)
-        {
-            await durexValidate();
-            var url = "http://chongzhi.taobao.com/item.do?method=down&itemIds=522871283911&tbcpCrumbs=1fb3d7437580ea5636013be21fab2a3c-a4460a6db84e4";
-            UrlHelper.SetValue(url, "tbcpCrumbs", tbcpCrumbs);
-            UrlHelper.SetValue(url, "itemIds", ids);
-            using (WBHelper helper = new WBHelper(false))
-            {
-                var content = await helper.SynchronousLoadString(url);
-                return JsonConvert.DeserializeObject<TaoJsonpResult>(content.Data);
-            }
-        }
+        //public async Task<TaoJsonpResult> downListItem(string ids)
+        //{
+        //    await durexValidate();
+        //    var url = "http://chongzhi.taobao.com/item.do?method=down&itemIds=522871283911&tbcpCrumbs=1fb3d7437580ea5636013be21fab2a3c-a4460a6db84e4";
+        //    url = UrlHelper.SetValue(url, "tbcpCrumbs", tbcpCrumbs);
+        //    url = UrlHelper.SetValue(url, "itemIds", ids);
+        //    using (WBHelper helper = new WBHelper(false))
+        //    {
+        //        var content = await helper.SynchronousLoadString(url);
+        //        return JsonConvert.DeserializeObject<TaoJsonpResult>(content.Data);
+        //    }
+        //}
 
         public async Task<TaoUplistResult> upListItem(string ids)
         {
-            await durexValidate();
-            var url = "http://chongzhi.taobao.com/item.do?method=up&itemIds=522871283911&tbcpCrumbs=1fb3d7437580ea5636013be21fab2a3c-a4460a6db84e4";
-            url = UrlHelper.SetValue(url, "tbcpCrumbs", tbcpCrumbs);
-            url = UrlHelper.SetValue(url, "itemIds", ids);
-            using (WBHelper helper = new WBHelper(false))
+            var validateRet = await durexValidate();
+            if (!validateRet)
             {
-                var content = await helper.SynchronousLoadString(url);
-                return JsonConvert.DeserializeObject<TaoUplistResult>(content.Data);
+                AppendText("二次校验失败，请检查网络情况及证书安装情况。");
+                return null;
             }
+            try
+            {
+                var url = "http://chongzhi.taobao.com/item.do?method=up&itemIds=522871283911&tbcpCrumbs=1fb3d7437580ea5636013be21fab2a3c-a4460a6db84e4";
+                url = UrlHelper.SetValue(url, "tbcpCrumbs", tbcpCrumbs);
+                url = UrlHelper.SetValue(url, "itemIds", ids);
+                using (WBHelper helper = new WBHelper(false))
+                {
+                    var content = await this.InvokeTask(helper.SynchronousLoadString, url);
+                    return JsonConvert.DeserializeObject<TaoUplistResult>(content.Data);
+                }
+            }
+            catch (Exception ex)
+            {
+                AppendText("上架商品失败，错误消息:", ex.Message);
+                AppendException(ex);
+            }
+            return null;
         }
         private async Task CloseTradeIfPossible(long tid)
         {
@@ -393,7 +428,7 @@ namespace WinFormsClient
                 MessageBox.Show("请输入内容！");
                 return;
             }
-            var h = await client.NewMessage(TextBoxMessage.Text);
+            var h = await this.InvokeTask(client.NewMessage, TextBoxMessage.Text);
             TextBoxMessage.Text = String.Empty;
             TextBoxMessage.Focus();
         }
@@ -410,7 +445,7 @@ namespace WinFormsClient
             List<TopTrade> list = new List<TopTrade>();
             while (tradeList.HasMore)
             {
-                tradeList = await client.SyncTrade(state, num, start);
+                tradeList = await this.InvokeTask(client.SyncTrade, state, (long)num, start);
                 if (!tradeList.Success)
                 {
                     return new ApiPagedResult<List<TopTrade>>(false, tradeList.Message);
@@ -504,7 +539,7 @@ namespace WinFormsClient
                 }
                 this.tssl_ConnState.Text = "连接状态：" + ConnectionState.Connected.AsZhConnectionState();
                 IsLogin = true;
-                var userInfo = await client.UserInfo();
+                var userInfo = await this.InvokeTask(client.UserInfo);
                 var userName = (string)userInfo.UserName;
                 AppDatabase.Initialize(userName);
                 AppSetting.InitializeUserSetting(userName, AppDatabase.db.Database);
@@ -543,7 +578,7 @@ namespace WinFormsClient
                     ResetProductStates();
                     BindDGViewProduct();
                     BindDGViewTBOrder();
-                    var permit = await client.TmcGroupAddThenTmcUserPermit();
+                    var permit = await this.InvokeTask(client.TmcGroupAddThenTmcUserPermit);
                     var permitSuccess = permit.Success;
                     this.AppendText("消息授权{0}", permitSuccess ? "成功" : "失败，错误消息：" + permit.Message);
                     if (permitSuccess)
@@ -645,7 +680,7 @@ namespace WinFormsClient
             var definition = new { buyer_nick = "", payment = "", oid = 0L, tid = 0L, type = "guarantee_trade", seller_nick = "" };
             //var content = @"{'buyer_nick':'包花呗','payment':'9.56','oid':1316790655492656,'tid':1316790655492656,'type':'guarantee_trade','seller_nick':'红指甲与高跟鞋'}";
             var d = JsonConvert.DeserializeAnonymousType(msg.Content, definition);
-            var trade = (await client.TradeHub.GetTrade(d.tid)).Data;
+            var trade = (await this.InvokeTask(client.TradeHub.GetTrade, d.tid)).Data;
             var product = AppDatabase.db.ProductItems.FindById(trade.NumIid);
             if (product == null)
             {
@@ -704,14 +739,14 @@ namespace WinFormsClient
                 var interceptType = AppSetting.UserSetting.Get<string>("拦截模式");
                 if (interceptType == InterceptMode.无条件拦截模式)
                 {
-                    InteceptQueue.CreateTaskItem(new InterceptInfo(supplier, product.SpuId, trade, statistic), InterceptTrade);
+                    InteceptQueue.Enqueue(new InterceptInfo(supplier, product.SpuId, trade, statistic), InterceptTrade, OnInterceptExecuted);
                     return;
                 }
                 else if (interceptType == InterceptMode.仅拦截亏本交易)
                 {
                     if (supplier.profitMin < 0)
                     {
-                        InteceptQueue.CreateTaskItem(new InterceptInfo(supplier, product.SpuId, trade, statistic), InterceptTrade);
+                        InteceptQueue.Enqueue(new InterceptInfo(supplier, product.SpuId, trade, statistic), InterceptTrade, OnInterceptExecuted);
                     }
                     else
                         AppendText("[{0}/{1}]不拦截-{2}。", trade.Tid, trade.NumIid, interceptType);
@@ -727,7 +762,7 @@ namespace WinFormsClient
                         if (countNumUsed > 1)
                         {
                             //AppendText("14天内同充值号码拦截，订单ID={0}", trade.Tid);
-                            InteceptQueue.CreateTaskItem(new InterceptInfo(supplier, product.SpuId, trade, statistic), InterceptTrade);
+                            InteceptQueue.Enqueue(new InterceptInfo(supplier, product.SpuId, trade, statistic), InterceptTrade, OnInterceptExecuted);
                             return;
                         }
                     }
@@ -737,7 +772,7 @@ namespace WinFormsClient
                     if (orderCount > 1)
                     {
                         //AppendText("14天内同宝贝付款订单大于1拦截，订单ID={0}", trade.Tid);
-                        InteceptQueue.CreateTaskItem(new InterceptInfo(supplier, product.SpuId, trade, statistic), InterceptTrade);
+                        InteceptQueue.Enqueue(new InterceptInfo(supplier, product.SpuId, trade, statistic), InterceptTrade, OnInterceptExecuted);
                         return;
                     }
 
@@ -751,7 +786,7 @@ namespace WinFormsClient
                     if (AppSetting.UserSetting.Get<string[]>("买家黑名单", new string[0]).Any(x => x == trade.BuyerNick))
                     {
                         //AppendText("黑名单买家拦截，订单ID={0}", trade.Tid);
-                        InteceptQueue.CreateTaskItem(new InterceptInfo(supplier, product.SpuId, trade, statistic), InterceptTrade);
+                        InteceptQueue.Enqueue(new InterceptInfo(supplier, product.SpuId, trade, statistic), InterceptTrade, OnInterceptExecuted);
                         return;
                     }
 
@@ -759,7 +794,7 @@ namespace WinFormsClient
                     if (trade.Num > 1)
                     {
                         //AppendText("购买数量超过1件拦截，订单ID={0}", trade.Tid);
-                        InteceptQueue.CreateTaskItem(new InterceptInfo(supplier, product.SpuId, trade, statistic), InterceptTrade);
+                        InteceptQueue.Enqueue(new InterceptInfo(supplier, product.SpuId, trade, statistic), InterceptTrade, OnInterceptExecuted);
                         return;
                     }
                     AppendText("[{0}/{1}]不拦截-{2}。", trade.Tid, trade.NumIid, interceptType);
@@ -770,6 +805,10 @@ namespace WinFormsClient
                 AppendText("[{0}/{1}]交易商品供应商信息未查询到，不拦截。", trade.Tid, trade.NumIid);
             }
         }
+        private void OnInterceptExecuted(InterceptInfo input, Exception ex)
+        {
+
+        }
 
         private async void TradeHub_TradeClose(Top.Tmc.Message msg)
         {
@@ -779,7 +818,7 @@ namespace WinFormsClient
             var definition = new { buyer_nick = "", payment = "", oid = 0L, tid = 0L, type = "guarantee_trade", seller_nick = "" };
             //var content = @"{'buyer_nick':'包花呗','payment':'9.56','oid':1316790655492656,'tid':1316790655492656,'type':'guarantee_trade','seller_nick':'红指甲与高跟鞋'}";
             var d = JsonConvert.DeserializeAnonymousType(msg.Content, definition);
-            var result = await client.TradeHub.GetTradeStatus(d.tid).ConfigureAwait(false);
+            var result = await this.InvokeTask(client.TradeHub.GetTradeStatus, d.tid);
             if (result.Success)
             {
                 var trade = AppDatabase.db.TopTrades.FindById(d.tid);
@@ -787,7 +826,7 @@ namespace WinFormsClient
                 {
                     trade.Status = result.Data;
                     AppDatabase.db.TopTrades.Update(trade);
-                    CloseTradeQueue.CreateTaskItem(trade.Tid, CloseTradeIfPossible);
+                    CloseTradeQueue.Enqueue(trade.Tid, CloseTradeIfPossible, OnCloseTradeExecuted);
                 }
             }
         }
@@ -801,7 +840,7 @@ namespace WinFormsClient
             var definition = new { buyer_nick = "", payment = "", oid = 0L, tid = 0L, type = "guarantee_trade", seller_nick = "" };
             //var content = @"{'buyer_nick':'包花呗','payment':'9.56','oid':1316790655492656,'tid':1316790655492656,'type':'guarantee_trade','seller_nick':'红指甲与高跟鞋'}";
             var d = JsonConvert.DeserializeAnonymousType(msg.Content, definition);
-            var trade = (await client.TradeHub.GetTrade(d.tid)).Data;
+            var trade = (await this.InvokeTask(client.TradeHub.GetTrade, d.tid)).Data;
             AppDatabase.UpsertTopTrade(trade);
             var product = AppDatabase.db.ProductItems.FindById(trade.NumIid);
             if (product == null)
@@ -814,7 +853,12 @@ namespace WinFormsClient
             AppDatabase.db.Statistics.Upsert(statistic, statistic.Id);
             OnStatisticUpdate(statistic);
             AppendText("[{0}]交易付款，买家：{1} 创建于{2}，付款时间{3}", trade.Tid, trade.BuyerNick, trade.Created.ToString("M月d日 H时m分s秒"), trade.PayTime.Value.ToString("M月d日 H时m分s秒"));
-            CloseTradeQueue.CreateTaskItem(trade.Tid, CloseTradeIfPossible);
+            CloseTradeQueue.Enqueue(trade.Tid, CloseTradeIfPossible, OnCloseTradeExecuted);
+        }
+
+        private void OnCloseTradeExecuted(long tid, Exception ex)
+        {
+
         }
 
         private void RefundHub_RefundTimeoutRemind(Top.Tmc.Message msg)
@@ -914,7 +958,7 @@ namespace WinFormsClient
                     product.ModifyProfitSubmitted = false;
                     AppDatabase.db.ProductItems.Update(product);
                     BindDGViewProduct();
-                    SyncSupplierQueue.CreateTaskItem(product, SyncSupplierInfo, x =>
+                    SyncSupplierQueue.Enqueue(product, SyncSupplierInfo, (input, result, ex) =>
                     {
                         BindDGViewProduct();
                     });
@@ -923,7 +967,7 @@ namespace WinFormsClient
                 //恢复价格的,已经在关单的时候提交了请求，这里只需要更新供应商利润信息即可
                 if (product.NeedResotreProfit)
                 {
-                    SyncSupplierQueue.CreateTaskItem(product, SyncSupplierInfo, x =>
+                    SyncSupplierQueue.Enqueue(product, SyncSupplierInfo, (input, result, ex) =>
                     {
                         BindDGViewProduct();
                     });
@@ -964,7 +1008,8 @@ namespace WinFormsClient
 
                 if (product.AutoUpshelf)
                 {
-                    await UpProduct(product);
+                    LockUplist(new ProductItem[] { product });
+                    WaitUpWaitDownlist.Enqueue(new ProductItem[] { product }, UpProduct, (input, ex) => { });
                 }
             }
             BindDGViewProduct();
@@ -1029,9 +1074,9 @@ namespace WinFormsClient
                 话费直充库存锁定数量.SetupAfterUserSettingInitialized("话费直充库存锁定数量");
                 对话费直充启用库存锁定.SetupAfterUserSettingInitialized("对话费直充启用库存锁定");
                 话费直充库存锁定类型.SetupAfterUserSettingInitialized("话费直充库存锁定类型", lockTypes, lockTypes[0]);
-
+                上架库存.SetupAfterUserSettingInitialized("上架库存");
                 自动好评交易checkBoxAuto.SetupAfterUserSettingInitialized("交易自动好评");
-
+                模拟网页上架.SetupAfterUserSettingInitialized("模拟网页上架");
                 赔钱利润.SetupAfterUserSettingInitialized("赔钱利润");
                 不陪钱利润.SetupAfterUserSettingInitialized("不赔钱利润");
 
@@ -1164,7 +1209,7 @@ namespace WinFormsClient
             for (int i = 0; i < finishedList.Count; i++)
             {
                 var item = finishedList[i];
-                var result = await client.Traderate(item.Tid);
+                var result = await this.InvokeTask(client.Traderate, item.Tid);
                 if (!result.Success)
                 {
                     AppendText("评价订单{0}时出现错误，后续操作已取消。错误消息：{1}", item.Tid, result.Message);
@@ -1432,6 +1477,9 @@ namespace WinFormsClient
             {
                 if (!cts.IsCancellationRequested)
                     cts.Cancel();
+                CloseTradeQueue.Dispose();
+                InteceptQueue.Dispose();
+                WaitUpWaitDownlist.Dispose();
                 SyncSupplierQueue.Dispose();
                 try
                 {
@@ -1440,7 +1488,7 @@ namespace WinFormsClient
                         if (Connection.State == ConnectionState.Connected)
                         {
                             AppendText("正在停止监控...");
-                            await client.TmcUserCancel();
+                            await this.InvokeTask(client.TmcUserCancel);
                         }
                         Connection.Error -= Connection_Error;
                         Connection.Closed -= Connection_Closed;
@@ -1582,11 +1630,12 @@ namespace WinFormsClient
             new WhiteListForm("白名单管理").ShowDialog(this);
         }
 
-        private async void UpProduct(object sender, EventArgs e)
+        private void UpProduct(object sender, EventArgs e)
         {
             var productIds = GetSelectedProductList();
-            var productList = AppDatabase.db.ProductItems.Find(x => x.Where == "仓库中").Where(x => productIds.Contains(x.Id));
-            await UpProduct(productList.ToArray());
+            var productList = AppDatabase.db.ProductItems.FindAll().Where(x => x.CanUpshelf() && productIds.Contains(x.Id)).ToArray();
+            this.LockUplist(productList);
+            WaitUpWaitDownlist.Enqueue(productList, UpProduct, (input, ex) => { });
         }
 
         public async Task<bool> SetProductProfit(ProductItem product, Func<ProductItem, decimal> Getprofit, bool forceModify = false, bool isUserOperation = false)
@@ -1707,11 +1756,6 @@ namespace WinFormsClient
 
         private async Task UpProduct(params ProductItem[] productList)
         {
-            if (productList == null || !productList.Any())
-            {
-                AppendText("没有可以上架的商品");
-                return;
-            }
             foreach (var product in productList)
             {
                 var lockType = "";
@@ -1731,86 +1775,134 @@ namespace WinFormsClient
                     lockType = AppSetting.UserSetting.Get<string>("点卡直充库存锁定类型");
                     qty = (int)AppSetting.UserSetting.Get<decimal>("点卡直充库存锁定数量");
                 }
+
                 if (lockType == "锁定所有商品" || (lockType == "锁定监控商品" && product.Monitor))
                 {
-                    if (qty == 0)
-                        qty = 1;
-                    var qtyret = await client.ItemHub.ItemQuantityUpdate(product.Id, qty);
-                    //var apix = await client.ItemHub.ItemUpdateList(product.Id, qty);
-                    //if (apix.Success)
-                    //{
-                    //    //await client.ItemHub.ItemQuantityUpdate(product.Id, qty);
-                    //    //有服务端消息，这个不显示了
-                    //    //AppendText("[商品{0}]上架完成。", product.ItemName);
-                    //}
-                    //else
-                    //{
-                    //    if (apix.Message.IndexOf("您所使用的客户端软件没有操作权限，请核实") != -1)
-                    //    {
-                    //        var upret = await upListItem(product.Id.ToString());
-                    //    }
-                    //    AppendText("[商品{0}]上架失败，错误消息：{1}", product.ItemName, apix.Message);
-                    //}
+                    await this.InvokeTask(client.ItemHub.ItemQuantityUpdate, product.Id, qty, 1);
                 }
                 else
                 {
-                    AppendText("类型为{0}的商品{1}没有设置为锁定库存，忽略。", product.ItemSubName, product.Id);
+                    qty = product.StockQty ?? (int)AppSetting.UserSetting.Get<decimal>("上架库存");
+                    await this.InvokeTask(client.ItemHub.ItemQuantityUpdate, product.Id, qty, 1);
+                }
+                if (!AppSetting.UserSetting.Get<bool>("模拟网页上架"))
+                {
+                    var apix = await this.InvokeTask(client.ItemHub.ItemUpdateList, product.Id, (long)qty);
+                    if (apix.Success)
+                    {
+                        //await client.ItemHub.ItemQuantityUpdate(product.Id, qty);
+                        //有服务端消息，这个不显示了
+                        //AppendText("[商品{0}]上架完成。", product.ItemName);
+                    }
+                    else
+                    {
+                        AppendText("[商品{0}]上架失败，错误消息：{1}", product.ItemName, apix.Message);
+                    }
                 }
             }
-            var upret = await upListItem(string.Join(",", productList.Select(x => x.Id)));
-            if (upret.status)
+            if (AppSetting.UserSetting.Get<bool>("模拟网页上架"))
             {
-                AppendText("上架完成，成功{0}，失败{1}", upret.succNum, upret.failNum);
-            }
-            else
-            {
-                AppendText("上架失败，错误消息：{0}", upret.msg);
+                var upret = await upListItem(string.Join(",", productList.Select(x => x.Id)));
+                if (upret != null)
+                {
+                    if (upret.status)
+                    {
+                        AppendText("上架请求已提交，成功{0}，失败{1}", upret.succNum, upret.failNum);
+
+                        foreach (var item in upret.errmap)
+                        {
+                            AppendText("商品{0}：{1}", item.Key, item.Value);
+                            var product = AppDatabase.db.ProductItems.FindById(long.Parse(item.Key));
+                            if (product != null)
+                            {
+                                product.OnDownshelf(AppDatabase.db.ProductItems);
+                            }
+                            BindDGViewProduct();
+                        }
+                    }
+                    else
+                    {
+                        AppendText("提交上架请求失败，错误消息：{0}", upret.msg);
+                        foreach (var product in productList)
+                        {
+                            if (product != null)
+                            {
+                                product.OnDownshelf(AppDatabase.db.ProductItems);
+                            }
+                            BindDGViewProduct();
+                        }
+                    }
+                }
             }
         }
 
 
-        private async void UpAllProduct(object sender, EventArgs e)
+        private void UpAllProduct(object sender, EventArgs e)
         {
-            var productList = AppDatabase.db.ProductItems.Find(x => x.Where == "仓库中");
+            var productList = AppDatabase.db.ProductItems.FindAll().Where(x => x.CanUpshelf()).ToArray();
             if (productList == null || !productList.Any())
             {
                 AppendText("没有可以上架的商品");
                 return;
             }
-            await UpProduct(productList.ToArray());
+            LockUplist(productList);
+            WaitUpWaitDownlist.Enqueue(productList, UpProduct, (input, ex) => { });
         }
 
-        private async void DownProduct(object sender, EventArgs e)
+        private void LockUplist(IEnumerable<ProductItem> productList)
+        {
+            foreach (var product in productList)
+            {
+                if (!product.CanUpshelf())
+                {
+                    continue;
+                }
+                product.OnUpshelfing(AppDatabase.db.ProductItems);
+                BindDGViewProduct();
+            }
+        }
+        private void DownProduct(object sender, EventArgs e)
         {
             var ids = GetSelectedProductList();
-            var productList = AppDatabase.db.ProductItems.Find(x => x.Where == "出售中").Where(x => ids.Contains(x.Id));
+            var productList = AppDatabase.db.ProductItems.FindAll().Where(x => x.CanDownshelf() && ids.Contains(x.Id)).ToArray();
             if (!productList.Any())
             {
                 AppendText("没有可以下架的商品");
                 return;
             }
-            foreach (var item in productList)
-            {
-                var r = await client.ItemHub.ItemUpdateDelist(item.Id);
-                if (r.Success)
-                {
-                    item.AutoUpshelf = false;
-                    AppDatabase.db.ProductItems.Update(item);
-                }
-            }
+            LockDownList(productList);
+            WaitUpWaitDownlist.Enqueue(productList, DownProduct, (input, ex) => { });
         }
 
-        private async void DownAllProduct(object sender, EventArgs e)
+        private void DownAllProduct(object sender, EventArgs e)
         {
-            var productList = AppDatabase.db.ProductItems.Find(x => x.Where == "出售中").ToList();
+            var productList = AppDatabase.db.ProductItems.FindAll().Where(x => x.CanDownshelf()).ToArray();
             if (!productList.Any())
             {
                 AppendText("没有可以下架的商品");
                 return;
             }
-            foreach (var item in productList)
+            LockDownList(productList);
+            WaitUpWaitDownlist.Enqueue(productList, DownProduct, (input, ex) => { });
+        }
+
+        private void LockDownList(IEnumerable<ProductItem> products)
+        {
+            foreach (var item in products)
             {
-                await client.ItemHub.ItemUpdateDelist(item.Id);
+                if (!item.CanDownshelf())
+                {
+                    continue;
+                }
+                item.OnDownshelfing(AppDatabase.db.ProductItems);
+                BindDGViewProduct();
+            }
+        }
+        public async Task DownProduct(ProductItem[] products)
+        {
+            foreach (var item in products)
+            {
+                await this.InvokeTask(client.ItemHub.ItemUpdateDelist, item.Id);
                 item.AutoUpshelf = false;
                 AppDatabase.db.ProductItems.Update(item);
             }
@@ -1827,7 +1919,7 @@ namespace WinFormsClient
                         break;
                     }
                     var itemId = product.Id;
-                    var ret = await this.client.ItemHub.ItemQuantityUpdate(itemId, stockQty);
+                    var ret = await this.InvokeTask(client.ItemHub.ItemQuantityUpdate, itemId, stockQty, 1);
                     if (ret.Success)
                     {
                         AppendText("商品{0}库存设置成功,值{1}", itemId, stockQty);
@@ -2110,10 +2202,10 @@ namespace WinFormsClient
             var rows = e.TargetObjects.AsList<DataGridViewRow>();
             foreach (var row in rows)
             {
-                //要启用下架菜单项，至少有一个在出售中
+                //要启用下架菜单项，至少有一个可以下架
                 var productId = (long)((System.Data.DataRowView)row.DataBoundItem).Row.ItemArray[0];
                 var product = AppDatabase.db.ProductItems.FindById(productId);
-                if (product.Where == "出售中")
+                if (product != null && product.CanDownshelf())
                 {
                     e.Enabled = true;
                     return;
@@ -2130,7 +2222,7 @@ namespace WinFormsClient
                 //要启用上架 至少有一个在仓库中
                 var productId = (long)((System.Data.DataRowView)row.DataBoundItem).Row.ItemArray[0];
                 var product = AppDatabase.db.ProductItems.FindById(productId);
-                if (product != null && product.Where == "仓库中")
+                if (product != null && product.CanUpshelf())
                 {
                     e.Enabled = true;
                     return;
@@ -2249,25 +2341,28 @@ namespace WinFormsClient
                 {
                     item.SyncProfitSubmited = true;
                     AppDatabase.db.ProductItems.Update(item);
-                    SyncSupplierQueue.CreateTaskItem(item, SyncSupplierInfo, x =>
-                    {
-                        var product = AppDatabase.db.ProductItems.FindById(x.ProductId);
-                        if (x.Success && !product.NeedResotreProfit)
-                        {
-                            //备份原始利润
-                            product.原利润 = product.利润;
-                        }
-                        if (product.SyncProfitSubmited)
-                        {
-                            product.SyncProfitSubmited = false;
-                        }
-                        AppDatabase.db.ProductItems.Update(product);
-                        BindDGViewProduct();
-                    });
+                    SyncSupplierQueue.Enqueue(item, SyncSupplierInfo, OnSyncSupplierInfoExecuted);
                 }
             }
             BindDGViewProduct();
         }
+
+        private void OnSyncSupplierInfoExecuted(ProductItem input, SimpleResult result, Exception ex)
+        {
+            var product = AppDatabase.db.ProductItems.FindById(input.Id);
+            if (ex == null && result.Success && !product.NeedResotreProfit)
+            {
+                //备份原始利润
+                product.原利润 = product.利润;
+            }
+            if (product.SyncProfitSubmited)
+            {
+                product.SyncProfitSubmited = false;
+            }
+            AppDatabase.db.ProductItems.Update(product);
+            BindDGViewProduct();
+        }
+
         public class SimpleResult
         {
             public bool Success { get; set; }

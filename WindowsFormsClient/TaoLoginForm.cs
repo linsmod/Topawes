@@ -39,16 +39,11 @@ namespace WinFormsClient
                 this.Close(); 
             };
             wbMode.WB.ProgressChanged2 += WbMode_ProgressChanged;
-            this.VisibleChanged += TaoLoginForm_VisibleChanged;
             this.Controls.Add(wbMode.WB);
 
             this.Text += " [IE v" + wbMode.WB.Version.ToString() + "]";
         }
 
-        private void TaoLoginForm_VisibleChanged(object sender, EventArgs e)
-        {
-            this.Owner.Enabled = !this.Visible;
-        }
 
         private void WbMode_ProgressChanged(object sender, ProgressChangedEventArgs e)
         {

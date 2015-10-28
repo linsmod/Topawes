@@ -32,18 +32,17 @@ namespace TopModel.MessageHubClients
         {
             if (proxyEvent != null)
             {
-                try
-                {
-                    var cts = new CancellationTokenSource();
-                    cts.CancelAfter(TimeSpan.FromSeconds(5));
-                    var t = Task.Factory.StartNew((x) => proxyEvent((T)x), value);
-                    t.Wait(cts.Token);
-                }
-                catch (Exception ex)
-                {
-
-                }
-                //proxyEvent.Invoke(value);
+                //try
+                //{
+                //    var cts = new CancellationTokenSource();
+                //    cts.CancelAfter(TimeSpan.FromSeconds(1));
+                //    var t = Task.Factory.StartNew((x) => proxyEvent((T)x), value);
+                //    t.Wait(cts.Token);
+                //}
+                //catch (Exception ex)
+                //{
+                //}
+                proxyEvent.Invoke(value);
             }
         }
     }

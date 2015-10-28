@@ -25,6 +25,7 @@ namespace WinFormsClient.Models
 
     public class DurexParamResult : TaoJsonpResult
     {
+        public int code;
         public DurexParam ret { get; set; }
     }
 
@@ -35,6 +36,7 @@ namespace WinFormsClient.Models
 
     public class TaoUplistResult
     {
+        public Dictionary<string, string> errmap { get; set; }
         public int failNum;
         public int succNum;
         public bool status { get; set; }

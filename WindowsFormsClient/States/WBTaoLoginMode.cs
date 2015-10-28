@@ -201,7 +201,7 @@ namespace WinFormsClient.WBMode
         }
 
 
-        private void StaticLogin(HTMLDocument doc)
+        private async void StaticLogin(HTMLDocument doc)
         {
             IHTMLInputTextElement TPL_username_1 = (IHTMLInputTextElement)doc.getElementById("TPL_username_1");
             if (AppSetting.UserSetting != null)
@@ -237,6 +237,7 @@ namespace WinFormsClient.WBMode
                             var checkCode = xdoc.Find(".field-checkcode.hidden");
                             if (checkCode.Any())
                             {
+                                await TaskEx.Delay(200);
                                 WB.Document.All["J_SubmitStatic"].InvokeMember("click");
                             }
                             return;

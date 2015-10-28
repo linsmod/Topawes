@@ -95,17 +95,12 @@ namespace TopModel
         [Display(Name = "修改利润")]
         public bool ModifyProfitSubmitted { get; set; }
 
-        public void OnDownshelf(LiteCollection<ProductItem> productItems)
-        {
-            Where = "仓库中";
-            productItems.Update(this);
-        }
+        public bool 正在上架 { get; set; }
 
-        public void OnUpshelf(LiteCollection<ProductItem> productItems)
-        {
-            Where = "出售中";
-            productItems.Update(this);
-        }
+        public bool 正在下架 { get; set; }
+
+
+       
 
         /// <summary>
         /// 获取供应商

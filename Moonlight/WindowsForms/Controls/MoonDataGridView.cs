@@ -14,6 +14,8 @@ namespace Moonlight.WindowsForms.Controls
     public partial class MoonDataGridView : DataGridView
     {
         public bool IsMouseOnCell { get; set; }
+        public int? SortColumnIndex { get; private set; }
+        public ListSortDirection SortDerection { get; private set; }
         public MoonDataGridView()
         {
             InitializeComponent();
@@ -32,6 +34,37 @@ namespace Moonlight.WindowsForms.Controls
             this.RowContextMenuStripNeeded += MoonDataGridView_RowContextMenuStripNeeded;
             this.AutoSizeColumnsMode = DataGridViewAutoSizeColumnsMode.DisplayedCells;
             this.AutoSizeRowsMode = DataGridViewAutoSizeRowsMode.DisplayedCells;
+            this.ColumnHeaderMouseClick += MoonDataGridView_ColumnHeaderMouseClick;
+            this.DataBindingComplete += MoonDataGridView_DataBindingComplete;
+        }
+
+        private void MoonDataGridView_DataBindingComplete(object sender, DataGridViewBindingCompleteEventArgs e)
+        {
+            if (SortColumnIndex != null)
+            {
+                this.Sort(this.Columns[SortColumnIndex.Value], SortDerection);
+            }
+        }
+
+        private void MoonDataGridView_ColumnHeaderMouseClick(object sender, DataGridViewCellMouseEventArgs e)
+        {
+            SortColumnIndex = e.ColumnIndex;
+            //System.Windows.Forms.DataGridViewColumnHeaderCell
+            if (Columns[e.ColumnIndex].HeaderCell.SortGlyphDirection == SortOrder.Ascending)
+            {
+                Columns[e.ColumnIndex].HeaderCell.SortGlyphDirection = SortOrder.Descending;
+                SortDerection = ListSortDirection.Descending;
+            }
+            else if (Columns[e.ColumnIndex].HeaderCell.SortGlyphDirection == SortOrder.Descending)
+            {
+                Columns[e.ColumnIndex].HeaderCell.SortGlyphDirection = SortOrder.Ascending;
+                SortDerection = ListSortDirection.Ascending;
+            }
+            else
+            {
+                return;
+            }
+            this.Sort(this.Columns[SortColumnIndex.Value], SortDerection);
         }
 
         private void MoonDataGridView_RowContextMenuStripNeeded(object sender, DataGridViewRowContextMenuStripNeededEventArgs e)
@@ -93,7 +126,7 @@ namespace Moonlight.WindowsForms.Controls
 
         private void dataGridView1_RowPostPaint(object sender, DataGridViewRowPostPaintEventArgs e)
         {
-            if (e.RowIndex % 10 == 0)
+            if (e.RowIndex % 5 == 4)
             {
                 Rectangle rectangle = new Rectangle(e.RowBounds.Location.X, e.RowBounds.Location.Y, RowHeadersWidth - 4, e.RowBounds.Height);
                 TextRenderer.DrawText(e.Graphics, (e.RowIndex + 1).ToString(),

@@ -13,6 +13,7 @@ using Moonlight.WindowsForms.Controls;
 using CSWebDownloader;
 using TopModel;
 using Moonlight.Treading;
+using System.Diagnostics;
 
 namespace WinFormsClient.Helpers
 {
@@ -127,7 +128,8 @@ namespace WinFormsClient.Helpers
         public async Task<DataLoadResult<HtmlDocument>> SynchronousLoadDocument(string url, string endUrl)
         {
             var cts = new CancellationTokenSource();
-            cts.CancelAfter(TimeSpan.FromSeconds(15));
+            var timeout = Debugger.IsAttached ? 15 : 3;
+            cts.CancelAfter(TimeSpan.FromSeconds(timeout));
             this.SyncNavContext = new SynchronousNavigationContext
             {
                 StartUrl = url,
@@ -157,21 +159,21 @@ namespace WinFormsClient.Helpers
 
         public async Task<DataLoadResult<string>> SynchronousLoadString(string url)
         {
-            var cts = new CancellationTokenSource();
-            cts.CancelAfter(TimeSpan.FromSeconds(15));
-            return await SynchronousLoadString(url, cts.Token);
+
+            return await SynchronousLoadString(url, url);
         }
 
-        public async Task<DataLoadResult<string>> SynchronousLoadString(string url, CancellationToken token)
+        public async Task<DataLoadResult<string>> SynchronousLoadString(string url, string endUrl)
         {
             this.SyncNavContext = new SynchronousNavigationContext
             {
                 StartUrl = url,
-                EndUrl = url,
+                EndUrl = endUrl,
                 Tcs = new TaskCompletionSource<SynchronousLoadResult>(),
             };
-
-            using (token.Register(() => SyncNavContext.Tcs.TrySetCanceled(), useSynchronizationContext: false))
+            var cts = new CancellationTokenSource();
+            cts.CancelAfter(TimeSpan.FromSeconds(Debugger.IsAttached ? 15 : 3));
+            using (cts.Token.Register(() => SyncNavContext.Tcs.TrySetCanceled(), useSynchronizationContext: false))
             {
                 this.WB.Cookie = Cookie;
                 this.WB.Navigate(url);

@@ -19,73 +19,36 @@ namespace WinFormsClient
         {
             Cts = token;
             WorkerThread = new Thread(TheadLoop);
-            WorkerThread.IsBackground = true;
             WorkerThread.Start();
         }
-        public QueueItem<T> Current { get; private set; }
-        public async void TheadLoop()
+        async void TheadLoop()
         {
             while (!Cts.IsCancellationRequested)
             {
                 var queueItem = tasks.Dequeue();
                 if (queueItem != null)
                 {
-                    var taskInfo = queueItem.Info;
-                    lock (syncObject)
-                    {
-                        taskInfo = AppDatabase.db.TaskInfos.FindById(taskInfo.TaskId);
-                        if (taskInfo.IsCanceled)
-                        {
-                            continue;
-                        }
-                        taskInfo.Running();
-                        AppDatabase.db.TaskInfos.Update(taskInfo);
-                    }
                     try
                     {
-                        Current = queueItem;
-                        await queueItem.Callback(queueItem.State);
-                        taskInfo.Complete();
+                        await queueItem.Target(queueItem.State);
                     }
                     catch (Exception ex)
                     {
-                        taskInfo.Fault(ex);
+                        queueItem.Callback(queueItem.State, ex);
                     }
-                    AppDatabase.db.TaskInfos.Update(taskInfo);
-                    Current = null;
-
-                }
-                else
-                {
-                    await TaskEx.Delay(1000);
                 }
             }
         }
 
-        public TaskInfo CreateTaskItem(T input, Func<T, Task> method)
+        public void Enqueue(T input, Func<T, Task> method, Action<T, Exception> callback)
         {
             var queueItem = new QueueItem<T>
             {
-                Info = new TaskInfo(),
                 State = input,
-                Callback = method
+                Target = method,
+                Callback = callback
             };
-            AppDatabase.db.TaskInfos.Insert(queueItem.Info);
             tasks.Enqueue(queueItem);
-            return queueItem.Info;
-        }
-
-        public void CancelTaskItem(Guid taskId)
-        {
-            lock (syncObject)
-            {
-                var item = AppDatabase.db.TaskInfos.FindById(taskId);
-                if (item != null && item.Status == TaskStatus.Created)
-                {
-                    item.Cancel();
-                    AppDatabase.db.TaskInfos.Update(item);
-                }
-            }
         }
 
 
@@ -95,85 +58,61 @@ namespace WinFormsClient
         }
     }
 
-    public class AppQueue<T, TResult> : IDisposable
+    public class TaskQueue<T, TResult> : IDisposable
     {
         static object syncObject = new object();
         CancellationToken Cts;
         BlockingQueue<QueueItem<T, TResult>> tasks = new BlockingQueue<QueueItem<T, TResult>>();
         public Thread WorkerThread { get; set; }
-        public AppQueue(CancellationToken token)
+        public TaskQueue(CancellationToken token)
         {
             Cts = token;
             WorkerThread = new Thread(TheadLoop);
+            WorkerThread.Name = string.Format("任务队列 TaskQueue<{0},{1}>", typeof(T).Name, typeof(TResult).Name);
             WorkerThread.Start();
         }
-        public QueueItem<T, TResult> Current { get; private set; }
-        public async void TheadLoop()
+        async void TheadLoop()
         {
             while (!Cts.IsCancellationRequested)
             {
                 var queueItem = tasks.Dequeue();
                 if (queueItem != null)
                 {
-                    var taskInfo = queueItem.Info;
-                    lock (syncObject)
-                    {
-                        taskInfo = AppDatabase.db.TaskInfos.FindById(taskInfo.TaskId);
-                        if (taskInfo.IsCanceled)
-                        {
-                            continue;
-                        }
-                        taskInfo.Running();
-                        AppDatabase.db.TaskInfos.Update(taskInfo);
-                    }
                     try
                     {
-                        Current = queueItem;
-                        var result = await queueItem.Target(queueItem.State);
+                        var result = await queueItem.Target(queueItem.Input);
                         if (queueItem.Callback != null)
-                            queueItem.Callback(result);
-                        taskInfo.Complete();
+                            queueItem.Callback(queueItem.Input, result, null);
                     }
                     catch (Exception ex)
                     {
-                        taskInfo.Fault(ex);
+                        if (queueItem.Callback != null)
+                            queueItem.Callback(queueItem.Input, default(TResult), ex);
                     }
-                    AppDatabase.db.TaskInfos.Update(taskInfo);
-                    Current = null;
-
-                }
-                else
-                {
-                    Thread.Sleep(1000);
                 }
             }
         }
 
-        public TaskInfo CreateTaskItem(T input, Func<T, Task<TResult>> method, Action<TResult> callback = null)
+        public void Enqueue(T input, Func<T, Task<TResult>> method)
+        {
+            Enqueue(input, method, null, CancellationToken.None);
+        }
+
+        public void Enqueue(T input, Func<T, Task<TResult>> method, Action<T, TResult, Exception> callback)
+        {
+            Enqueue(input, method, callback, CancellationToken.None);
+        }
+
+        public void Enqueue(T input, Func<T, Task<TResult>> method, Action<T, TResult, Exception> callback, CancellationToken cancelToken)
         {
             var queueItem = new QueueItem<T, TResult>
             {
-                Info = new TaskInfo(),
-                State = input,
+                Input = input,
                 Target = method,
-                Callback = callback
+                Callback = callback,
+                CancelToken = cancelToken
             };
-            AppDatabase.db.TaskInfos.Insert(queueItem.Info);
             tasks.Enqueue(queueItem);
-            return queueItem.Info;
-        }
-
-        public void CancelTaskItem(Guid taskId)
-        {
-            lock (syncObject)
-            {
-                var item = AppDatabase.db.TaskInfos.FindById(taskId);
-                if (item != null && item.Status == TaskStatus.Created)
-                {
-                    item.Cancel();
-                    AppDatabase.db.TaskInfos.Update(item);
-                }
-            }
         }
 
 
@@ -186,86 +125,16 @@ namespace WinFormsClient
 
     public class QueueItem<T, TResult>
     {
-        public Action<TResult> Callback { get; internal set; }
-        public TaskInfo Info { get; set; }
-        public T State { get; set; }
+        public Action<T, TResult, Exception> Callback { get; internal set; }
+        public CancellationToken CancelToken { get; internal set; }
+        public T Input { get; set; }
         public Func<T, Task<TResult>> Target { get; set; }
-    }
-
-    public class TaskInfo
-    {
-        public TaskInfo() :
-            this(ObjectId.NewObjectId())
-        {
-        }
-        public TaskInfo(ObjectId groupId)
-        {
-            TaskId = ObjectId.NewObjectId();
-            GroupId = groupId;
-            Status = TaskStatus.Created;
-            CreateAt = DateTime.Now;
-        }
-        [BsonId]
-        public ObjectId TaskId { get; set; }
-        public ObjectId GroupId { get; set; }
-        public bool IsCanceled
-        {
-            get
-            {
-                return this.Status == TaskStatus.Canceled;
-            }
-        }
-        public bool IsCompleted
-        {
-            get
-            {
-                return this.Status == TaskStatus.RanToCompletion;
-            }
-        }
-
-        public bool Faulted
-        {
-            get { return Status == TaskStatus.Faulted; }
-        }
-
-        /// <summary>
-        /// 任务状态
-        /// </summary>
-        public TaskStatus Status { get; set; }
-        public DateTime CreateAt { get; set; }
-        public DateTime? CancelAt { get; set; }
-        public DateTime? CompleteAt { get; set; }
-        public DateTime? FaultAt { get; set; }
-        public Exception Exception { get; set; }
-
-        internal void Complete()
-        {
-            this.CompleteAt = DateTime.Now;
-            this.Status = TaskStatus.RanToCompletion;
-        }
-
-        internal void Fault(Exception ex)
-        {
-            this.FaultAt = DateTime.Now;
-            this.Status = TaskStatus.Faulted;
-        }
-
-        internal void Running()
-        {
-            this.Status = TaskStatus.Running;
-        }
-
-        internal void Cancel()
-        {
-            this.CancelAt = DateTime.Now;
-            this.Status = TaskStatus.Canceled;
-        }
     }
 
     public class QueueItem<T>
     {
-        public TaskInfo Info { get; set; }
+        public Action<T, Exception> Callback { get; internal set; }
         public T State { get; set; }
-        public Func<T, Task> Callback { get; set; }
+        public Func<T, Task> Target { get; set; }
     }
 }
