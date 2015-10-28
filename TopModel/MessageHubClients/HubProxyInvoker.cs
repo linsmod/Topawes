@@ -4,6 +4,7 @@ using System;
 using System.Collections.Generic;
 using System.Linq;
 using System.Text;
+using System.Threading;
 using System.Threading.Tasks;
 
 namespace TopModel.MessageHubClients
@@ -31,7 +32,18 @@ namespace TopModel.MessageHubClients
         {
             if (proxyEvent != null)
             {
-                proxyEvent.Invoke(value);
+                try
+                {
+                    var cts = new CancellationTokenSource();
+                    cts.CancelAfter(TimeSpan.FromSeconds(5));
+                    var t = Task.Factory.StartNew((x) => proxyEvent((T)x), value);
+                    t.Wait(cts.Token);
+                }
+                catch (Exception ex)
+                {
+
+                }
+                //proxyEvent.Invoke(value);
             }
         }
     }

@@ -121,12 +121,13 @@ namespace WinFormsClient.Helpers
 
         public async Task<DataLoadResult<HtmlDocument>> SynchronousLoadDocument(string url)
         {
+
+            return await SynchronousLoadDocument(url, url);
+        }
+        public async Task<DataLoadResult<HtmlDocument>> SynchronousLoadDocument(string url, string endUrl)
+        {
             var cts = new CancellationTokenSource();
             cts.CancelAfter(TimeSpan.FromSeconds(15));
-            return await SynchronousLoadDocument(url, url, cts.Token);
-        }
-        public async Task<DataLoadResult<HtmlDocument>> SynchronousLoadDocument(string url, string endUrl, CancellationToken token)
-        {
             this.SyncNavContext = new SynchronousNavigationContext
             {
                 StartUrl = url,
@@ -134,7 +135,7 @@ namespace WinFormsClient.Helpers
                 Tcs = new TaskCompletionSource<SynchronousLoadResult>(),
             };
 
-            using (token.Register(() => SyncNavContext.Tcs.TrySetCanceled(), useSynchronizationContext: false))
+            using (cts.Token.Register(() => SyncNavContext.Tcs.TrySetCanceled(), useSynchronizationContext: false))
             {
                 this.WB.Cookie = Cookie;
                 this.WB.Navigate(url);

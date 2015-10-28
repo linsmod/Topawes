@@ -7,7 +7,7 @@ using System.Text;
 
 namespace TopModel
 {
-    public class ProductItem
+    public class ProductItem : IComparable<ProductItem>
     {
         /// <summary>
         /// 如522571681053
@@ -140,6 +140,12 @@ namespace TopModel
             this.UpdateAt = DateTime.Now;
             productItems.Update(this);
         }
+
+        public int CompareTo(ProductItem other)
+        {
+            return (int)(this.Id - other.Id);
+        }
+
         /// <summary>
         /// 是否需要恢复价格
         /// </summary>

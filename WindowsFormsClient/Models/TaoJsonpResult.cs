@@ -22,4 +22,22 @@ namespace WinFormsClient.Models
         public int priceChangedCount { get; set; }
         public double alipayBalance { get; set; }
     }
+
+    public class DurexParamResult : TaoJsonpResult
+    {
+        public DurexParam ret { get; set; }
+    }
+
+    public class DurexParam
+    {
+        public string param { get; set; }
+    }
+
+    public class TaoUplistResult
+    {
+        public int failNum;
+        public int succNum;
+        public bool status { get; set; }
+        public string msg { get; set; }
+    }
 }

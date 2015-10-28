@@ -16,6 +16,7 @@ using System.Drawing;
 using System.IO;
 using System.Linq;
 using System.Security.Cryptography.X509Certificates;
+using System.Text;
 using System.Text.RegularExpressions;
 using System.Threading;
 using System.Threading.Tasks;
@@ -37,12 +38,14 @@ namespace WinFormsClient
         private Dictionary<string, string> TaoAuthorizedCookieDictionary = new Dictionary<string, string>();
         public JumonyParser HtmlParser = new JumonyParser();
         public AppQueue<InterceptInfo> InteceptQueue;
+        public AppQueue<long> CloseTradeQueue;
         public AppQueue<ProductItem, SimpleResult> SyncSupplierQueue;
         const string IndexUrl = "http://chongzhi.taobao.com/index.do?spm=0.0.0.0.OR0khk&method=index";
         public TimeSpan DateDifference = TimeSpan.Zero;
         public static CancellationTokenSource cts = new CancellationTokenSource();
         public bool IsAutoRateRunning = false;
         public string tbcpCrumbs = "";
+        public string durexParam = "";
         private MessageHubClient client { get; set; }
         //public const string Server = "http://localhost:62585/";
         //public const string Server = "http://localhost:8090/";
@@ -61,6 +64,7 @@ namespace WinFormsClient
             this.Text = title;
             SyncSupplierQueue = new AppQueue<ProductItem, SimpleResult>(cts.Token);
             InteceptQueue = new AppQueue<InterceptInfo>(cts.Token);
+            CloseTradeQueue = new AppQueue<long>(cts.Token);
             InstallCert();
             wbLoginMode.UserCancelLogin += () => { this.Close(); };
             wbTaoChongZhiMode.AskLogin += () => { this.InvokeAction(this.ShowLoginWindow, wb); };
@@ -263,6 +267,57 @@ namespace WinFormsClient
             return JsonConvert.DeserializeObject<TaoJsonpResult>(content.Data);
         }
 
+        public async Task<bool> durexValidate()
+        {
+            using (WBHelper helper = new WBHelper(true))
+            {
+                //getDurexParam
+                var content = await helper.WB.GetAjaxResult("http://chongzhi.taobao.com/ajax.do?method=getDurexParam&type=0&callback=_");
+                content = content.Substring(2, content.Length - 3);
+                var param = JsonConvert.DeserializeObject<DurexParamResult>(content);
+
+                if (param.status == 0 && !string.IsNullOrEmpty(param.ret.param))
+                {
+                    durexParam = param.ret.param;
+                    //durex/validate
+                    var url = "http://aq.taobao.com/durex/validate?param=&redirecturl=%2F%2Fchongzhi.taobao.com%2Ferror.do%3Fmethod%3DdurexJump";
+                    url = UrlHelper.SetValue(url, "param", durexParam);
+                    try
+                    {
+                        var doc = await helper.SynchronousLoadDocument(url, "http://chongzhi.taobao.com/error.do?method=durexJump&type=success");
+                        return true;
+                    }
+                    catch { }
+                }
+            }
+            return false;
+        }
+
+        public async Task<TaoJsonpResult> downListItem(string ids)
+        {
+            await durexValidate();
+            var url = "http://chongzhi.taobao.com/item.do?method=down&itemIds=522871283911&tbcpCrumbs=1fb3d7437580ea5636013be21fab2a3c-a4460a6db84e4";
+            UrlHelper.SetValue(url, "tbcpCrumbs", tbcpCrumbs);
+            UrlHelper.SetValue(url, "itemIds", ids);
+            using (WBHelper helper = new WBHelper(false))
+            {
+                var content = await helper.SynchronousLoadString(url);
+                return JsonConvert.DeserializeObject<TaoJsonpResult>(content.Data);
+            }
+        }
+
+        public async Task<TaoUplistResult> upListItem(string ids)
+        {
+            await durexValidate();
+            var url = "http://chongzhi.taobao.com/item.do?method=up&itemIds=522871283911&tbcpCrumbs=1fb3d7437580ea5636013be21fab2a3c-a4460a6db84e4";
+            url = UrlHelper.SetValue(url, "tbcpCrumbs", tbcpCrumbs);
+            url = UrlHelper.SetValue(url, "itemIds", ids);
+            using (WBHelper helper = new WBHelper(false))
+            {
+                var content = await helper.SynchronousLoadString(url);
+                return JsonConvert.DeserializeObject<TaoUplistResult>(content.Data);
+            }
+        }
         private async Task CloseTradeIfPossible(long tid)
         {
             try
@@ -732,7 +787,7 @@ namespace WinFormsClient
                 {
                     trade.Status = result.Data;
                     AppDatabase.db.TopTrades.Update(trade);
-                    CloseTradeIfPossible(trade.Tid);
+                    CloseTradeQueue.CreateTaskItem(trade.Tid, CloseTradeIfPossible);
                 }
             }
         }
@@ -759,7 +814,7 @@ namespace WinFormsClient
             AppDatabase.db.Statistics.Upsert(statistic, statistic.Id);
             OnStatisticUpdate(statistic);
             AppendText("[{0}]交易付款，买家：{1} 创建于{2}，付款时间{3}", trade.Tid, trade.BuyerNick, trade.Created.ToString("M月d日 H时m分s秒"), trade.PayTime.Value.ToString("M月d日 H时m分s秒"));
-            CloseTradeIfPossible(trade.Tid);
+            CloseTradeQueue.CreateTaskItem(trade.Tid, CloseTradeIfPossible);
         }
 
         private void RefundHub_RefundTimeoutRemind(Top.Tmc.Message msg)
@@ -824,8 +879,8 @@ namespace WinFormsClient
 
         private void ItemHub_ItemZeroStock(Top.Tmc.Message msg)
         {
-            AppendText(msg.Topic);
-            AppendText(msg.Content);
+            //AppendText(msg.Topic);
+            //AppendText(msg.Content);
         }
 
         private async void ItemHub_ItemUpshelf(Top.Tmc.Message msg)
@@ -889,10 +944,10 @@ namespace WinFormsClient
                 //更新库存
                 product.StockQty = d.num;
                 AppDatabase.db.ProductItems.Update(product);
-
+                BindDGViewProduct();
                 //await SetItemQty(product);
             }
-            BindDGViewProduct();
+
         }
 
         private async void ItemHub_ItemDownshelf(Top.Tmc.Message msg)
@@ -1126,8 +1181,10 @@ namespace WinFormsClient
             ResetTaskProgress();
         }
         bool IsSyncProductListAll;
+        public static DateTime ProductSyncTime = DateTime.Now;
         private async Task<bool> SyncAllProductList()
         {
+            ProductSyncTime = DateTime.Now;
             if (IsSyncProductListAll)
             {
                 AppendText("请等待上次同步任务完成...");
@@ -1152,6 +1209,11 @@ namespace WinFormsClient
                 }
                 if (success)
                 {
+                    var productUnknown = AppDatabase.db.ProductItems.Find(x => x.UpdateAt < ProductSyncTime);
+                    foreach (var item in productUnknown)
+                    {
+                        AppDatabase.db.ProductItems.Delete(item.Id);
+                    }
                     this.InvokeAction(() =>
                     {
                         BindDGViewProduct();
@@ -1236,10 +1298,9 @@ namespace WinFormsClient
                 }
 
             }
-            var dt = DateTime.Now;
             foreach (var item in productList)
             {
-                item.UpdateAt = dt;
+                item.UpdateAt = ProductSyncTime;
                 item.Where = where;
                 item.原利润 = item.利润 = item.一口价 - item.进价;
             }
@@ -1499,7 +1560,6 @@ namespace WinFormsClient
                 var selected = GetSelectedProductList();
                 dataGridViewItem.DataSource = null;
                 dataGridViewItem.DataSource = dt;
-                dt = null;
                 dataGridViewItem.ClearSelection();
                 SelectRows(selected);
             });
@@ -1675,22 +1735,36 @@ namespace WinFormsClient
                 {
                     if (qty == 0)
                         qty = 1;
-                    var apix = await client.ItemHub.ItemUpdateList(product.Id, qty);
-                    if (apix.Success)
-                    {
-                        //await client.ItemHub.ItemQuantityUpdate(product.Id, qty);
-                        //有服务端消息，这个不显示了
-                        //AppendText("[商品{0}]上架完成。", product.ItemName);
-                    }
-                    else
-                    {
-                        AppendText("[商品{0}]上架失败，错误消息：{1}", product.ItemName, apix.Message);
-                    }
+                    var qtyret = await client.ItemHub.ItemQuantityUpdate(product.Id, qty);
+                    //var apix = await client.ItemHub.ItemUpdateList(product.Id, qty);
+                    //if (apix.Success)
+                    //{
+                    //    //await client.ItemHub.ItemQuantityUpdate(product.Id, qty);
+                    //    //有服务端消息，这个不显示了
+                    //    //AppendText("[商品{0}]上架完成。", product.ItemName);
+                    //}
+                    //else
+                    //{
+                    //    if (apix.Message.IndexOf("您所使用的客户端软件没有操作权限，请核实") != -1)
+                    //    {
+                    //        var upret = await upListItem(product.Id.ToString());
+                    //    }
+                    //    AppendText("[商品{0}]上架失败，错误消息：{1}", product.ItemName, apix.Message);
+                    //}
                 }
                 else
                 {
                     AppendText("类型为{0}的商品{1}没有设置为锁定库存，忽略。", product.ItemSubName, product.Id);
                 }
+            }
+            var upret = await upListItem(string.Join(",", productList.Select(x => x.Id)));
+            if (upret.status)
+            {
+                AppendText("上架完成，成功{0}，失败{1}", upret.succNum, upret.failNum);
+            }
+            else
+            {
+                AppendText("上架失败，错误消息：{0}", upret.msg);
             }
         }
 
