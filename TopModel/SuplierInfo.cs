@@ -16,6 +16,7 @@
         /// </summary>
         public SuplierDetail[] data { get; set; }
         public string status { get; set; }//200
+        public string msg { get; set; }
     }
     public class SuplierDetail
     {

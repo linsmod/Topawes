@@ -224,22 +224,18 @@ namespace WinFormsClient
         {
             var url = "http://chongzhi.taobao.com/item.do?spu={0}&action=edit&method=supplierInfo&_=" + DateTime.Now.Ticks;
             url = string.Format(url, spu);
-            var content = await wbHelper.WB.ExecuteTriggerJSONP(url);
-            var doc = (HTMLDocument)wbHelper.WB.Document.DomDocument;
-            var cnt = (IHTMLDOMNode)doc.getElementById("jsonpcontent");
-            if (cnt != null)
-                cnt.removeNode();
-            var suplierInfo = JsonConvert.DeserializeObject<SuplierInfo>(content);
-            if (suplierInfo.profitData != null && suplierInfo.profitData.Any())
+            var content = await wbHelper.WB.GetAjaxResult(url);
+            try
             {
+                var suplierInfo = JsonConvert.DeserializeObject<SuplierInfo>(content);
                 //查到供应商
                 return suplierInfo;
             }
-            else
+            catch (Exception ex)
             {
-                //无供应商,平台默认会自动关单
-                return null;
             }
+            //无供应商,平台默认会自动关单
+            return null;
         }
         /// <summary>
         /// 设置供应商(非AJAX)
@@ -563,48 +559,26 @@ namespace WinFormsClient
             {
                 var success = false;
                 //查找供应商
-                var url = string.Format("http://chongzhi.taobao.com/item.do?spu={0}&action=edit&method=supplierInfo&_=" + DateTime.Now.Ticks, product.SpuId);
+                var supplier = await this.InvokeTask(supplierInfo, helper, product.SpuId);
+                if (supplier != null && supplier.profitData != null && supplier.profitData.Any())
+                {
+                    product.OnSupplierInfoUpdate(AppDatabase.db.ProductItems, supplier);
+                    success = true;
+                }
+                return new SimpleResult { Success = success, ProductId = product.Id };
+            }
+        }
+        private async Task CheckIfLoginRequired()
+        {
+            using (var helper = new WBHelper(false))
+            {
                 var x = await this.InvokeTask(helper.IsLoginRequired);
                 while (x)
                 {
                     this.InvokeAction(ShowLoginWindow, helper.WB);
                     x = await this.InvokeTask(helper.IsLoginRequired);
                 }
-                var content = await this.InvokeTask(helper.WB.ExecuteTriggerJSONP, url);
-                while (content == "{\"code\":999}")
-                {
-                    this.InvokeAction(ShowLoginWindow, helper.WB);
-                    content = await this.InvokeTask(helper.WB.ExecuteTriggerJSONP, url);
-                }
-                if (!string.IsNullOrEmpty(content))
-                {
-                    var supplier = JsonConvert.DeserializeObject<SuplierInfo>(content);
-                    if (supplier.profitData.Any())
-                    {
-                        product.OnSupplierInfoUpdate(AppDatabase.db.ProductItems, supplier);
-                        success = true;
-                    }
-                }
-                return new SimpleResult { Success = success, ProductId = product.Id };
             }
-        }
-
-        /// <summary>
-        /// 同步供应商
-        /// </summary>
-        /// <param name="args"></param>
-        /// <returns></returns>
-        private async Task SyncSupplierInfo(IEnumerable<ProductItem> args)
-        {
-            var list = args.ToList();
-            for (int i = 0; i < list.Count; i++)
-            {
-                var product = list[i];
-                await SyncSupplierInfo(product);
-                ReportTaskProgress("正在处理后台任务...", i, list.Count);
-            }
-            ResetTaskProgress();
-            BindDGViewProduct();
         }
 
         private async void TradeHub_TradeCreate(Top.Tmc.Message msg)
@@ -642,19 +616,14 @@ namespace WinFormsClient
             }
             else
             {
+                await CheckIfLoginRequired();
                 using (var wbHelper = new WBHelper(true))
                 {
                     try
                     {
-                        var x = await this.InvokeTask(wbHelper.IsLoginRequired);
-                        while (x)
-                        {
-                            this.InvokeAction(ShowLoginWindow, wbHelper.WB);
-                            x = await this.InvokeTask(wbHelper.IsLoginRequired);
-                        }
                         //查找供应商
                         supplier = await this.InvokeTask(supplierInfo, wbHelper, product.SpuId);
-                        if (supplier != null)
+                        if (supplier.profitData != null && supplier.profitData.Any())
                         {
                             product.OnSupplierInfoUpdate(AppDatabase.db.ProductItems, supplier);
                         }
@@ -665,7 +634,7 @@ namespace WinFormsClient
                     }
                 }
             }
-            if (supplier != null)
+            if (supplier != null && supplier.profitData != null && supplier.profitData.Any())
             {
                 if (ServerNow.HasValue)
                 {
@@ -1562,79 +1531,77 @@ namespace WinFormsClient
 
         public async Task<bool> SetProductProfit(ProductItem product, Func<ProductItem, decimal> Getprofit, bool forceModify = false, bool isUserOperation = false)
         {
-            decimal profit = Getprofit(product);
-            SuplierInfo supplier = null;
-            if (!string.IsNullOrEmpty(product.SupplierId))
+            try
             {
-                supplier = product.GetSuplierInfo();
-            }
-            else
-            {
-                using (var wbHelper = new WBHelper(true))
+                decimal profit = Getprofit(product);
+                SuplierInfo supplier = null;
+                if (!string.IsNullOrEmpty(product.SupplierId))
                 {
-                    var x = await this.InvokeTask(wbHelper.IsLoginRequired);
-                    while (x)
+                    supplier = product.GetSuplierInfo();
+                }
+                else
+                {
+                    await CheckIfLoginRequired();
+                    using (var wbHelper = new WBHelper(true))
                     {
-                        this.InvokeAction(ShowLoginWindow, wbHelper.WB);
-                        x = await this.InvokeTask(wbHelper.IsLoginRequired);
+                        supplier = await this.InvokeTask(supplierInfo, wbHelper, product.SpuId);
+                        if (supplier == null || !supplier.profitData.Any())
+                        {
+                            AppendText("【{0}】暂无供应商，改价操作取消。", product.ItemName);
+                            return false;
+                        }
+                        product.OnSupplierInfoUpdate(AppDatabase.db.ProductItems, supplier);
                     }
-                    supplier = await this.InvokeTask(supplierInfo, wbHelper, product.SpuId);
-                    if (supplier == null || !supplier.profitData.Any())
+                }
+                if (supplier != null && supplier.profitData != null && supplier.profitData.Any())
+                {
+                    if (supplier.profitData[0].price == 0)
                     {
                         AppendText("【{0}】暂无供应商，改价操作取消。", product.ItemName);
                         return false;
                     }
-                    product.OnSupplierInfoUpdate(AppDatabase.db.ProductItems, supplier);
-                }
-            }
-            if (supplier != null)
-            {
-                if (supplier.profitData[0].price == 0)
-                {
-                    AppendText("【{0}】暂无供应商，改价操作取消。", product.ItemName);
-                    return false;
-                }
-                if (supplier.profitData[0].price == product.进价 && product.利润 == profit && !forceModify)
-                {
-                    //价格无变化不处理
-                    AppendText("商品【{0}】进价及利润无变化，跳过。", product.ItemName);
-                    BindDGViewProduct();
-                    return true;
-                }
-                string profitString = "0.00";
-                profitString = profit.ToString("f2");
-                var oneprice = (supplier.profitData[0].price + profit).ToString("f2");
-                using (var wbHelper = new WBHelper(false))
-                {
-                    var x = await this.InvokeTask(wbHelper.IsLoginRequired);
-                    while (x)
+                    if (supplier.profitData[0].price == product.进价 && product.利润 == profit && !forceModify)
                     {
-                        this.InvokeAction(ShowLoginWindow, wbHelper.WB);
-                        x = await this.InvokeTask(wbHelper.IsLoginRequired);
-                    }
-                    var save = await this.InvokeTask(supplierSave, wbHelper, supplier.profitData[0].id, product.SpuId, profitString, oneprice, product.Id, tbcpCrumbs);
-                    if (save.status != 200)
-                    {
-                        AppendText("为商品{0}设置利润时失败。错误消息：{1}", product.Id, save.msg);
-                        return false;
-                    }
-                    else
-                    {
-                        product.ModifyProfitSubmitted = true;
-                        if (isUserOperation)
-                        {
-                            //备份原始利润
-                            product.原利润 = profit;
-                        }
-                        AppDatabase.db.ProductItems.Update(product);
+                        //价格无变化不处理
+                        AppendText("商品【{0}】进价及利润无变化，跳过。", product.ItemName);
                         BindDGViewProduct();
                         return true;
                     }
+                    string profitString = "0.00";
+                    profitString = profit.ToString("f2");
+                    var oneprice = (supplier.profitData[0].price + profit).ToString("f2");
+                    await CheckIfLoginRequired();
+                    using (var wbHelper = new WBHelper(false))
+                    {
+                        var save = await this.InvokeTask(supplierSave, wbHelper, supplier.profitData[0].id, product.SpuId, profitString, oneprice, product.Id, tbcpCrumbs);
+                        if (save.status != 200)
+                        {
+                            AppendText("为商品{0}设置利润时失败。错误消息：{1}", product.Id, save.msg);
+                            return false;
+                        }
+                        else
+                        {
+                            product.ModifyProfitSubmitted = true;
+                            if (isUserOperation)
+                            {
+                                //备份原始利润
+                                product.原利润 = profit;
+                            }
+                            AppDatabase.db.ProductItems.Update(product);
+                            BindDGViewProduct();
+                            return true;
+                        }
+                    }
+                }
+                else
+                {
+                    AppendText("为商品{0}设置利润时失败，因为没有查询到供应商信息。", product.Id);
+                    return false;
                 }
             }
-            else
+            catch (Exception ex)
             {
-                AppendText("为商品{0}设置利润时失败，因为没有查询到供应商信息。", product.Id);
+                AppendException(ex);
                 return false;
             }
         }
