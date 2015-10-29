@@ -100,7 +100,7 @@ namespace WinFormsClient.Helpers
         {
             if (SyncNavContext == null)
                 return;
-            if (!SyncNavContext.Tcs.Task.IsCompleted && SyncNavContext.EndUrl == WB.Document.Url.AbsoluteUri)
+            if (!SyncNavContext.Tcs.Task.IsCompleted && SyncNavContext.EndUrls.Any(x => x == WB.Document.Url.AbsoluteUri))
             {
                 if ((int)SyncNavContext.Tcs.Task.Status <= 3)
                 {
@@ -124,7 +124,7 @@ namespace WinFormsClient.Helpers
         {
             var client = (sender as HttpDownloadClient);
             var url = client.Url;
-            if (SyncNavContext.EndUrl == url.AbsoluteUri && e.Error == null)
+            if (SyncNavContext.EndUrls.Any(x => x == url.AbsoluteUri) && e.Error == null)
             {
                 SyncNavContext.Tcs.TrySetResult(SynchronousLoadResult.GetFileDownloadResult(true, client.DownloadPath));
             }
@@ -143,7 +143,7 @@ namespace WinFormsClient.Helpers
                 SyncNavContext.Tcs.TrySetResult(SynchronousLoadResult.GetWebBrowserResult(false, true));
                 return;
             }
-            if (!SyncNavContext.Tcs.Task.IsCompleted && SyncNavContext.EndUrl == WB.Document.Url.AbsoluteUri)
+            if (!SyncNavContext.Tcs.Task.IsCompleted && SyncNavContext.EndUrls.Any(x => x == WB.Document.Url.AbsoluteUri))
             {
                 if ((int)SyncNavContext.Tcs.Task.Status <= 3)
                 {
@@ -160,15 +160,14 @@ namespace WinFormsClient.Helpers
         {
             return await SynchronousLoadDocument(url, url);
         }
-        public async Task<DataLoadResult<HtmlDocument>> SynchronousLoadDocument(string url, string endUrl)
+        public async Task<DataLoadResult<HtmlDocument>> SynchronousLoadDocument(string url, params string[] endUrls)
         {
             var cts = new CancellationTokenSource();
-            var timeout = Debugger.IsAttached ? 15 : 10;
-            cts.CancelAfter(TimeSpan.FromSeconds(timeout));
+            cts.CancelAfter(TimeSpan.FromSeconds(Debugger.IsAttached ? 15 : 10));
             this.SyncNavContext = new SynchronousNavigationContext
             {
                 StartUrl = url,
-                EndUrl = endUrl,
+                EndUrls = endUrls,
                 Tcs = new TaskCompletionSource<SynchronousLoadResult>(),
             };
 
@@ -176,7 +175,6 @@ namespace WinFormsClient.Helpers
             {
                 this.WB.Navigate(url);
                 var result = await SyncNavContext.Tcs.Task;
-                cts.Dispose();
                 if (result.LoginRequired)
                 {
                     return new DataLoadResult<HtmlDocument> { LoginRequired = true };
@@ -194,16 +192,15 @@ namespace WinFormsClient.Helpers
 
         public async Task<DataLoadResult<string>> SynchronousLoadString(string url)
         {
-
             return await SynchronousLoadString(url, url);
         }
 
-        public async Task<DataLoadResult<string>> SynchronousLoadString(string url, string endUrl)
+        public async Task<DataLoadResult<string>> SynchronousLoadString(string url, params string[] endUrls)
         {
             this.SyncNavContext = new SynchronousNavigationContext
             {
                 StartUrl = url,
-                EndUrl = endUrl,
+                EndUrls = endUrls,
                 Tcs = new TaskCompletionSource<SynchronousLoadResult>(),
             };
             var cts = new CancellationTokenSource();
@@ -236,6 +233,7 @@ namespace WinFormsClient.Helpers
             {
                 Data = string.Empty
             };
+
         }
 
         private void UnsubscribEvents()

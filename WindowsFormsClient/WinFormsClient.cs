@@ -525,7 +525,6 @@ namespace WinFormsClient
                 this.InvokeAction(() =>
                 {
                     //登录完成后导航到这个页面，方便后面AJAX直接使用这个浏览器取数据
-                    //wbMain.Navigate("http://chongzhi.taobao.com/index.do?spm=0.0.0.0.OR0khk&method=index");
                     this.InvokeAction(wb.Navigate, "http://chongzhi.taobao.com/index.do?spm=0.0.0.0.OR0khk&method=index");
                 });
                 try

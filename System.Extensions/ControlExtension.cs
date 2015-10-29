@@ -35,6 +35,16 @@ namespace System.Windows.Forms
                 await method.Invoke(arg);
         }
 
+        public static async Task InvokeTask<T>(this Control control, Func<T[], Task> method, params T[] arg)
+        {
+            if (control.InvokeRequired)
+            {
+                await (Task)control.Invoke(method, arg);
+            }
+            else
+                await method.Invoke(arg);
+        }
+
         /// <summary>
         /// 在创建控件的线程上调用方法并返回值
         /// </summary>
@@ -82,6 +92,27 @@ namespace System.Windows.Forms
         /// <param name="arg2"></param>
         /// <returns></returns>
         public static async Task<TResult> InvokeTask<T1, T2, TResult>(this Control control, Func<T1, T2, Task<TResult>> method, T1 arg1, T2 arg2)
+        {
+            if (control.InvokeRequired)
+            {
+                return await (Task<TResult>)control.Invoke(method, arg1, arg2);
+            }
+            else
+                return await method.Invoke(arg1, arg2);
+        }
+
+        /// <summary>
+        /// 在创建控件的线程上调用方法并返回值
+        /// </summary>
+        /// <typeparam name="T1"></typeparam>
+        /// <typeparam name="T2"></typeparam>
+        /// <typeparam name="TResult"></typeparam>
+        /// <param name="control"></param>
+        /// <param name="method"></param>
+        /// <param name="arg1"></param>
+        /// <param name="arg2"></param>
+        /// <returns></returns>
+        public static async Task<TResult> InvokeTask<T1, T2, TResult>(this Control control, Func<T1, T2[], Task<TResult>> method, T1 arg1, params T2[] arg2)
         {
             if (control.InvokeRequired)
             {
