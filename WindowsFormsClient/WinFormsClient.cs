@@ -201,32 +201,28 @@ namespace WinFormsClient
             AppDatabase.db.TopTrades.Update(trade);
             var product = AppDatabase.db.ProductItems.FindById(trade.NumIid);
 
-            //更新价格
-            using (var helper = new WBHelper(false))
+            try
             {
-                try
+                if (!await this.SetProductProfit(product, (x) => 0, forceModify: true))
                 {
-                    if (!await this.SetProductProfit(product, (x) => 0, forceModify: true))
-                    {
-                        statistic.InterceptFailed++;
-                        AppDatabase.db.Statistics.Upsert(statistic, statistic.Id);
-                        OnStatisticUpdate(statistic);
-                    }
-                    else
-                    {
-                        AppendText("商品{0}改价已提交", trade.NumIid);
-
-                        //1分钟后关单
-                        await TaskEx.Delay(1000 * 60 - 500);
-
-                        AppendText("{0}关闭交易...", trade.Tid);
-                        await CloseTradeIfPossible(trade.Tid);
-                    }
+                    statistic.InterceptFailed++;
+                    AppDatabase.db.Statistics.Upsert(statistic, statistic.Id);
+                    OnStatisticUpdate(statistic);
                 }
-                catch (Exception ex)
+                else
                 {
-                    AppendException(ex);
+                    AppendText("商品{0}改价已提交", trade.NumIid);
+
+                    //1分钟后关单
+                    await TaskEx.Delay(1000 * 60 - 500);
+
+                    AppendText("{0}关闭交易...", trade.Tid);
+                    await CloseTradeIfPossible(trade.Tid);
                 }
+            }
+            catch (Exception ex)
+            {
+                AppendException(ex);
             }
         }
 
@@ -303,7 +299,6 @@ namespace WinFormsClient
                             return true;
                         }
                         catch { }
-                        await helper.SynchronousLoadDocument("http://chongzhi.taobao.com/item.do?method=list&type=1&keyword=&category=0&supplier=0&promoted=0&order=0&desc=0&page=1&size=20");
                     }
                     else
                     {
@@ -524,7 +519,7 @@ namespace WinFormsClient
                 {
                     //登录完成后导航到这个页面，方便后面AJAX直接使用这个浏览器取数据
                     //wbMain.Navigate("http://chongzhi.taobao.com/index.do?spm=0.0.0.0.OR0khk&method=index");
-                    wb.Navigate("http://chongzhi.taobao.com/index.do?spm=0.0.0.0.OR0khk&method=index");
+                    this.InvokeAction(wb.Navigate, "http://chongzhi.taobao.com/index.do?spm=0.0.0.0.OR0khk&method=index");
                 });
                 try
                 {
@@ -609,12 +604,16 @@ namespace WinFormsClient
         }
         private void ResetProductStates()
         {
-            foreach (var item in AppDatabase.db.ProductItems.FindAll())
+            try
             {
-                item.ModifyProfitSubmitted = false;
-                item.SyncProfitSubmited = false;
-                AppDatabase.db.ProductItems.Update(item);
+                foreach (var item in AppDatabase.db.ProductItems.FindAll())
+                {
+                    item.ModifyProfitSubmitted = false;
+                    item.SyncProfitSubmited = false;
+                    AppDatabase.db.ProductItems.Update(item);
+                }
             }
+            catch { }
         }
 
         private async Task SyncBackground()
@@ -1819,19 +1818,21 @@ namespace WinFormsClient
                             }
                             BindDGViewProduct();
                         }
+                        return;
                     }
                     else
                     {
                         AppendText("提交上架请求失败，错误消息：{0}", upret.msg);
-                        foreach (var product in productList)
-                        {
-                            if (product != null)
-                            {
-                                product.OnDownshelf(AppDatabase.db.ProductItems);
-                            }
-                            BindDGViewProduct();
-                        }
+
                     }
+                }
+                foreach (var product in productList)
+                {
+                    if (product != null)
+                    {
+                        product.OnDownshelf(AppDatabase.db.ProductItems);
+                    }
+                    BindDGViewProduct();
                 }
             }
         }
@@ -1842,7 +1843,7 @@ namespace WinFormsClient
             var productList = AppDatabase.db.ProductItems.FindAll().Where(x => x.CanUpshelf()).ToArray();
             if (productList == null || !productList.Any())
             {
-                AppendText("没有可以上架的商品");
+                AppendText("没有可以上架的商品或商品正在上架");
                 return;
             }
             LockUplist(productList);
@@ -1867,7 +1868,7 @@ namespace WinFormsClient
             var productList = AppDatabase.db.ProductItems.FindAll().Where(x => x.CanDownshelf() && ids.Contains(x.Id)).ToArray();
             if (!productList.Any())
             {
-                AppendText("没有可以下架的商品");
+                AppendText("没有可以下架的商品或商品正在下架");
                 return;
             }
             LockDownList(productList);
@@ -1879,7 +1880,7 @@ namespace WinFormsClient
             var productList = AppDatabase.db.ProductItems.FindAll().Where(x => x.CanDownshelf()).ToArray();
             if (!productList.Any())
             {
-                AppendText("没有可以下架的商品");
+                AppendText("没有可以下架的商品或商品正在下架");
                 return;
             }
             LockDownList(productList);

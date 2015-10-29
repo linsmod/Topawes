@@ -128,7 +128,7 @@ namespace WinFormsClient.Helpers
         public async Task<DataLoadResult<HtmlDocument>> SynchronousLoadDocument(string url, string endUrl)
         {
             var cts = new CancellationTokenSource();
-            var timeout = Debugger.IsAttached ? 15 : 3;
+            var timeout = Debugger.IsAttached ? 15 : 10;
             cts.CancelAfter(TimeSpan.FromSeconds(timeout));
             this.SyncNavContext = new SynchronousNavigationContext
             {
@@ -139,7 +139,6 @@ namespace WinFormsClient.Helpers
 
             using (cts.Token.Register(() => SyncNavContext.Tcs.TrySetCanceled(), useSynchronizationContext: false))
             {
-                this.WB.Cookie = Cookie;
                 this.WB.Navigate(url);
                 var result = await SyncNavContext.Tcs.Task;
                 if (result.LoginRequired)
@@ -172,10 +171,9 @@ namespace WinFormsClient.Helpers
                 Tcs = new TaskCompletionSource<SynchronousLoadResult>(),
             };
             var cts = new CancellationTokenSource();
-            cts.CancelAfter(TimeSpan.FromSeconds(Debugger.IsAttached ? 15 : 3));
+            cts.CancelAfter(TimeSpan.FromSeconds(Debugger.IsAttached ? 15 : 10));
             using (cts.Token.Register(() => SyncNavContext.Tcs.TrySetCanceled(), useSynchronizationContext: false))
             {
-                this.WB.Cookie = Cookie;
                 this.WB.Navigate(url);
                 var result = await SyncNavContext.Tcs.Task;
                 if (result.LoginRequired)
