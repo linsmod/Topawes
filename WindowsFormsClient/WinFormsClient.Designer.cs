@@ -29,7 +29,7 @@
         private void InitializeComponent()
         {
             this.components = new System.ComponentModel.Container();
-            System.Windows.Forms.DataGridViewCellStyle dataGridViewCellStyle2 = new System.Windows.Forms.DataGridViewCellStyle();
+            System.Windows.Forms.DataGridViewCellStyle dataGridViewCellStyle1 = new System.Windows.Forms.DataGridViewCellStyle();
             System.ComponentModel.ComponentResourceManager resources = new System.ComponentModel.ComponentResourceManager(typeof(WinFormsClient));
             this.上架所选ToolStripMenuItem = new System.Windows.Forms.ToolStripMenuItem();
             this.下架所选ToolStripMenuItem = new System.Windows.Forms.ToolStripMenuItem();
@@ -85,6 +85,8 @@
             this.dataGridViewTbOrder = new System.Windows.Forms.DataGridView();
             this.tabPage1 = new System.Windows.Forms.TabPage();
             this.groupBox5 = new System.Windows.Forms.GroupBox();
+            this.label4 = new System.Windows.Forms.Label();
+            this.上架库存 = new Moonlight.WindowsForms.StateControls.MoonUpDown();
             this.模拟网页上架 = new Moonlight.WindowsForms.StateControls.MoonCheckBox();
             this.自动好评交易checkBoxAuto = new Moonlight.WindowsForms.StateControls.MoonCheckBox();
             this.label3 = new System.Windows.Forms.Label();
@@ -182,8 +184,7 @@
             this.修改库存ToolStripMenuItem = new System.Windows.Forms.ToolStripMenuItem();
             this.全选ToolStripMenuItem = new System.Windows.Forms.ToolStripMenuItem();
             this.notifyIcon1 = new System.Windows.Forms.NotifyIcon(this.components);
-            this.上架库存 = new Moonlight.WindowsForms.StateControls.MoonUpDown();
-            this.label4 = new System.Windows.Forms.Label();
+            this.不限制浏览器数量 = new Moonlight.WindowsForms.StateControls.MoonCheckBox();
             this.tabControl1.SuspendLayout();
             this.tabPageItemList.SuspendLayout();
             this.panel1.SuspendLayout();
@@ -195,6 +196,7 @@
             ((System.ComponentModel.ISupportInitialize)(this.dataGridViewTbOrder)).BeginInit();
             this.tabPage1.SuspendLayout();
             this.groupBox5.SuspendLayout();
+            ((System.ComponentModel.ISupportInitialize)(this.上架库存)).BeginInit();
             this.groupBox4.SuspendLayout();
             this.groupBox3.SuspendLayout();
             ((System.ComponentModel.ISupportInitialize)(this.话费直充库存锁定数量)).BeginInit();
@@ -211,7 +213,6 @@
             this.splitContainer1.Panel2.SuspendLayout();
             this.splitContainer1.SuspendLayout();
             this.menuStrip1.SuspendLayout();
-            ((System.ComponentModel.ISupportInitialize)(this.上架库存)).BeginInit();
             this.SuspendLayout();
             // 
             // 上架所选ToolStripMenuItem
@@ -451,14 +452,14 @@
             this.dataGridViewItem.BackgroundColor = System.Drawing.Color.WhiteSmoke;
             this.dataGridViewItem.ColumnHeadersHeightSizeMode = System.Windows.Forms.DataGridViewColumnHeadersHeightSizeMode.AutoSize;
             this.dataGridViewItem.ContextMenuStrip = this.contextMenuStrip1;
-            dataGridViewCellStyle2.Alignment = System.Windows.Forms.DataGridViewContentAlignment.MiddleLeft;
-            dataGridViewCellStyle2.BackColor = System.Drawing.SystemColors.Window;
-            dataGridViewCellStyle2.Font = new System.Drawing.Font("宋体", 9F, System.Drawing.FontStyle.Regular, System.Drawing.GraphicsUnit.Point, ((byte)(134)));
-            dataGridViewCellStyle2.ForeColor = System.Drawing.SystemColors.ControlText;
-            dataGridViewCellStyle2.SelectionBackColor = System.Drawing.Color.SteelBlue;
-            dataGridViewCellStyle2.SelectionForeColor = System.Drawing.SystemColors.HighlightText;
-            dataGridViewCellStyle2.WrapMode = System.Windows.Forms.DataGridViewTriState.False;
-            this.dataGridViewItem.DefaultCellStyle = dataGridViewCellStyle2;
+            dataGridViewCellStyle1.Alignment = System.Windows.Forms.DataGridViewContentAlignment.MiddleLeft;
+            dataGridViewCellStyle1.BackColor = System.Drawing.SystemColors.Window;
+            dataGridViewCellStyle1.Font = new System.Drawing.Font("宋体", 9F, System.Drawing.FontStyle.Regular, System.Drawing.GraphicsUnit.Point, ((byte)(134)));
+            dataGridViewCellStyle1.ForeColor = System.Drawing.SystemColors.ControlText;
+            dataGridViewCellStyle1.SelectionBackColor = System.Drawing.Color.SteelBlue;
+            dataGridViewCellStyle1.SelectionForeColor = System.Drawing.SystemColors.HighlightText;
+            dataGridViewCellStyle1.WrapMode = System.Windows.Forms.DataGridViewTriState.False;
+            this.dataGridViewItem.DefaultCellStyle = dataGridViewCellStyle1;
             this.dataGridViewItem.IsMouseOnCell = true;
             this.dataGridViewItem.Location = new System.Drawing.Point(3, 3);
             this.dataGridViewItem.Name = "dataGridViewItem";
@@ -757,6 +758,7 @@
             // 
             // groupBox5
             // 
+            this.groupBox5.Controls.Add(this.不限制浏览器数量);
             this.groupBox5.Controls.Add(this.label4);
             this.groupBox5.Controls.Add(this.上架库存);
             this.groupBox5.Controls.Add(this.模拟网页上架);
@@ -768,6 +770,34 @@
             this.groupBox5.TabIndex = 23;
             this.groupBox5.TabStop = false;
             this.groupBox5.Text = "软件自动化";
+            // 
+            // label4
+            // 
+            this.label4.AutoSize = true;
+            this.label4.Location = new System.Drawing.Point(9, 76);
+            this.label4.Name = "label4";
+            this.label4.Size = new System.Drawing.Size(53, 12);
+            this.label4.TabIndex = 16;
+            this.label4.Text = "上架库存";
+            // 
+            // 上架库存
+            // 
+            this.上架库存.AppUserSettingProtect = false;
+            this.上架库存.Location = new System.Drawing.Point(68, 73);
+            this.上架库存.Maximum = new decimal(new int[] {
+            999999,
+            0,
+            0,
+            0});
+            this.上架库存.Name = "上架库存";
+            this.上架库存.Size = new System.Drawing.Size(52, 21);
+            this.上架库存.TabIndex = 15;
+            this.上架库存.UserSettingId = null;
+            this.上架库存.Value = new decimal(new int[] {
+            10,
+            0,
+            0,
+            0});
             // 
             // 模拟网页上架
             // 
@@ -1688,33 +1718,19 @@
             this.notifyIcon1.Text = "notifyIcon1";
             this.notifyIcon1.Visible = true;
             // 
-            // 上架库存
+            // 不限制浏览器数量
             // 
-            this.上架库存.AppUserSettingProtect = false;
-            this.上架库存.Location = new System.Drawing.Point(68, 73);
-            this.上架库存.Maximum = new decimal(new int[] {
-            999999,
-            0,
-            0,
-            0});
-            this.上架库存.Name = "上架库存";
-            this.上架库存.Size = new System.Drawing.Size(52, 21);
-            this.上架库存.TabIndex = 15;
-            this.上架库存.UserSettingId = null;
-            this.上架库存.Value = new decimal(new int[] {
-            10,
-            0,
-            0,
-            0});
-            // 
-            // label4
-            // 
-            this.label4.AutoSize = true;
-            this.label4.Location = new System.Drawing.Point(9, 76);
-            this.label4.Name = "label4";
-            this.label4.Size = new System.Drawing.Size(53, 12);
-            this.label4.TabIndex = 16;
-            this.label4.Text = "上架库存";
+            this.不限制浏览器数量.AppUserSettingProtect = false;
+            this.不限制浏览器数量.AutoSize = true;
+            this.不限制浏览器数量.Checked = true;
+            this.不限制浏览器数量.CheckState = System.Windows.Forms.CheckState.Checked;
+            this.不限制浏览器数量.Location = new System.Drawing.Point(6, 107);
+            this.不限制浏览器数量.Name = "不限制浏览器数量";
+            this.不限制浏览器数量.Size = new System.Drawing.Size(120, 16);
+            this.不限制浏览器数量.TabIndex = 17;
+            this.不限制浏览器数量.Text = "不限制浏览器数量";
+            this.不限制浏览器数量.UserSettingId = null;
+            this.不限制浏览器数量.UseVisualStyleBackColor = true;
             // 
             // WinFormsClient
             // 
@@ -1744,6 +1760,7 @@
             this.tabPage1.PerformLayout();
             this.groupBox5.ResumeLayout(false);
             this.groupBox5.PerformLayout();
+            ((System.ComponentModel.ISupportInitialize)(this.上架库存)).EndInit();
             this.groupBox4.ResumeLayout(false);
             this.groupBox4.PerformLayout();
             this.groupBox3.ResumeLayout(false);
@@ -1767,7 +1784,6 @@
             this.splitContainer1.ResumeLayout(false);
             this.menuStrip1.ResumeLayout(false);
             this.menuStrip1.PerformLayout();
-            ((System.ComponentModel.ISupportInitialize)(this.上架库存)).EndInit();
             this.ResumeLayout(false);
             this.PerformLayout();
 
@@ -1928,6 +1944,7 @@
         private System.Windows.Forms.Label label3;
         private System.Windows.Forms.Label label4;
         private Moonlight.WindowsForms.StateControls.MoonUpDown 上架库存;
+        private Moonlight.WindowsForms.StateControls.MoonCheckBox 不限制浏览器数量;
     }
 }
 

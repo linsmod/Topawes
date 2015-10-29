@@ -108,7 +108,7 @@ namespace WinFormsClient
             LoadMenuItemSetting();
             this.OnLoginSuccess();
             tabPage2.Controls.Add(wb);
-            WBHelper.InitWBHelper(wbArrayWrapper, "http://chongzhi.taobao.com/index.do?spm=0.0.0.0.OR0khk&method=index");
+            WBHelper.InitWBHelper(wbArrayWrapper, "http://chongzhi.taobao.com/index.do?method=index");
         }
 
         private void InstallCert()
@@ -166,6 +166,10 @@ namespace WinFormsClient
         }
         private async Task OnLoginSuccess()
         {
+            if (!AppSetting.UserSetting.Get<bool>("AutoSelectLoginedAccount") && MessageBox.Show("下次自动登陆？", this.title, MessageBoxButtons.YesNo) == DialogResult.Yes)
+            {
+                AppSetting.UserSetting.Set<bool>("AutoSelectLoginedAccount", true);
+            }
             await TaskEx.Delay(500);
             this.InvokeAction(async () =>
             {
@@ -233,7 +237,7 @@ namespace WinFormsClient
         /// <param name="wb"></param>
         /// <param name="spu"></param>
         /// <returns></returns>
-        public static async Task<SuplierInfo> supplierInfo(WBHelper wbHelper, string spu)
+        public async Task<SuplierInfo> supplierInfo(WBHelper wbHelper, string spu)
         {
             var url = "http://chongzhi.taobao.com/item.do?spu={0}&action=edit&method=supplierInfo&_=" + DateTime.Now.Ticks;
             url = string.Format(url, spu);
@@ -246,6 +250,7 @@ namespace WinFormsClient
             }
             catch (Exception ex)
             {
+                AppendException(ex);
             }
             //无供应商,平台默认会自动关单
             return null;
@@ -278,11 +283,13 @@ namespace WinFormsClient
 
         public async Task<bool> durexValidate()
         {
-            using (WBHelper helper = new WBHelper(true))
+            using (WBHelper helper = new WBHelper())
             {
+                await this.InvokeTask(helper.SynchronousLoadDocument, "http://chongzhi.taobao.com/index.do?spm=0.0.0.0.Xwjc5t&method=index&random=0.7032918996278134");
                 //getDurexParam
-                var content = await this.InvokeTask(helper.WB.GetAjaxResult, "http://chongzhi.taobao.com/ajax.do?method=getDurexParam&type=0&callback=_");
-                content = content.Substring(2, content.Length - 3);
+                var content = await this.InvokeTask(helper.WB.GetAjaxResult, "http://chongzhi.taobao.com/ajax.do?method=getDurexParam&type=0&callback=" + DateTime.Now.Ticks);
+                var leng = DateTime.Now.Ticks.ToString().Length;
+                content = content.Substring(leng + 1, content.Length - 2 - leng);
                 var param = JsonConvert.DeserializeObject<DurexParamResult>(content);
 
                 if (param.code == 200)
@@ -362,7 +369,7 @@ namespace WinFormsClient
                     //等待付款
                     try
                     {
-                        var result = await client.TradeHub.CloseTrade(topTrade.Tid, AppSetting.UserSetting.Get<string>("关单原因"));
+                        var result = await this.InvokeTask(client.TradeHub.CloseTrade, topTrade.Tid, AppSetting.UserSetting.Get<string>("关单原因"));
                     }
                     catch (Exception ex)
                     {
@@ -922,8 +929,8 @@ namespace WinFormsClient
 
         private void ItemHub_ItemZeroStock(Top.Tmc.Message msg)
         {
-            //AppendText(msg.Topic);
-            //AppendText(msg.Content);
+            AppendText(msg.Topic);
+            AppendText(msg.Content);
         }
 
         private async void ItemHub_ItemUpshelf(Top.Tmc.Message msg)
@@ -1075,6 +1082,7 @@ namespace WinFormsClient
                 话费直充库存锁定类型.SetupAfterUserSettingInitialized("话费直充库存锁定类型", lockTypes, lockTypes[0]);
                 上架库存.SetupAfterUserSettingInitialized("上架库存");
                 自动好评交易checkBoxAuto.SetupAfterUserSettingInitialized("交易自动好评");
+                不限制浏览器数量.SetupAfterUserSettingInitialized("不限制浏览器数量");
                 模拟网页上架.SetupAfterUserSettingInitialized("模拟网页上架");
                 赔钱利润.SetupAfterUserSettingInitialized("赔钱利润");
                 不陪钱利润.SetupAfterUserSettingInitialized("不赔钱利润");

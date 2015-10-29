@@ -14,6 +14,7 @@ using CSWebDownloader;
 using TopModel;
 using Moonlight.Treading;
 using System.Diagnostics;
+using Moonlight;
 
 namespace WinFormsClient.Helpers
 {
@@ -25,9 +26,14 @@ namespace WinFormsClient.Helpers
         internal static string Cookie;
 
         internal SynchronousNavigationContext SyncNavContext { get; private set; }
-
+        internal static Control container;
+        public static string wbInitUrl;
+        public bool IsForAjaxUse;
+        public bool IsNew;
         public static void InitWBHelper(Control parent, string initUrl)
         {
+            container = parent;
+            wbInitUrl = initUrl;
             int i = 0;
             foreach (var item in parent.Controls)
             {
@@ -49,14 +55,44 @@ namespace WinFormsClient.Helpers
             }
         }
 
+        /// <summary>
+        /// 开个新的浏览器
+        /// </summary>
+        public WBHelper()
+        {
+            container.InvokeAction(() =>
+            {
+                this.WB = new ExtendedWinFormsWebBrowser();
+                container.Controls.Add(this.WB);
+                this.WB.ScriptErrorsSuppressed = true;
+                SubscribEvents();
+                IsNew = true;
+            });
+        }
+
         public WBHelper(bool ajax)
         {
-            ExtendedWinFormsWebBrowser exWb = wbQueue.Dequeue();
-            if (exWb.Parent == null)
+            IsForAjaxUse = ajax;
+            if (AppSetting.UserSetting.Get("不限制浏览器数量", false))
             {
-                throw new Exception("在使用前必须将浏览器放入某个控件");
+                if (wbQueue.Count == 0)
+                {
+                    container.InvokeAction(() =>
+                    {
+                        this.WB = new ExtendedWinFormsWebBrowser();
+                        container.Controls.Add(this.WB);
+                        this.WB.ScriptErrorsSuppressed = true;
+                        SubscribEvents();
+                        if (ajax)
+                        {
+                            this.WB.Navigate(wbInitUrl);
+                            TaskEx.Delay(50);
+                        }
+                    });
+                    return;
+                }
             }
-            this.WB = exWb;
+            this.WB = ajax ? ajaxWbQueue.Dequeue() : wbQueue.Dequeue();
             SubscribEvents();
         }
 
@@ -122,7 +158,6 @@ namespace WinFormsClient.Helpers
 
         public async Task<DataLoadResult<HtmlDocument>> SynchronousLoadDocument(string url)
         {
-
             return await SynchronousLoadDocument(url, url);
         }
         public async Task<DataLoadResult<HtmlDocument>> SynchronousLoadDocument(string url, string endUrl)
@@ -141,6 +176,7 @@ namespace WinFormsClient.Helpers
             {
                 this.WB.Navigate(url);
                 var result = await SyncNavContext.Tcs.Task;
+                cts.Dispose();
                 if (result.LoginRequired)
                 {
                     return new DataLoadResult<HtmlDocument> { LoginRequired = true };
@@ -176,6 +212,7 @@ namespace WinFormsClient.Helpers
             {
                 this.WB.Navigate(url);
                 var result = await SyncNavContext.Tcs.Task;
+                cts.Dispose();
                 if (result.LoginRequired)
                 {
                     return new DataLoadResult<string>
@@ -217,7 +254,17 @@ namespace WinFormsClient.Helpers
         public void Dispose()
         {
             UnsubscribEvents();
-            wbQueue.Enqueue(WB);
+            if (IsNew)
+            {
+                container.InvokeAction(container.Controls.Remove, WB);
+                WB = null;
+            }
+            else
+            {
+                if (IsForAjaxUse)
+                    ajaxWbQueue.Enqueue(WB);
+                else wbQueue.Enqueue(WB);
+            }
         }
 
         public async Task<bool> IsLoginRequired()
