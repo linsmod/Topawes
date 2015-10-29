@@ -59,21 +59,19 @@ namespace WinFormsClient
         WBTaoChongZhiBrowserState wbTaoChongZhiMode = new WBTaoChongZhiBrowserState();
         ExtendedWinFormsWebBrowser wb = new ExtendedWinFormsWebBrowser();
         public string title = "淘充值防牛工具";
-        public static WinFormsClient Instance;
         internal WinFormsClient()
         {
-            Instance = this;
             this.Text = title;
-            SyncSupplierQueue = new TaskQueue<ProductItem, SimpleResult>(cts.Token);
-            InteceptQueue = new AppQueue<InterceptInfo>(cts.Token);
-            CloseTradeQueue = new AppQueue<long>(cts.Token);
-            WaitUpWaitDownlist = new AppQueue<ProductItem[]>(cts.Token);
             InitializeComponent();
             this.Load += WinFormsClient_Load;
         }
 
         private void WinFormsClient_Load(object sender, EventArgs e)
         {
+            SyncSupplierQueue = new TaskQueue<ProductItem, SimpleResult>(cts.Token);
+            InteceptQueue = new AppQueue<InterceptInfo>(cts.Token);
+            CloseTradeQueue = new AppQueue<long>(cts.Token);
+            WaitUpWaitDownlist = new AppQueue<ProductItem[]>(cts.Token);
             InstallCert();
             wbLoginMode.UserCancelLogin += () => { this.Close(); };
             wbTaoChongZhiMode.AskLogin += () => { this.InvokeAction(this.ShowLoginWindow, wb); };
@@ -138,15 +136,6 @@ namespace WinFormsClient
             AppSetting.InitializeUserSetting(userName, Path.Combine(AppDomain.CurrentDomain.BaseDirectory, userName + ".bin"));
             ((sender as Button).Parent.Parent as Form).Close();
         }
-
-        private void TaskScheduler_UnobservedTaskException(object sender, UnobservedTaskExceptionEventArgs e)
-        {
-            AppendException(e.Exception);
-            foreach (var item in e.Exception.InnerExceptions)
-            {
-                AppendException(item);
-            }
-        }
         private void ResetTaskProgress()
         {
             this.InvokeAction(() =>
@@ -170,7 +159,7 @@ namespace WinFormsClient
             {
                 AppSetting.UserSetting.Set<bool>("AutoSelectLoginedAccount", true);
             }
-            await TaskEx.Delay(500);
+            await Task.Delay(500);
             this.InvokeAction(async () =>
             {
                 using (var wbHelper = new WBHelper(false))
@@ -218,7 +207,7 @@ namespace WinFormsClient
                     AppendText("商品{0}改价已提交", trade.NumIid);
 
                     //1分钟后关单
-                    await TaskEx.Delay(1000 * 60 - 500);
+                    await Task.Delay(1000 * 60 - 500);
 
                     AppendText("{0}关闭交易...", trade.Tid);
                     await CloseTradeIfPossible(trade.Tid);
@@ -534,7 +523,7 @@ namespace WinFormsClient
                 catch
                 {
                     AppendText("尝试连接失败，10s后重试...");
-                    await TaskEx.Delay(1000 * 10);
+                    await Task.Delay(1000 * 10);
                     ConnectAsync();
                     return;
                 }
@@ -1054,7 +1043,7 @@ namespace WinFormsClient
             {
                 //await SyncAllProductList().ConfigureAwait(false);
             }
-            return TaskEx.FromResult(product);
+            return Task.FromResult(product);
         }
         public class InterceptMode
         {
@@ -1553,7 +1542,7 @@ namespace WinFormsClient
                 while (!cts.IsCancellationRequested)
                 {
                     GetServerTime();
-                    await TaskEx.Delay(5000);
+                    await Task.Delay(5000);
                 }
             });
         }
@@ -2322,7 +2311,7 @@ namespace WinFormsClient
             {
                 AppendException(ex);
             }
-            this.InvokeAction(async () => { await TaskEx.Delay(3); 一键赔钱.Enabled = true; 一键不赔钱.Enabled = true; });
+            this.InvokeAction(async () => { await Task.Delay(3); 一键赔钱.Enabled = true; 一键不赔钱.Enabled = true; });
         }
 
         private async void 一键不赔钱_Click(object sender, EventArgs e)
@@ -2336,7 +2325,7 @@ namespace WinFormsClient
             {
                 AppendException(ex);
             }
-            this.InvokeAction(async () => { await TaskEx.Delay(3); 一键赔钱.Enabled = true; 一键不赔钱.Enabled = true; });
+            this.InvokeAction(async () => { await Task.Delay(3); 一键赔钱.Enabled = true; 一键不赔钱.Enabled = true; });
         }
 
         private void 获取供应商信息ToolStripMenuItem_Click(object sender, EventArgs e)

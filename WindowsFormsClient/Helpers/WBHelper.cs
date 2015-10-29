@@ -86,7 +86,7 @@ namespace WinFormsClient.Helpers
                         if (ajax)
                         {
                             this.WB.Navigate(wbInitUrl);
-                            TaskEx.Delay(50);
+                            Task.Delay(50);
                         }
                     });
                     return;

@@ -12,11 +12,11 @@ namespace System.Windows.Forms
         {
             wb.InstallAjaxMethod();
             wb.Document.InvokeScript("topAjax", new object[] { url });
-            await TaskEx.Delay(100);
+            await Task.Delay(100);
             object content = null;
             while ((content = wb.Document.InvokeScript("getAjaxResult")) == null || content.ToString() == "")
             {
-                await TaskEx.Delay(100);
+                await Task.Delay(100);
                 if (wb.IsBusy)
                     continue;
             }

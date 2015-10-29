@@ -90,7 +90,7 @@ namespace WinFormsClient
 
             Application.ApplicationExit += Application_ApplicationExit;
 
-            TaskScheduler.UnobservedTaskException += TaskScheduler_UnobservedTaskException;
+            TaskScheduler.UnobservedTaskException += TaskScheduler_UnobservedTaskException; ;
 
             Application.Run(new WinFormsClient());
         }

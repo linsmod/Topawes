@@ -106,7 +106,7 @@ namespace WinFormsClient.WBMode
                         return;
                     }
                     WB.Document.All["J_SubmitStatic"].Click += WBTaoLoginState_Click;
-                    await TaskEx.Delay(100);
+                    await Task.Delay(100);
                     if (J_Static.clientWidth > 0 && J_Static.clientHeight > 0)
                     {
                         IsPasswordLogin = true;
@@ -237,7 +237,7 @@ namespace WinFormsClient.WBMode
                             var checkCode = xdoc.Find(".field-checkcode.hidden");
                             if (checkCode.Any())
                             {
-                                await TaskEx.Delay(200);
+                                await Task.Delay(200);
                                 WB.Document.All["J_SubmitStatic"].InvokeMember("click");
                             }
                             return;
